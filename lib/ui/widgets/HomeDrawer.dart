@@ -14,7 +14,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
   void initState() {
     super.initState();
     RRUser.instance.then((value) {
-      print(value);
       setState(() {
         user = value;
       });
@@ -36,8 +35,8 @@ class _HomeDrawerState extends State<HomeDrawer> {
           ListTile(
             onTap: () {
               if (user == null) {
-                Navigator.pushNamed(context, "/login");
                 Scaffold.of(context).openEndDrawer();
+                Navigator.pushNamed(context, "/login");
               } else {
                 showDialog(
                   context: context,

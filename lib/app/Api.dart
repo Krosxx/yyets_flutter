@@ -26,7 +26,7 @@ class Api {
               }
             }
           } catch (e) {
-            print("234" + e);
+            print("234" + e.toString());
           }
         }, onRequest: (RequestOptions options) {
           _dioClient.lock();
@@ -120,7 +120,7 @@ class Api {
   }
 
   static Future<Map> login(String text, String pass) {
-    if (text.length == 11) {
+    if (text.length == 11 && RegExp(r"1[0-9]\d{9}$").hasMatch(text)) {
       return _loginWithPhone(text, pass);
     } else {
       return _loginWithAccount(text, pass);
@@ -142,15 +142,18 @@ class Api {
     return data;
   }
 
-  //TODO
-  static Future<Map> _loginWithPhone(String phone, String pass) async {
-    throw Exception("暂不支持手机登录");
-//    var res = await dioClient.get(await linkUserUrl(""));
-//    var data = res.data['data'];
-//    if (data == null || data == '') {
-//      throw Exception(res.data["info"]);
-//    }
-//    return data;
+  ///
+  /// 手机号登录
+  /// area 暂时只支持中国
+  static Future<Map> _loginWithPhone(String phone, String pass,
+      {String area = "86"}) async {
+    var res = await dioClient.get(await linkUserUrl(
+        "g=api/public&m=v2&a=mobile_login&area=$area&mobile=$phone&password=$pass"));
+    var data = res.data['data'];
+    if (data == null || data == '') {
+      throw Exception(res.data["info"]);
+    }
+    return data;
   }
 
   /// @return token uid
