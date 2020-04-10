@@ -41,11 +41,11 @@ class _CommentsPageState extends State<CommentsPage> {
   }
 
   void loadMore() {
-    print("load more comments $_page");
     if (_loadStatus == LoadingStatus.NO_MORE ||
         _loadStatus == LoadingStatus.LOADING) {
       return;
     }
+    print("load more comments $_page");
     setState(() {
       _loadStatus = LoadingStatus.LOADING;
     });
@@ -66,7 +66,7 @@ class _CommentsPageState extends State<CommentsPage> {
         });
       }
     }).catchError((e) {
-      debugPrint(e.toString());
+      print(e.toString());
       setState(() {
         _loadStatus = LoadingStatus.ERROR;
       });

@@ -44,7 +44,10 @@ class _DetailPageState extends State<DetailPage>
     super.initState();
     _scrollViewController = ScrollController(initialScrollOffset: 0.0);
     _tabController = TabController(vsync: this, length: 4);
+    loadData();
+  }
 
+  void loadData() {
     Api.getDetail(data["id"]).then((d) {
       setState(() {
         detail = d;
@@ -56,6 +59,7 @@ class _DetailPageState extends State<DetailPage>
       print(e);
     });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +105,7 @@ class _DetailPageState extends State<DetailPage>
                     child: FlatButton(
                       child: Text("获取失败，点击重试"),
                       onPressed: () {
-                        initState();
+                        loadData();
                       },
                     ),
                   )
@@ -124,7 +128,7 @@ class _DetailPageState extends State<DetailPage>
                           CommentsPage(
                             data['id'],
                             detail["comments_hot"],
-                            data['channel'] ?? detail['channel'],
+                            data['channel'] ?? resource['channel'],
                           ),
                           MoviesGridWidget(detail['similar']),
                         ],
@@ -184,5 +188,4 @@ class _DetailPageState extends State<DetailPage>
       ),
     ]);
   }
-
 }

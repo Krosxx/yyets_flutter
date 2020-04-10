@@ -22,12 +22,16 @@ class Api {
   }
 
   static Future<Map<String, dynamic>> getDetail(String id) async {
-    var res = await Dio().get(detailUrl(id));
+    var url = detailUrl(id);
+    print(url);
+    var res = await Dio().get(url);
     return res.data['data'];
   }
 
   static Future<List> loadComments(String id, String channel, int page) async {
+
     var res = await Dio().get(commentUrl(id, channel, page));
+    print(res.data);
     return (res.data['data'] ?? {})['list'] ?? [];
   }
 
@@ -52,9 +56,10 @@ class Api {
     return res.data['data'] ?? [];
   }
 
-  static Future<List> search(String query) async {
-    var res = await Dio().get(linkUserUrl(""));
-    return res.data['data'] ?? [];
+  static Future<List> search(String query, int page) async {
+    var res = await Dio().get(linkUserUrl(
+        "st=resource&a=search&g=api%2Fv2&limit=10&k=$query&page=$page&m=index"));
+    return res.data['data']["list"] ?? [];
   }
 
   static Future<Map> userInfo(String query) async {

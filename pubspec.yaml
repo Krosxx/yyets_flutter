@@ -20,8 +20,11 @@ dependencies:
   flutter:
     sdk: flutter
   dio: ^3.0.9
-  hive: ^1.4.1+1
-  hive_flutter: ^0.3.0+2
+  shared_preferences: ^0.5.6+3
+  shared_preferences_web: ^0.1.2+4
+  shared_preferences_macos: ^0.0.1+6
+
+  path_provider: any
   fluttertoast: ^4.0.1
   url_launcher: ^5.1.4
   url_launcher_web: ^0.1.0
@@ -32,11 +35,8 @@ dependencies:
   permission_handler: ^5.0.0+hotfix.3
 
 dev_dependencies:
-#  flutter_test:
-#    sdk: flutter
-
-  hive_generator: ^0.7.0+2
-  build_runner: ^1.8.1
+  flutter_test:
+    sdk: flutter
 
 
 # For information on the generic Dart part of this file, see the

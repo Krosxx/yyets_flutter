@@ -2,12 +2,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/app/Stroage.dart';
-import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
+import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
 
 class SearchPageDelegate extends SearchDelegate<Map> {
   @override
   Widget buildSuggestions(BuildContext context) {
-    return _SuggestionPage(query);
+    return SuggestionPage(query, (q) {
+      query = q;
+      showResults(context);
+    });
   }
 
   @override
@@ -41,81 +44,139 @@ class SearchPageDelegate extends SearchDelegate<Map> {
 
   @override
   Widget buildResults(BuildContext context) {
-    if (query.isEmpty) {
+    var q = query;
+    if (q.isEmpty) {
       query = "";
       return Container();
     } else {
-      return _ResultPage(query);
+      addQueryHistory(q);
+      return ResultPage(q);
     }
   }
 }
 
-class _SuggestionPage extends StatefulWidget {
+class SuggestionPage extends StatefulWidget {
   final String query;
+  final Function onShowResult;
 
-  _SuggestionPage(this.query);
+  SuggestionPage(this.query, this.onShowResult);
 
   @override
   State createState() => _SuggestionState();
 }
 
-class _SuggestionState extends State<_SuggestionPage> {
-  List<String> suggestions = [];
+class _SuggestionState extends State<SuggestionPage> {
+  Future _fun;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: suggestions.length,
-        itemBuilder: (c, i) {
-          return ListTile(
-            title: Text(suggestions[i]),
-          );
-        });
+    return FutureBuilder(
+      future: _fun,
+      builder: (c, snap) {
+        if (snap.connectionState == ConnectionState.done && !snap.hasError) {
+          var suggestions = snap.data;
+          return ListView.builder(
+              itemCount: suggestions.length,
+              itemBuilder: (c, i) {
+                return ListTile(
+                  onTap: () {
+                    widget.onShowResult(suggestions[i]);
+                  },
+                  title: Text(suggestions[i]),
+                  trailing: Container(
+                    width: 20,
+                    height: 20,
+                    child: IconButton(
+                      iconSize: 20,
+                      padding: EdgeInsets.all(0),
+                      onPressed: () async {
+                        await deleteQueryHistory(suggestions[i]);
+                        loadSuggestions();
+                      },
+                      icon: Icon(Icons.close),
+                    ),
+                  ),
+                );
+              });
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+
+  void loadSuggestions() {
+    var query = widget.query;
+    setState(() {
+      if (query != "") {
+        _fun = querySuggest(query);
+      } else {
+        _fun = getQueryHistory();
+      }
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    querySuggest(widget.query).then((value) {
-      setState(() {
-        suggestions = value;
-      });
-    });
+    loadSuggestions();
   }
 }
 
-class _ResultPage extends StatefulWidget {
-
+class ResultPage extends StatefulWidget {
   final String query;
 
-  _ResultPage(this.query);
+  ResultPage(this.query);
 
   @override
-  State createState() => _ResultPageState();
-
+  State createState() => ResultPageState();
 }
 
-class _ResultPageState extends State<_ResultPage> {
-
-  List results = [];
-
-  LoadingStatus _status = LoadingStatus.LOADING;
+class ResultPageState extends LoadingPageState<ResultPage> {
+  @override
+  Future<List> fetchData(int page) => Api.search(widget.query, page);
 
   @override
-  void initState() {
-    Api.search(widget.query).then((value) =>
-    {
-    });
+  Widget buildItem(BuildContext context, int index, dynamic item) {
+    return ListTile(
+      onTap: () {
+        var data = Map();
+        data.addAll(item);
+        data.putIfAbsent('id', () => item["itemid"]);
+        data.remove('itemid');
+        data.putIfAbsent("poster", () => item["poster_b"]);
+        Navigator.pushNamed(context, "/detail", arguments: data);
+        print(data);
+      },
+      leading: Hero(
+          tag: "img_${item["itemid"]}",
+          child: Image.network(
+            item["poster_b"],
+            height: 150,
+            width: 50,
+            fit: BoxFit.cover,
+          )),
+      title: Text(item["title"]),
+      subtitle: Wrap(
+        runSpacing: 0,
+        children: [
+          tagText(item['area']),
+          tagText(item['score']),
+          tagText(item['play_status']),
+          tagText(item['category']),
+        ],
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: results.length,
-        itemBuilder: (c, i) {
-      return ListTile(
-        title: Text(results[i]),
-      );
-    });
+  Widget tagText(String s) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 0, 5, 0),
+      child: Chip(
+//      labelPadding: EdgeInsets.all(2),
+//      padding: EdgeInsets.all(5),
+        label: Text(s),
+      ),
+    );
   }
 }

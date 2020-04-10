@@ -11,7 +11,11 @@ Widget getWidgetByLoadingStatus(LoadingStatus status, VoidCallback onRefresh) {
         child: FlatButton(onPressed: onRefresh, child: Text("数据加载失败，点击重试")),
       );
     case LoadingStatus.NO_MORE:
-      return Center(child: Text("到底了"));
+      return Center(
+          child: Padding(
+        padding: EdgeInsets.all(10),
+        child: Text("---   到底了   ---"),
+      ));
     case LoadingStatus.NONE:
       return Container();
   }

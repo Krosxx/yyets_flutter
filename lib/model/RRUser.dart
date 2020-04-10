@@ -1,34 +1,35 @@
-import 'package:hive/hive.dart';
+import 'dart:convert';
 
-@HiveType()
+import 'package:flutter_yyets/utils/mysp.dart';
+
 class RRUser {
-  @HiveField(0)
   String uid;
-  @HiveField(1)
   String name;
-  @HiveField(2)
   String avatar;
-  @HiveField(3)
   String token;
 
-  RRUser(this.uid, this.name, this.avatar, this.token);
+  RRUser({this.uid, this.name, this.avatar, this.token});
 
   static RRUser _ins;
 
   static Future<RRUser> get instance async {
     if (_ins == null) {
-      var box = await Hive.openBox('box');
-      _ins = box.get("user_ins");
+      var config = (await MySp).get("user_ins", defaultValue: null);
+      if(config==null) {
+        var map = json.decode(config);
+        save(map);
+      }
     }
     return _ins;
   }
 
   static void save(Map data) {
-    _ins = RRUser(data['uid'], data['name'], data['avatar'], data['token']);
-    Hive.openBox("box").then((box) {
-      box.put('user_ins', _ins);
-    });
+    _ins = RRUser(
+        uid: data['uid'],
+        name: data['name'],
+        avatar: data['avatar'],
+        token: data['token']);
   }
 
-  static bool get isLogin => instance != null;
+  static Future<bool> get isLogin async => (await instance) != null;
 }
