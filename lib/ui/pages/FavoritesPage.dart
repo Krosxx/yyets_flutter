@@ -15,6 +15,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   int sortType = 0;
 
   _Body _body;
+
   @override
   void initState() {
     super.initState();
@@ -99,7 +100,6 @@ class _FavoriteListState extends LoadingPageState<_Body> {
     }
   }
 
-
   @override
   void didUpdateWidget(_Body oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -119,12 +119,15 @@ class _FavoriteListState extends LoadingPageState<_Body> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
           children: [
-            Image.network(
-              detail['poster'],
-              width: 100,
-              fit: BoxFit.cover,
-              height: 125,
-            ),
+            /*Hero(
+              tag: "img_${item["id"]}",
+              child: */Image.network(
+                detail['poster'],
+                width: 100,
+                fit: BoxFit.cover,
+                height: 125,
+              ),
+//            ),
             Container(
               width: 5,
             ),

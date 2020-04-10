@@ -45,6 +45,7 @@ class SearchPageDelegate extends SearchDelegate<Map> {
     );
   }
 
+  //TODO fix 进入详情 返回会刷新
   @override
   Widget buildResults(BuildContext context) {
     var q = query;
@@ -124,33 +125,58 @@ class ResultPageState extends LoadingPageState<ResultPage> {
 
   @override
   Widget buildItem(BuildContext context, int index, dynamic item) {
-    return ListTile(
-      onTap: () {
-        var data = Map();
-        data.addAll(item);
-        data.putIfAbsent('id', () => item["itemid"]);
-        data.remove('itemid');
-        data.putIfAbsent("poster", () => item["poster_b"]);
-        Navigator.pushNamed(context, "/detail", arguments: data);
-        print(data);
-      },
-      leading: Hero(
-          tag: "img_${item["itemid"]}",
-          child: Image.network(
-            item["poster_b"],
-            height: 150,
-            width: 50,
-            fit: BoxFit.cover,
-          )),
-      title: Text(item["title"]),
-      subtitle: Wrap(
-        runSpacing: 0,
-        children: [
-          tagText(item['area']),
-          tagText(item['score']),
-          tagText(item['play_status']),
-          tagText(item['category']),
-        ],
+    return Container(
+      padding: EdgeInsets.all(5),
+      child: InkWell(
+        onTap: () {
+          var data = Map();
+          data.addAll(item);
+          data.putIfAbsent('id', () => item["itemid"]);
+          data.remove('itemid');
+          data.putIfAbsent("poster", () => item["poster_b"]);
+          Navigator.pushNamed(context, "/detail", arguments: data);
+          print(data);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Hero(
+              tag: "img_${item["itemid"]}",
+              child: Image.network(
+                item["poster_b"],
+                width: 100,
+                fit: BoxFit.cover,
+                height: 125,
+              ),
+            ),
+            Container(
+              width: 5,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item['title'],
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Container(
+                    height: 5,
+                  ),
+                  Wrap(
+                    children: [
+                      tagText(item['area']),
+                      tagText(item['score']),
+                      tagText(item['play_status']),
+                      tagText(item['category']),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
