@@ -58,6 +58,7 @@ class _RankPageState extends State<RankPage>
           height: 45,
           child: TabBar(
             controller: _controller,
+            isScrollable: true,
             tabs: <Widget>[
               Tab(text: "今日"),
               Tab(text: "本月"),

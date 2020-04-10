@@ -7,6 +7,8 @@ import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
 class SearchPageDelegate extends SearchDelegate<Map> {
   @override
   Widget buildSuggestions(BuildContext context) {
+    print("buildSuggestions  $query");
+
     return SuggestionPage(query, (q) {
       query = q;
       showResults(context);
@@ -23,6 +25,7 @@ class SearchPageDelegate extends SearchDelegate<Map> {
               close(context, null);
             } else {
               query = "";
+              showSuggestions(context);
             }
           })
     ];
@@ -66,12 +69,12 @@ class SuggestionPage extends StatefulWidget {
 }
 
 class _SuggestionState extends State<SuggestionPage> {
-  Future _fun;
+  String get query => widget.query;
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: _fun,
+      future: query != "" ? querySuggest(query) : getQueryHistory(),
       builder: (c, snap) {
         if (snap.connectionState == ConnectionState.done && !snap.hasError) {
           var suggestions = snap.data;
@@ -91,7 +94,7 @@ class _SuggestionState extends State<SuggestionPage> {
                       padding: EdgeInsets.all(0),
                       onPressed: () async {
                         await deleteQueryHistory(suggestions[i]);
-                        loadSuggestions();
+                        setState(() {});
                       },
                       icon: Icon(Icons.close),
                     ),
@@ -103,23 +106,6 @@ class _SuggestionState extends State<SuggestionPage> {
         }
       },
     );
-  }
-
-  void loadSuggestions() {
-    var query = widget.query;
-    setState(() {
-      if (query != "") {
-        _fun = querySuggest(query);
-      } else {
-        _fun = getQueryHistory();
-      }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadSuggestions();
   }
 }
 

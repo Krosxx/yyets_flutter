@@ -15,7 +15,7 @@ class RRUser {
   static Future<RRUser> get instance async {
     if (_ins == null) {
       var config = (await MySp).get("user_ins", defaultValue: null);
-      if(config==null) {
+      if (config != null) {
         var map = json.decode(config);
         save(map);
       }
