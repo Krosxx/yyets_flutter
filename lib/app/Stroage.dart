@@ -30,3 +30,11 @@ deleteQueryHistory(String q) async {
   qh.remove(q);
   (await MySp).set("query_history", qh.join(_LIST_SEP));
 }
+
+Future<int> get favoritesSortType async {
+  return (await MySp).get("favorites_sort_type") ?? 0;
+}
+
+Future setFavoritesSortType(int type) {
+  return MySp.then((sp) => sp.set("favorites_sort_type", type));
+}

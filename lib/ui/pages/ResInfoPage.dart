@@ -26,7 +26,7 @@ class _ResInfoState extends State<ResInfoPage> {
 
   void _downloadAndPlay(String rrUri) async {
     if (!Platform.isAndroid) {
-      showToast("边下边播仅支持安卓系统");
+      toast("边下边播仅支持安卓系统");
       return;
     }
     if (await Permission.storage.request().isGranted) {
@@ -34,7 +34,7 @@ class _ResInfoState extends State<ResInfoPage> {
         print(result);
       });
     } else {
-      showToast("请授予存储权限");
+      toast("请授予存储权限");
     }
   }
 
@@ -64,7 +64,7 @@ class _ResInfoState extends State<ResInfoPage> {
         setState(() {
           _loadingStatus = LoadingStatus.ERROR;
         });
-        showToast(e);
+        toast(e);
       });
     });
   }
@@ -108,7 +108,7 @@ class _ResInfoState extends State<ResInfoPage> {
               if (canDownPlay) {
                 _downloadAndPlay(_data['item_app']['name']);
               } else {
-                showToast("不支持边下边播");
+                toast("不支持边下边播");
               }
             },
             child: Text(canDownPlay ? "边下边播" : "暂无边下边播资源"),
@@ -136,9 +136,9 @@ class _ResInfoState extends State<ResInfoPage> {
                               child: InkWell(
                                 onTap: () {
                                   launchUri(file['address']).catchError((e) {
-                                    showToast(e);
+                                    toast(e);
                                   });
-                                  showToast(file['address']);
+                                  toast(file['address']);
                                   print(item.toString());
                                 },
                                 child: Column(

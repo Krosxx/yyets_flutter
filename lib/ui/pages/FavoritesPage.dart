@@ -1,80 +1,160 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
-import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
+import 'package:flutter_yyets/app/Stroage.dart';
+import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
+import 'package:flutter_yyets/ui/utils.dart';
 import 'package:flutter_yyets/utils/times.dart';
 
 class FavoritesPage extends StatefulWidget {
   @override
-  State createState() => _FavoritePageState();
+  State createState() => _FavoritesPageState();
 }
 
-class _FavoritePageState extends State<FavoritesPage> {
-  List _items = [];
-  int _page = 1;
-  LoadingStatus _status = LoadingStatus.LOADING;
+class _FavoritesPageState extends State<FavoritesPage> {
+  int sortType = 0;
 
+  _Body _body;
   @override
   void initState() {
     super.initState();
-    _refresh();
-  }
-
-  void _loadMore() {
-    Api.myFavorites(_page).then((data) {
+    favoritesSortType.then((value) {
       setState(() {
-        if (data.isEmpty) {
-          _status = LoadingStatus.NO_MORE;
-        } else {
-          _page++;
-          _items.addAll(data);
-          _status = LoadingStatus.NONE;
-        }
-      });
-    }).catchError((e) {
-      setState(() {
-        _status = LoadingStatus.ERROR;
+        sortType = value;
+        _body = _Body(0);
       });
     });
-  }
-
-  void _refresh() {
-    _page = 1;
-    _loadMore();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text("我的收藏"),
+      appBar: AppBar(
+        title: Text("我的收藏"),
+        actions: [
+          PopupMenuButton(
+            icon: Icon(Icons.sort),
+            onSelected: (value) {
+              if (sortType != value) {
+                setFavoritesSortType(value);
+                setState(() {
+                  _body = _Body(value);
+                  sortType = value;
+                });
+              }
+            },
+            itemBuilder: (c) {
+              return [
+                CheckedPopupMenuItem(
+                  checked: sortType == 0,
+                  value: 0,
+                  child: Text("更新时间"),
+                ),
+                CheckedPopupMenuItem(
+                  checked: sortType == 1,
+                  value: 1,
+                  child: Text("收藏时间 ↑"),
+                ),
+                CheckedPopupMenuItem(
+                  checked: sortType == 2,
+                  value: 2,
+                  child: Text("收藏时间 ↓"),
+                )
+              ];
+            },
+          )
+        ],
+      ),
+      body: _body,
+    );
+  }
+}
+
+class _Body extends StatefulWidget {
+  final int sortType;
+
+  _Body(this.sortType);
+
+  @override
+  State createState() => _FavoriteListState();
+}
+
+class _FavoriteListState extends LoadingPageState<_Body> {
+  @override
+  Future<List> fetchData(int page) =>
+      Api.myFavorites(page, limit: widget.sortType == 0 ? 20 : 10000);
+
+  @override
+  void onLoadComplete() {
+    if (widget.sortType >= 1) {
+      items.sort((a, b) {
+        int at = int.parse(a['dateline']);
+        int bt = int.parse(b['dateline']);
+        if (widget.sortType == 1) {
+          return bt - at;
+        } else {
+          return at - bt;
+        }
+      });
+    }
+  }
+
+
+  @override
+  void didUpdateWidget(_Body oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    refresh();
+  }
+
+  @override
+  Widget buildItem(BuildContext context, int index, dynamic item) {
+    var detail = item['detail'];
+    return Container(
+      padding: EdgeInsets.all(5),
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, "/detail", arguments: detail);
+        },
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Image.network(
+              detail['poster'],
+              width: 100,
+              fit: BoxFit.cover,
+              height: 125,
+            ),
+            Container(
+              width: 5,
+            ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    detail['cnname'],
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  Container(
+                    height: 5,
+                  ),
+                  Text("更新时间：${formatSeconds(int.parse(item['updatetime']))}"),
+                  Text('收藏时间：${formatSeconds(int.parse(item['dateline']))}'),
+                  Wrap(
+                    children: [
+                      tagText(detail['score']),
+                      tagText(detail['type_name']),
+                      tagText(detail['category']),
+                      tagText(detail['play_status']),
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
         ),
-        body: _items.isNotEmpty
-            ? ListView.builder(
-                itemCount: _items.length,
-                itemBuilder: (BuildContext context, int index) {
-                  var item = _items[index];
-                  var detail = item['detail'];
-                  return ListTile(
-                    onTap: () {
-                      Navigator.pushNamed(context, "/detail",
-                          arguments: detail);
-                    },
-                    leading: Image.network(
-                      detail['poster'],
-                      width: 180,
-                      height: 255,
-                    ),
-                    title: Text(detail['cnname']),
-                    subtitle: Column(
-                      children: <Widget>[
-                        Text("更新时间：${formatSeconds(detail['dateline'])}"),
-                        Text('收藏时间：${formatSeconds(item['dateline'])}'),
-                      ],
-                    ),
-                  );
-                },
-              )
-            : getWidgetByLoadingStatus(_status, _loadMore));
+      ),
+    );
   }
 }

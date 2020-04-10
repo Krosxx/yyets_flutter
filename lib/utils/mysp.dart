@@ -25,26 +25,32 @@ class _MySp {
   get sp => _sp;
 
   init() async {
-    if (Platform.isWindows) {
-      _initFile();
-    } else {
+    if (_sp != null) return;
+    try {
+      if (Platform.isWindows) {
+        _initFile();
+      } else {
+        _sp = await SharedPreferences.getInstance();
+      }
+    } catch (e) {
       _sp = await SharedPreferences.getInstance();
     }
   }
 
   has(String key) {
     if (Platform.isWindows) {
-      return _sp.getKeys().contains(key);
-    } else {
       return _configMap.containsKey(key);
+    } else {
+      return _sp.getKeys().contains(key);
     }
   }
 
   remove(String key) {
     if (Platform.isWindows) {
-      _sp.remove(key);
+      _configMap.remove(key);
+      _toFile();
     } else {
-      _setOnWindows(key, null);
+      _sp.remove(key);
     }
   }
 
@@ -131,7 +137,7 @@ class _MySp {
 
   static _toFile() {
     var json = jsonEncode(_configMap);
-    print("写配置: " + json);
+//    print("写配置: " + json);
     var f = File("config");
     f.writeAsStringSync(json);
   }

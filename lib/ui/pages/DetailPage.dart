@@ -128,7 +128,7 @@ class _DetailPageState extends State<DetailPage>
                           CommentsPage(
                             data['id'],
                             detail["comments_hot"],
-                            data['channel'] ?? resource['channel'],
+                            resource['channel'],
                           ),
                           MoviesGridWidget(detail['similar']),
                         ],

@@ -29,11 +29,17 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
     loadMore();
   }
 
+  void refresh() {
+    items.clear();
+    _page = 1;
+    loadMore();
+  }
+
   void loadMore() {
-    print("load more page: $_page");
     if (_status == LoadingStatus.NO_MORE || _status == LoadingStatus.LOADING) {
       return;
     }
+    print("load more page: $_page");
     setState(() {
       _status = LoadingStatus.LOADING;
     });
@@ -56,7 +62,7 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
       setState(() {
         _status = LoadingStatus.ERROR;
       });
-      showToast(e);
+      toast(e);
     });
   }
 
@@ -64,19 +70,21 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
 
   @override
   Widget build(BuildContext context) {
-    if(_status==LoadingStatus.LOADING&&items.isEmpty)
-      return Center(child: CircularProgressIndicator(),);
+    if (_status == LoadingStatus.LOADING && items.isEmpty)
+      return Center(
+        child: CircularProgressIndicator(),
+      );
     else
       return ListView.builder(
-        controller: _scrollController,
-        itemCount: items.length + 1,
-        itemBuilder: (c, i) {
-          if (i == items.length) {
-            return getWidgetByLoadingStatus(_status, loadMore);
-          } else {
-            return buildItem(context, i, items[i]);
-          }
-        });
+          controller: _scrollController,
+          itemCount: items.length + 1,
+          itemBuilder: (c, i) {
+            if (i == items.length) {
+              return getWidgetByLoadingStatus(_status, loadMore);
+            } else {
+              return buildItem(context, i, items[i]);
+            }
+          });
   }
 
   Widget buildItem(BuildContext context, int index, dynamic item);

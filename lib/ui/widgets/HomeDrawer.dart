@@ -2,30 +2,95 @@ import 'package:flutter/material.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 
-class HomeDrawer extends StatelessWidget {
+class HomeDrawer extends StatefulWidget {
+  @override
+  State createState() => _HomeDrawerState();
+}
+
+class _HomeDrawerState extends State<HomeDrawer> {
+  RRUser user;
+
+  @override
+  void initState() {
+    super.initState();
+    RRUser.instance.then((value) {
+      print(value);
+      setState(() {
+        user = value;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    print("build drawer");
     return Drawer(
         child: MediaQuery.removePadding(
       removeTop: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            backgroundColor: Color.fromARGB(0, 0, 0, 0),
-            child: Image.network("https://flutter.cn/favicon.ico"),
+          Container(
+            height: 10,
+          ),
+          ListTile(
+            onTap: () {
+              if (user == null) {
+                Navigator.pushNamed(context, "/login");
+                Scaffold.of(context).openEndDrawer();
+              } else {
+                showDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (c) {
+                    return AlertDialog(
+                      title: Text("退出登录?"),
+                      actions: [
+                        FlatButton(
+                          child: Text("确定"),
+                          onPressed: () {
+                            setState(() {
+                              user = null;
+                            });
+                            RRUser.logout();
+                            Navigator.pop(context);
+                          },
+                        ),
+                        FlatButton(
+                          child: Text("取消"),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              }
+            },
+            leading: ClipOval(
+              child: Image.network(
+                  user?.avatar ?? "https://flutter.cn/favicon.ico"),
+            ),
+            title: Text(
+              user?.name ?? "登录",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: user == null ? null : Text(user.email),
+          ),
+          Container(
+            height: 10,
           ),
           Expanded(
             child: ListView(children: [
               ListTile(
-                leading: Icon(Icons.adb),
+                leading: Icon(Icons.favorite),
                 title: Text("我的收藏"),
                 onTap: () {
                   RRUser.isLogin.then((value) {
                     if (value) {
+                      Scaffold.of(context).openEndDrawer();
                       Navigator.pushNamed(context, "/favorites");
                     } else {
-                      showToast("请先登录");
+                      toast("请先登录");
                       Navigator.pushNamed(context, "/login");
                     }
                   });
@@ -35,7 +100,7 @@ class HomeDrawer extends StatelessWidget {
                 leading: Icon(Icons.adb),
                 title: Text("边下边播"),
                 onTap: () {
-                  showToast("TODO");
+                  toast("TODO");
                 },
               )
             ]),

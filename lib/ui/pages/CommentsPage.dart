@@ -70,7 +70,7 @@ class _CommentsPageState extends State<CommentsPage> {
       setState(() {
         _loadStatus = LoadingStatus.ERROR;
       });
-      showToast(e);
+      toast(e);
     });
   }
 
