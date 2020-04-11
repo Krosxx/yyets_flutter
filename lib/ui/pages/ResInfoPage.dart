@@ -25,6 +25,7 @@ class _ResInfoState extends State<ResInfoPage> {
   LoadingStatus _loadingStatus = LoadingStatus.LOADING;
 
   void _downloadAndPlay(String rrUri) async {
+    print(rrUri);
     if (!Platform.isAndroid) {
       toast("边下边播仅支持安卓系统");
       return;
@@ -86,25 +87,38 @@ class _ResInfoState extends State<ResInfoPage> {
 
   @override
   Widget build(BuildContext context) {
+    bool canDownPlay =
+        _data['item_app'] != null && _data['item_app']['name'] != null;
     return Scaffold(
-        appBar: AppBar(
-          title: Text(title()),
-        ),
-        body: _loadingStatus == LoadingStatus.NONE
-            ? buildBody()
-            : getWidgetByLoadingStatus(_loadingStatus, _loadData,
-                errText: _errText));
+      appBar: AppBar(
+        title: Text(title()),
+      ),
+      body: _loadingStatus == LoadingStatus.NONE
+          ? buildBody(canDownPlay)
+          : getWidgetByLoadingStatus(_loadingStatus, _loadData,
+              errText: _errText),
+      floatingActionButton: canDownPlay
+          ? FloatingActionButton(
+              backgroundColor: Colors.lightBlue,
+              onPressed: () {
+                _downloadAndPlay(_data['item_app']['name']);
+              },
+              child: Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+              ),
+            )
+          : null,
+    );
   }
 
   var itemExp = <bool>[];
 
-  Widget buildBody() {
+  Widget buildBody(bool canDownPlay) {
     List resList = _data['item_list'] ?? [];
     if (itemExp.length != resList.length) {
       itemExp = resList.map((i) => false).toList();
     }
-    bool canDownPlay =
-        _data['item_app'] != null && _data['item_app']['name'] != null;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
