@@ -185,15 +185,39 @@ class Api {
 
   ///收藏
   static Future<bool> follow(String id) async {
-    var res = await dioClient.get(
-        linkUserUrl("g=api/v2&m=index&a=fav_follow&id=$id&ft=resource"));
+    var res = await dioClient
+        .get(linkUserUrl("g=api/v2&m=index&a=fav_follow&id=$id&ft=resource"));
     return res.data["status"] == 1;
   }
+
   ///收藏
   static Future<bool> unFollow(String id) async {
-    var res = await dioClient.get(
-        linkUserUrl("g=api/v2&m=index&a=fav_unfollow&id=$id&ft=resource"));
+    var res = await dioClient
+        .get(linkUserUrl("g=api/v2&m=index&a=fav_unfollow&id=$id&ft=resource"));
     return res.data["status"] == 1;
+  }
+
+  static Future<Map> commentUser(
+      String replyId, String content, String channel) async {
+    var res = await dioClient.get(linkUserUrl(
+        "m=comment&a=save&channel=$channel&itemid=39790&content=$content&replyid=$replyId"));
+
+    if (res.data['status'] == 1) {
+      return res.data['data'];
+    } else {
+      throw Exception(res.data['info']);
+    }
+  }
+
+  static Future<bool> commentGood(String commentId) async {
+    var res = await dioClient
+        .get(linkUserUrl("m=comment&a=good&id=$commentId&thread=1"));
+    return res.data['status'] == 1;
+  }
+  static Future<bool> commentBad(String commentId) async {
+    var res = await dioClient
+        .get(linkUserUrl("m=comment&a=bad&id=$commentId&thread=1"));
+    return res.data['status'] == 1;
   }
 
   //统一 accKey  client

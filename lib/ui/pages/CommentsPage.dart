@@ -7,9 +7,9 @@ import 'package:flutter_yyets/utils/toast.dart';
 class CommentsPage extends StatefulWidget {
   final List hotComments;
   final String id;
-  final String chanel;
+  final String channel;
 
-  CommentsPage(this.id, this.hotComments, this.chanel);
+  CommentsPage(this.id, this.hotComments, this.channel);
 
   @override
   State createState() {
@@ -41,11 +41,9 @@ class _CommentsPageState extends State<CommentsPage>
     scrollListener = () {
       // ignore: invalid_use_of_protected_member
       var ps = _scrollController.positions;
-      print(ps.length);
       var pos = ps.elementAt(ps.length - 1);
       double p = pos.pixels;
       double mp = pos.maxScrollExtent;
-      print("$p/$mp");
       if (_loadStatus != LoadingStatus.LOADING &&
           _loadStatus != LoadingStatus.ERROR &&
           p >= mp - 50) {
@@ -72,7 +70,7 @@ class _CommentsPageState extends State<CommentsPage>
         _loadStatus = LoadingStatus.LOADING;
       });
     }
-    Api.loadComments(widget.id, widget.chanel, _page).then((data) {
+    Api.loadComments(widget.id, widget.channel, _page).then((data) {
       print("load comments: ${data.length}");
       if (data.isEmpty) {
         if (mounted) {
@@ -120,31 +118,35 @@ class _CommentsPageState extends State<CommentsPage>
     int hotLen = widget.hotComments.length;
     int totalLen = comments.length + hotLen + 3;
     return ListView.builder(
-        shrinkWrap: true,
-        itemCount: totalLen,
-        itemBuilder: (c, i) {
-          if (i == 0) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: Text("热评"),
-            );
-          } else if (i == totalLen - 1) {
-            return getWidgetByLoadingStatus(_loadStatus, loadMore);
-          } else if (i == hotLen + 1) {
-            return Padding(
-              padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: Text("全部评论"),
-            );
+      shrinkWrap: true,
+      itemCount: totalLen,
+      itemBuilder: (c, i) {
+        if (i == 0) {
+          return Padding(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+            child: Text("热评"),
+          );
+        } else if (i == totalLen - 1) {
+          return getWidgetByLoadingStatus(_loadStatus, loadMore);
+        } else if (i == hotLen + 1) {
+          return Padding(
+            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+            child: Text("全部评论"),
+          );
+        } else {
+          var comment;
+          if (i <= hotLen) {
+            comment = widget.hotComments[i - 1];
           } else {
-            var comment;
-            if (i <= hotLen) {
-              comment = widget.hotComments[i - 1];
-            } else {
-              comment = comments[i - 2 - hotLen];
-            }
-            return CommentsWidgetBuilder.build(comment);
+            comment = comments[i - 2 - hotLen];
           }
-        });
+          return CommentsWidgetBuilder.build(context, comment, widget.channel,
+              () {
+            setState(() {});
+          });
+        }
+      },
+    );
   }
 
   @override

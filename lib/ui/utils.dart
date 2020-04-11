@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/ui/widgets/BottomInputDialog.dart';
 
 Widget tagText(String s) {
   return Padding(
@@ -7,4 +8,10 @@ Widget tagText(String s) {
       label: Text(s),
     ),
   );
+}
+
+Future showInputDialog(BuildContext context,
+    String actionText,Widget title) {
+  return Navigator.push(context,
+      PopRoute(child: BottomInputDialog(actionText, title)));
 }
