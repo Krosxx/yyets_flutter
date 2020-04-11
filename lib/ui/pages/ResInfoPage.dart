@@ -100,6 +100,7 @@ class _ResInfoState extends State<ResInfoPage> {
               errText: _errText),
       floatingActionButton: canDownPlay
           ? FloatingActionButton(
+              tooltip: "边下边播",
               backgroundColor: Colors.lightBlue,
               onPressed: () {
                 _downloadAndPlay(_data['item_app']['name']);
@@ -139,31 +140,31 @@ class _ResInfoState extends State<ResInfoPage> {
                 children: fs.map((file) {
                   return Card(
                       child: InkWell(
-                        onTap: () {
-                          String addr = file['address'];
-                          print(addr);
-                          String pwd = file['passwd'];
-                          if (pwd != null && pwd.isNotEmpty) {
-                            setClipboardData(pwd);
-                            toastLong("网盘密码已复制：$pwd");
-                          }
-                          launchUri(addr).then((val) {
-                            if (!val) {
-                              toast("请安装迅雷等下载软件");
-                            }
-                          }).catchError((e) {
-                            print(e);
-                            toast(e);
-                          });
-                        },
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Text("way: " + file['way'].toString() ?? ""),
-                            Text(file['way_name'] ?? ""),
-                          ],
-                        ),
-                      ));
+                    onTap: () {
+                      String addr = file['address'];
+                      print(addr);
+                      String pwd = file['passwd'];
+                      if (pwd != null && pwd.isNotEmpty) {
+                        setClipboardData(pwd);
+                        toastLong("网盘密码已复制：$pwd");
+                      }
+                      launchUri(addr).then((val) {
+                        if (!val) {
+                          toast("请安装迅雷等下载软件");
+                        }
+                      }).catchError((e) {
+                        print(e);
+                        toast(e);
+                      });
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Text("way: " + file['way'].toString() ?? ""),
+                        Text(file['way_name'] ?? ""),
+                      ],
+                    ),
+                  ));
                 }).toList(),
                 physics: NeverScrollableScrollPhysics(),
                 childAspectRatio: 1.3,
