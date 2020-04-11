@@ -87,14 +87,15 @@ class _ResInfoState extends State<ResInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool canDownPlay =
-        _data['item_app'] != null && _data['item_app']['name'] != null;
+    bool canDownPlay = _data != null &&
+        _data['item_app'] != null &&
+        _data['item_app']['name'] != null;
     return Scaffold(
       appBar: AppBar(
         title: Text(title()),
       ),
       body: _loadingStatus == LoadingStatus.NONE
-          ? buildBody(canDownPlay)
+          ? buildBody()
           : getWidgetByLoadingStatus(_loadingStatus, _loadData,
               errText: _errText),
       floatingActionButton: canDownPlay
@@ -114,100 +115,84 @@ class _ResInfoState extends State<ResInfoPage> {
 
   var itemExp = <bool>[];
 
-  Widget buildBody(bool canDownPlay) {
+  Widget buildBody() {
     List resList = _data['item_list'] ?? [];
     if (itemExp.length != resList.length) {
       itemExp = resList.map((i) => false).toList();
     }
     return SingleChildScrollView(
-      child: Column(
-        children: <Widget>[
-          FlatButton(
-            onPressed: () {
-              if (canDownPlay) {
-                _downloadAndPlay(_data['item_app']['name']);
-              } else {
-                toast("不支持边下边播");
-              }
-            },
-            child: Text(canDownPlay ? "边下边播" : "暂无边下边播资源"),
-          ),
-          Container(
-            margin: EdgeInsets.all(10),
-            child: ExpansionPanelList(
-                expansionCallback: (i, isExp) {
-                  setState(() {
-                    itemExp[i] = !itemExp[i];
-                  });
-                },
-                children: resList.asMap().keys.map((i) {
-                  var item = resList[i];
-                  List fs = item['files'];
-                  return ExpansionPanel(
-                      canTapOnHeader: true,
-                      isExpanded: itemExp[i],
-                      body: GridView.extent(
-                        shrinkWrap: true,
-                        children: fs.map((file) {
-                          var pwd = file['passwd'];
-                          return Card(
-                              color: Colors.black26,
-                              child: InkWell(
-                                onTap: () {
-                                  String pwd = file['passwd'];
-                                  if (pwd != null && pwd.isNotEmpty) {
-                                    setClipboardData(pwd);
-                                    toastLong("网盘密码已复制：$pwd");
-                                  }
+      padding: EdgeInsets.all(10),
+      child: ExpansionPanelList(
+        expansionCallback: (i, isExp) {
+          setState(() {
+            itemExp[i] = !itemExp[i];
+          });
+        },
+        children: resList.asMap().keys.map((i) {
+          var item = resList[i];
+          List fs = item['files'];
+          return ExpansionPanel(
+              canTapOnHeader: true,
+              isExpanded: itemExp[i],
+              body: GridView.extent(
+                shrinkWrap: true,
+                children: fs.map((file) {
+                  var pwd = file['passwd'];
+                  return Card(
+                      color: Colors.black26,
+                      child: InkWell(
+                        onTap: () {
+                          String pwd = file['passwd'];
+                          if (pwd != null && pwd.isNotEmpty) {
+                            setClipboardData(pwd);
+                            toastLong("网盘密码已复制：$pwd");
+                          }
 
-                                  launchUri(file['address']).then((val) {
-                                    if (!val) {
-                                      toast("请安装迅雷等下载软件");
-                                    }
-                                  }).catchError((e) {
-                                    print(e);
-                                    toast(e);
-                                  });
-                                },
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: <Widget>[
-                                    Text(
-                                        "way: " + file['way'].toString() ?? ""),
-                                    Text(file['way_name'] ?? ""),
-                                    (pwd == null || pwd.isEmpty)
-                                        ? Container()
-                                        : Text(file['passwd'] ?? ""),
-                                  ],
-                                ),
-                              ));
-                        }).toList(),
-                        physics: NeverScrollableScrollPhysics(),
-                        childAspectRatio: 1.3,
-                        maxCrossAxisExtent: 90,
+                          launchUri(file['address']).then((val) {
+                            if (!val) {
+                              toast("请安装迅雷等下载软件");
+                            }
+                          }).catchError((e) {
+                            print(e);
+                            toast(e);
+                          });
+                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Text("way: " + file['way'].toString() ?? ""),
+                            Text(file['way_name'] ?? ""),
+                            (pwd == null || pwd.isEmpty)
+                                ? Container()
+                                : Text(file['passwd'] ?? ""),
+                          ],
+                        ),
+                      ));
+                }).toList(),
+                physics: NeverScrollableScrollPhysics(),
+                childAspectRatio: 1.3,
+                maxCrossAxisExtent: 90,
+              ),
+              headerBuilder: (BuildContext context, bool isExpanded) {
+                var size = item['size']?.toString();
+                return Container(
+                  padding: EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        item['format_tip'] ?? "",
+                        style: TextStyle(color: Colors.blueAccent),
                       ),
-                      headerBuilder: (BuildContext context, bool isExpanded) {
-                        var size = item['size']?.toString();
-                        return Container(
-                          padding: EdgeInsets.all(10),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text(
-                                item['format_tip'] ?? "",
-                                style: TextStyle(color: Colors.blueAccent),
-                              ),
-                              size == null || size.isEmpty
-                                  ? Container()
-                                  : Text(size.toString()),
-                              Text(item['dateline'].toString() ?? "")
-                            ],
-                          ),
-                        );
-                      });
-                }).toList()),
-          ),
-        ],
+                      size == null || size.isEmpty
+                          ? Container()
+                          : Text(size.toString()),
+                      Text(item['dateline'].toString() ?? "")
+                    ],
+                  ),
+                );
+              });
+        }).toList(),
       ),
     );
   }
