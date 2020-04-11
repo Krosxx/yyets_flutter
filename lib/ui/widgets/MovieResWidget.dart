@@ -28,7 +28,7 @@ class MovieResWidget extends StatelessWidget {
                       children: <Widget>[
                         Text(
                           item['number'],
-                          style: TextStyle(fontSize: 16),
+                          style: TextStyle(fontSize: 16, color: Colors.blueAccent,fontWeight: FontWeight.bold),
                         ),
                         Text(item['name']),
                         item['play'] == 1

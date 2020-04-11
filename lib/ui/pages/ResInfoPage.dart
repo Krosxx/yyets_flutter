@@ -179,7 +179,10 @@ class _ResInfoState extends State<ResInfoPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
-                              Text(item['format_tip'] ?? ""),
+                              Text(
+                                item['format_tip'] ?? "",
+                                style: TextStyle(color: Colors.blueAccent),
+                              ),
                               size == null || size.isEmpty
                                   ? Container()
                                   : Text(size.toString()),

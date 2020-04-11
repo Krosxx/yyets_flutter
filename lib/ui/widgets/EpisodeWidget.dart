@@ -48,7 +48,9 @@ class EpisodeWidget extends StatelessWidget {
                           Text(
                             epiItem['episode'],
                             style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w700),
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blueAccent),
                           ),
                           Text(epiItem['play_time']),
                         ],
