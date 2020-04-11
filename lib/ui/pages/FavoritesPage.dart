@@ -119,15 +119,15 @@ class _FavoriteListState extends LoadingPageState<_Body> {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
           children: [
-            /*Hero(
-              tag: "img_${item["id"]}",
-              child: */Image.network(
+            Hero(
+              tag: "img_${detail["id"]}",
+              child: Image.network(
                 detail['poster'],
                 width: 100,
                 fit: BoxFit.cover,
                 height: 125,
               ),
-//            ),
+            ),
             Container(
               width: 5,
             ),
