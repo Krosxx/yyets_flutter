@@ -6,7 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
 import 'package:flutter_yyets/utils/toast.dart';
-import 'package:flutter_yyets/utils/url_utils.dart';
+import 'package:flutter_yyets/utils/tools.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ResInfoPage extends StatefulWidget {
@@ -64,7 +64,8 @@ class _ResInfoState extends State<ResInfoPage> {
         setState(() {
           _loadingStatus = LoadingStatus.ERROR;
         });
-        toast(e);
+        _errText = e.message;
+        toast(e.message);
       });
     });
   }
@@ -80,7 +81,7 @@ class _ResInfoState extends State<ResInfoPage> {
     }
     return t;
   }
-
+  String _errText = "资源加载失败，请重试";
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,7 +90,7 @@ class _ResInfoState extends State<ResInfoPage> {
         ),
         body: _loadingStatus == LoadingStatus.NONE
             ? buildBody()
-            : getWidgetByLoadingStatus(_loadingStatus, _loadData));
+            : getWidgetByLoadingStatus(_loadingStatus, _loadData,errText: _errText));
   }
 
   var itemExp = <bool>[];
@@ -99,7 +100,7 @@ class _ResInfoState extends State<ResInfoPage> {
     if (itemExp.length != resList.length) {
       itemExp = resList.map((i) => false).toList();
     }
-    bool canDownPlay = _data['item_app']['name'] != null;
+    bool canDownPlay = _data['item_app'] !=null && _data['item_app']['name'] != null;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -135,11 +136,16 @@ class _ResInfoState extends State<ResInfoPage> {
                               color: Colors.black26,
                               child: InkWell(
                                 onTap: () {
+                                  String pwd = file['passwd'];
+                                  if (pwd != null && pwd.isNotEmpty) {
+                                    setClipboardData(pwd);
+                                    toastLong("网盘密码已复制：$pwd");
+                                  }
+
                                   launchUri(file['address']).catchError((e) {
+                                    print(e);
                                     toast(e);
                                   });
-                                  toast(file['address']);
-                                  print(item.toString());
                                 },
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -166,7 +172,9 @@ class _ResInfoState extends State<ResInfoPage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Text(item['format_tip'] ?? ""),
-                              size == null || size.isEmpty ? Container(): Text(size.toString()),
+                              size == null || size.isEmpty
+                                  ? Container()
+                                  : Text(size.toString()),
                               Text(item['dateline'].toString() ?? "")
                             ],
                           ),

@@ -20,13 +20,13 @@ class Api {
             var status = res.data["status"];
             if (status != null) {
               if (status != 1) {
-                print("status err: " + res.data);
+                print("status err: " + res.data.toString());
               } else {
 //                print("dio data: ${res.data['data']}");
               }
             }
           } catch (e) {
-            print("234" + e.toString());
+            print("error" + e.toString());
           }
         }, onRequest: (RequestOptions options) {
           _dioClient.lock();
@@ -98,6 +98,9 @@ class Api {
       String episode = ""}) async {
     var res =
         await dioClient.get(await resUrl(id, itemid, channel, season, episode));
+    if (res.data["status"] != 1) {
+      throw Exception(res.data["info"]);
+    }
     return res.data['data'];
   }
 
