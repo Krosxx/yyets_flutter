@@ -81,7 +81,9 @@ class _ResInfoState extends State<ResInfoPage> {
     }
     return t;
   }
+
   String _errText = "资源加载失败，请重试";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,7 +92,8 @@ class _ResInfoState extends State<ResInfoPage> {
         ),
         body: _loadingStatus == LoadingStatus.NONE
             ? buildBody()
-            : getWidgetByLoadingStatus(_loadingStatus, _loadData,errText: _errText));
+            : getWidgetByLoadingStatus(_loadingStatus, _loadData,
+                errText: _errText));
   }
 
   var itemExp = <bool>[];
@@ -100,7 +103,8 @@ class _ResInfoState extends State<ResInfoPage> {
     if (itemExp.length != resList.length) {
       itemExp = resList.map((i) => false).toList();
     }
-    bool canDownPlay = _data['item_app'] !=null && _data['item_app']['name'] != null;
+    bool canDownPlay =
+        _data['item_app'] != null && _data['item_app']['name'] != null;
     return SingleChildScrollView(
       child: Column(
         children: <Widget>[
@@ -142,7 +146,11 @@ class _ResInfoState extends State<ResInfoPage> {
                                     toastLong("网盘密码已复制：$pwd");
                                   }
 
-                                  launchUri(file['address']).catchError((e) {
+                                  launchUri(file['address']).then((val) {
+                                    if (!val) {
+                                      toast("请安装迅雷等下载软件");
+                                    }
+                                  }).catchError((e) {
                                     print(e);
                                     toast(e);
                                   });

@@ -7,11 +7,11 @@ Future launchUri(String uri) async {
   try {
     if (Platform.isWindows) {
       Process.start("explorer ", [uri]);
-      return;
+      return true;
     }
   } catch (e) {}
   if (await canLaunch(uri)) {
-    launch(uri);
+    return await launch(uri);
   } else {
     throw "canot open $uri";
   }
