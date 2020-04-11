@@ -4,14 +4,30 @@ import 'package:flutter/material.dart';
 ///
 /// 季集
 ///
-class EpisodeWidget extends StatelessWidget {
+///
+
+class EpisodeWidget extends StatefulWidget {
   final List<dynamic> episodes;
   final Map resInfo;
 
   EpisodeWidget(this.episodes, this.resInfo);
 
   @override
+  State createState() => EpisodeWidgetState();
+}
+
+class EpisodeWidgetState extends State<EpisodeWidget>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  List<dynamic> get episodes => widget.episodes;
+
+  Map get resInfo => widget.resInfo;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return ListView.builder(
         itemCount: episodes.length,
         itemBuilder: (c, i) {

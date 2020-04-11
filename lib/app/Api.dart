@@ -62,7 +62,7 @@ class Api {
 
   static Future<String> commentUrl(String id, String channel, int page) =>
       linkUserUrl(
-          "a=fetch&itemid=$id&channel=$channel&pagesize=16&page=$page&m=comment");
+          "a=fetch&itemid=$id&channel=$channel&pagesize=20&page=$page&m=comment");
 
   static Future<String> resUrl(String id, String itemid, String channel,
           String season, String episode) =>

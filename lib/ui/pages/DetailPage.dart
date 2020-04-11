@@ -17,7 +17,6 @@ class DetailPage extends StatefulWidget {
 
 class _DetailPageState extends State<DetailPage>
     with SingleTickerProviderStateMixin {
-  ScrollController _scrollViewController;
   TabController _tabController;
 
   get data => widget.data;
@@ -35,14 +34,12 @@ class _DetailPageState extends State<DetailPage>
   @override
   void dispose() {
     super.dispose();
-    _scrollViewController.dispose();
     _tabController.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    _scrollViewController = ScrollController(initialScrollOffset: 0.0);
     _tabController = TabController(vsync: this, length: 4);
     loadData();
   }
@@ -69,7 +66,6 @@ class _DetailPageState extends State<DetailPage>
     return Scaffold(
         appBar: AppBar(title: Text(title)),
         body: NestedScrollView(
-            controller: _scrollViewController,
             headerSliverBuilder:
                 (BuildContext context, bool innerBoxIsScrolled) {
               return <Widget>[
@@ -131,7 +127,7 @@ class _DetailPageState extends State<DetailPage>
                           CommentsPage(
                             data['id'],
                             detail["comments_hot"],
-                            resource['channel'],
+                            resource['channel']
                           ),
                           MoviesGridWidget(detail['similar']),
                         ],
