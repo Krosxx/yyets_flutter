@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
+import 'package:flutter_yyets/utils/toast.dart';
+import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 Future launchUri(String uri) async {
@@ -36,4 +38,13 @@ setClipboardData(String data) {
     }
   } catch (e) {}
   Clipboard.setData(ClipboardData(text: "123"));
+}
+
+void share(String text, {String subject}) {
+  if (Platform.isWindows) {
+    //todo
+    toastLong("暂不支持Win端分享");
+    return;
+  }
+  Share.share(text, subject: subject);
 }
