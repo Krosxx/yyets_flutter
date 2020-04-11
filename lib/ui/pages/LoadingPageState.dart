@@ -51,18 +51,22 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
         });
       } else {
         _page++;
-        setState(() {
-          _status = LoadingStatus.NONE;
-          items.addAll(data);
-          onLoadComplete();
-        });
+        if (mounted) {
+          setState(() {
+            _status = LoadingStatus.NONE;
+            items.addAll(data);
+            onLoadComplete();
+          });
+        }
       }
     }).catchError((e) {
       debugPrint(e.toString());
-      setState(() {
-        _status = LoadingStatus.ERROR;
-      });
-      toast(e);
+      if (mounted) {
+        setState(() {
+          _status = LoadingStatus.ERROR;
+        });
+        toast(e);
+      }
     });
   }
 

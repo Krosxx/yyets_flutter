@@ -49,17 +49,20 @@ class _DetailPageState extends State<DetailPage>
 
   void loadData() {
     Api.getDetail(data["id"]).then((d) {
-      setState(() {
-        detail = d;
-      });
+      if (mounted) {
+        setState(() {
+          detail = d;
+        });
+      }
     }).catchError((e) {
-      setState(() {
-        _hasErr = true;
-      });
+      if (mounted) {
+        setState(() {
+          _hasErr = true;
+        });
+      }
       print(e);
     });
   }
-
 
   @override
   Widget build(BuildContext context) {

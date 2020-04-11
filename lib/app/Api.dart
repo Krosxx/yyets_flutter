@@ -22,7 +22,7 @@ class Api {
               if (status != 1) {
                 print("status err: " + res.data);
               } else {
-                print("dio data: ${res.data['data']}");
+//                print("dio data: ${res.data['data']}");
               }
             }
           } catch (e) {

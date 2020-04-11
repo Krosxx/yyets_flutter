@@ -5,7 +5,7 @@ Future<List<String>> getQueryHistory() async {
   if (qhs == "") {
     return [];
   } else {
-    return qhs.split(_LIST_SEP);
+    return qhs.split(_LIST_SEP).reversed.toList();
   }
 }
 

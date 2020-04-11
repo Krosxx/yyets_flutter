@@ -153,7 +153,7 @@ class _MySp {
     } else {
       //文件存在
       var json = configFile.readAsStringSync();
-      print("配置文件：" + json);
+//      print("配置文件：" + json);
       try {
         _configMap = jsonDecode(json);
       } catch (e) {
