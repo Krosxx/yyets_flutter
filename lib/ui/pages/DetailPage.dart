@@ -68,13 +68,19 @@ class _DetailPageState extends State<DetailPage>
     return Scaffold(
       appBar: AppBar(
         title: Text(title),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: () =>
-                share(title + "\n" + detail["share_url"]+"\n\n来自 人人影视_Flutter", subject: "人人影视分享"),
-          )
-        ],
+        actions: detail == null
+            ? null
+            : [
+                IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: () => share(
+                      title +
+                          "\n" +
+                          detail["share_url"] +
+                          "\n\n来自 人人影视_Flutter",
+                      subject: "人人影视分享"),
+                )
+              ],
       ),
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -169,7 +175,7 @@ class _DetailPageState extends State<DetailPage>
                 height: 10,
               ),
               Text(data["play_status"] ?? resource["play_status"] ?? ""),
-              resource == null
+              resource.isEmpty
                   ? Container()
                   : Wrap(
                       children: [
@@ -180,7 +186,7 @@ class _DetailPageState extends State<DetailPage>
                             : tagText(resource['zimuzu']),
                       ],
                     ),
-              resource == null
+              resource.isEmpty
                   ? Container()
                   : tagText((resource['category'] ?? []).join('/')),
             ],
