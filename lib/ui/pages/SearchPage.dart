@@ -191,4 +191,7 @@ class ResultPageState extends LoadingPageState<ResultPage> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

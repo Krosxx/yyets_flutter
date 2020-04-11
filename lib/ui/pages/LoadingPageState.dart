@@ -6,7 +6,8 @@ import 'package:flutter_yyets/utils/toast.dart';
 ///
 /// 数据列表
 ///
-abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
+abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
+    with AutomaticKeepAliveClientMixin {
   final List items = [];
   ScrollController _scrollController;
   LoadingStatus _status = LoadingStatus.NONE;
@@ -74,6 +75,7 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     if (_status == LoadingStatus.LOADING && items.isEmpty)
       return Center(
         child: CircularProgressIndicator(),
@@ -90,6 +92,9 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P> {
             }
           });
   }
+
+  @override
+  bool get wantKeepAlive => false;
 
   Widget buildItem(BuildContext context, int index, dynamic item);
 }
