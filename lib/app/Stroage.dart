@@ -1,11 +1,17 @@
 import 'package:flutter_yyets/utils/mysp.dart';
 
+///
+/// 搜索历史记录
+/// new
+/// ...
+/// old
+///
 Future<List<String>> getQueryHistory() async {
   String qhs = (await MySp).get("query_history") ?? "";
   if (qhs == "") {
     return [];
   } else {
-    return qhs.split(_LIST_SEP).reversed.toList();
+    return qhs.split(_LIST_SEP);
   }
 }
 
@@ -19,8 +25,8 @@ Future<List<String>> querySuggest(String qy) async {
 
 addQueryHistory(String qy) async {
   Set qh = Set<String>();
-  qh.addAll(await getQueryHistory());
   qh.add(qy);
+  qh.addAll(await getQueryHistory());
   (await MySp).set("query_history", qh.join(_LIST_SEP));
 }
 
