@@ -122,7 +122,7 @@ class _FavoriteListState extends LoadingPageState<_Body> {
             Hero(
               tag: "img_${detail["id"]}",
               child: Image.network(
-                detail['poster'],
+                detail['poster_b'],
                 width: 100,
                 fit: BoxFit.cover,
                 height: 125,

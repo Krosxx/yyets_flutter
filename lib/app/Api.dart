@@ -54,34 +54,32 @@ class Api {
     return _dioClient;
   }
 
-  static Future<String> get rankUrl =>
-      linkUserUrl("m=index&a=HOT&limit=50&g=api/v3");
+  static String get rankUrl => linkUserUrl("m=index&a=HOT&limit=50&g=api/v3");
 
-  static Future<String> detailUrl(String id) =>
+  static String detailUrl(String id) =>
       linkUserUrl("m=index&a=resource&rid=$id&g=api/v2");
 
-  static Future<String> commentUrl(String id, String channel, int page) =>
-      linkUserUrl(
-          "a=fetch&itemid=$id&channel=$channel&pagesize=20&page=$page&m=comment");
+  static String commentUrl(String id, String channel, int page) => linkUserUrl(
+      "a=fetch&itemid=$id&channel=$channel&pagesize=20&page=$page&m=comment");
 
-  static Future<String> resUrl(String id, String itemid, String channel,
-          String season, String episode) =>
+  static String resUrl(String id, String itemid, String channel, String season,
+          String episode) =>
       linkUserUrl(
           "g=api/v2&m=index&a=resource_item&id=$id&season=$season&episode=$episode&itemid=$itemid");
 
   static Future<Map<String, dynamic>> loadRank() async {
-    var res = await dioClient.get(await rankUrl);
+    var res = await dioClient.get(rankUrl);
     return res.data['data'];
   }
 
   static Future<Map<String, dynamic>> getDetail(String id) async {
     var url = detailUrl(id);
-    var res = await dioClient.get(await url);
+    var res = await dioClient.get(url);
     return res.data['data'];
   }
 
   static Future<List> loadComments(String id, String channel, int page) async {
-    var res = await dioClient.get(await commentUrl(id, channel, page));
+    var res = await dioClient.get(commentUrl(id, channel, page));
     return (res.data['data'] ?? {})['list'] ?? [];
   }
 
@@ -96,8 +94,7 @@ class Api {
       String channel = "",
       String season = "",
       String episode = ""}) async {
-    var res =
-        await dioClient.get(await resUrl(id, itemid, channel, season, episode));
+    var res = await dioClient.get(resUrl(id, itemid, channel, season, episode));
     if (res.data["status"] != 1) {
       throw Exception(res.data["info"]);
     }
@@ -105,20 +102,19 @@ class Api {
   }
 
   static Future<List> myFavorites(int page, {int limit = 20}) async {
-    var res = await dioClient.get(await linkUserUrl(
+    var res = await dioClient.get(linkUserUrl(
         "g=api/v2&m=index&a=fav_list&ft=resource&page=$page&limit=$limit"));
     return res.data['data'] ?? [];
   }
 
   static Future<List> search(String query, int page) async {
-    var res = await dioClient.get(await linkUserUrl(
+    var res = await dioClient.get(linkUserUrl(
         "st=resource&a=search&g=api%2Fv2&limit=10&k=$query&page=$page&m=index"));
     return res.data['data']["list"] ?? [];
   }
 
   static Future<Map> userInfo() async {
-    var res =
-        await dioClient.get(await linkUserUrl("g=api/public&m=v2&a=userinfo"));
+    var res = await dioClient.get(linkUserUrl("g=api/public&m=v2&a=userinfo"));
     return res.data['data'] ?? [];
   }
 
@@ -136,7 +132,7 @@ class Api {
     for (int i = 0; i < 19; i++) {
       id += ran.nextInt(9).toString();
     }
-    var res = await dioClient.get(await linkUserUrl(
+    var res = await dioClient.get(linkUserUrl(
         "g=api/public&m=v2&a=login&account=$account&password=$pass&registration_id=$id"));
     var data = res.data['data'];
     if (data == null || data == '') {
@@ -150,7 +146,7 @@ class Api {
   /// area 暂时只支持中国
   static Future<Map> _loginWithPhone(String phone, String pass,
       {String area = "86"}) async {
-    var res = await dioClient.get(await linkUserUrl(
+    var res = await dioClient.get(linkUserUrl(
         "g=api/public&m=v2&a=mobile_login&area=$area&mobile=$phone&password=$pass"));
     var data = res.data['data'];
     if (data == null || data == '') {
@@ -168,8 +164,7 @@ class Api {
       "password": pass,
       "repassword": pass,
     });
-    var res = await dioClient.post(
-        await linkUserUrl("g=api/public&m=v2/a=register"),
+    var res = await dioClient.post(linkUserUrl("g=api/public&m=v2/a=register"),
         data: formData);
     var data = res.data['data'];
     if (data == null) {
@@ -178,8 +173,31 @@ class Api {
     return data;
   }
 
+  static Future<bool> isFollow(String id) async {
+    var res = await dioClient.get(
+        linkUserUrl("g=api/v2&m=index&a=fav_check_follow&id=$id&ft=resource"));
+    try {
+      return res.data['data'] == "1";
+    } catch (e) {
+      return false;
+    }
+  }
+
+  ///收藏
+  static Future<bool> follow(String id) async {
+    var res = await dioClient.get(
+        linkUserUrl("g=api/v2&m=index&a=fav_follow&id=$id&ft=resource"));
+    return res.data["status"] == 1;
+  }
+  ///收藏
+  static Future<bool> unFollow(String id) async {
+    var res = await dioClient.get(
+        linkUserUrl("g=api/v2&m=index&a=fav_unfollow&id=$id&ft=resource"));
+    return res.data["status"] == 1;
+  }
+
   //统一 accKey  client
-  static Future<String> linkUserUrl(String url) async {
+  static String linkUserUrl(String url) {
     return "http://a.zmzapi.com/index.php?accesskey=519f9cab85c8059d17544947k361a827&client=2&" +
         url;
     //uid & token

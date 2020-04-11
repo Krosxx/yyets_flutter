@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
+import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/ui/pages/CommentsPage.dart';
 import 'package:flutter_yyets/ui/utils.dart';
 import 'package:flutter_yyets/ui/widgets/EpisodeWidget.dart';
 import 'package:flutter_yyets/ui/widgets/MovieResWidget.dart';
 import 'package:flutter_yyets/ui/widgets/MoviesGridWidget.dart';
+import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 
 class DetailPage extends StatefulWidget {
@@ -28,10 +30,35 @@ class _DetailPageState extends State<DetailPage>
 
   bool _hasErr = false;
 
+  bool _isFollow = false;
+
   String get title => () {
         var enname = data['enname'];
         return data["cnname"] + (enname == null ? "" : "($enname)");
       }();
+
+  void toggleFollow() {
+    bool status = !_isFollow;
+    Future fun;
+    if (_isFollow) {
+      fun = Api.unFollow(data['id']);
+    } else {
+      fun = Api.follow(data['id']);
+    }
+    fun.then((res) {
+      String action = status ? "收藏" : "取消收藏";
+      if (res) {
+        toastLong("${action}成功");
+        if (mounted) {
+          setState(() {
+            _isFollow = status;
+          });
+        }
+      } else {
+        toastLong("${action}失败");
+      }
+    });
+  }
 
   @override
   void dispose() {
@@ -47,6 +74,20 @@ class _DetailPageState extends State<DetailPage>
   }
 
   void loadData() {
+    RRUser.isLogin.then((login) async {
+      if (login) {
+        return await Api.isFollow(data['id']);
+      } else {
+        return false;
+      }
+    }).then((value) {
+      print("isStar: $value");
+      if (mounted) {
+        setState(() {
+          _isFollow = value;
+        });
+      }
+    });
     Api.getDetail(data["id"]).then((d) {
       if (mounted) {
         setState(() {
@@ -71,6 +112,19 @@ class _DetailPageState extends State<DetailPage>
         actions: detail == null
             ? null
             : [
+                IconButton(
+                  icon: Icon(
+                    Icons.star,
+                    color: _isFollow ? Colors.yellowAccent : null,
+                  ),
+                  onPressed: () async {
+                    if (!await RRUser.isLogin) {
+                      toastLong("请登录后操作");
+                    } else {
+                      toggleFollow();
+                    }
+                  },
+                ),
                 IconButton(
                   icon: Icon(Icons.share),
                   onPressed: () => share(
@@ -152,7 +206,7 @@ class _DetailPageState extends State<DetailPage>
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: <Widget>[
       Hero(
           child: Image.network(
-            data["poster"],
+            data["poster_b"] ?? resource["poster_b"] ?? data["poster"],
             fit: BoxFit.cover,
             width: 150,
             height: 280.0 - 46,
@@ -174,7 +228,19 @@ class _DetailPageState extends State<DetailPage>
               Container(
                 height: 10,
               ),
-              Text(data["play_status"] ?? resource["play_status"] ?? ""),
+              Wrap(
+                children: [
+                  Text(data["play_status"] ?? resource["play_status"] ?? ""),
+                  Container(
+                    width: 10,
+                  ),
+                  Text(
+                    resource['level']?.toUpperCase() ?? "",
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold, color: Colors.lightBlue),
+                  ),
+                ],
+              ),
               resource.isEmpty
                   ? Container()
                   : Wrap(
