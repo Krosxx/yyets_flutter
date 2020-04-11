@@ -137,18 +137,17 @@ class _ResInfoState extends State<ResInfoPage> {
               body: GridView.extent(
                 shrinkWrap: true,
                 children: fs.map((file) {
-                  var pwd = file['passwd'];
                   return Card(
-                      color: Colors.black26,
                       child: InkWell(
                         onTap: () {
+                          String addr = file['address'];
+                          print(addr);
                           String pwd = file['passwd'];
                           if (pwd != null && pwd.isNotEmpty) {
                             setClipboardData(pwd);
                             toastLong("网盘密码已复制：$pwd");
                           }
-
-                          launchUri(file['address']).then((val) {
+                          launchUri(addr).then((val) {
                             if (!val) {
                               toast("请安装迅雷等下载软件");
                             }
@@ -162,9 +161,6 @@ class _ResInfoState extends State<ResInfoPage> {
                           children: <Widget>[
                             Text("way: " + file['way'].toString() ?? ""),
                             Text(file['way_name'] ?? ""),
-                            (pwd == null || pwd.isEmpty)
-                                ? Container()
-                                : Text(file['passwd'] ?? ""),
                           ],
                         ),
                       ));

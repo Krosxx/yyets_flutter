@@ -33,7 +33,7 @@ class SearchPageDelegate extends SearchDelegate<Map> {
 
   @override
   ThemeData appBarTheme(BuildContext context) {
-    return ThemeData.dark();
+    return Theme.of(context);
   }
 
   @override

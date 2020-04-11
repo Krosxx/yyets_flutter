@@ -14,6 +14,7 @@ class MovieResWidget extends StatelessWidget {
         itemBuilder: (c, i) {
           var item = movRes[i];
           return Card(
+            color: Theme.of(context).cardColor,
             margin: EdgeInsets.fromLTRB(10, 10, 10, 5),
             child: InkWell(
               onTap: () {

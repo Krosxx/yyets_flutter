@@ -140,30 +140,34 @@ class _DetailPageState extends State<DetailPage>
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
-              backgroundColor: Colors.black,
               pinned: true,
               floating: true,
               automaticallyImplyLeading: false,
               expandedHeight: 282,
               flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.parallax,
+                collapseMode: CollapseMode.pin,
                 background: Container(
                   //头部整个背景颜色
                   height: double.infinity,
                   child: _buildDetail(),
                 ),
               ),
-              bottom:
-                  TabBar(controller: _tabController, isScrollable: true, tabs: [
-                Tab(text: "剧集"),
-                Tab(text: "介绍"),
-                Tab(
-                    text: "评论" +
-                        (detail == null
-                            ? ""
-                            : "(${detail['comments_count']})")),
-                Tab(text: "推荐"),
-              ]),
+              bottom: TabBar(
+                  controller: _tabController,
+                  labelColor: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                  isScrollable: true,
+                  tabs: [
+                    Tab(text: "剧集"),
+                    Tab(text: "介绍"),
+                    Tab(
+                        text: "评论" +
+                            (detail == null
+                                ? ""
+                                : "(${detail['comments_count']})")),
+                    Tab(text: "推荐"),
+                  ],)
             ),
           ];
         },

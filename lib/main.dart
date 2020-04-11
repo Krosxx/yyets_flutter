@@ -10,16 +10,30 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+
+  final ThemeData light = ThemeData(
+      primarySwatch: Colors.blue,
+      buttonColor: Colors.blueAccent,
+      brightness: Brightness.light,
+      primaryColor: Colors.white,
+      cardColor: Colors.white,
+      platform: TargetPlatform.fuchsia);
+
+  final ThemeData dark = ThemeData(
+      primarySwatch: Colors.blue,
+      buttonColor: Colors.blueAccent,
+      brightness: Brightness.dark,
+      cardColor: Colors.black12,
+      platform: TargetPlatform.fuchsia);
+
+
   @override
   Widget build(BuildContext context) {
     return OKToast(
       child: MaterialApp(
         title: 'yyeTs',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-            primarySwatch: Colors.green,
-            brightness: Brightness.dark,
-            platform: TargetPlatform.fuchsia),
+        theme: light,
         routes: ROUTES,
       ),
     );

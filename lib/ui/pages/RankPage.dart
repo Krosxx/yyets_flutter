@@ -58,6 +58,9 @@ class _RankPageState extends State<RankPage>
           height: 45,
           child: TabBar(
             controller: _controller,
+            labelColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
             isScrollable: true,
             tabs: <Widget>[
               Tab(text: "今日"),

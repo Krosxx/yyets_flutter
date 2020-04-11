@@ -64,7 +64,7 @@ class BottomInputDialog extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     RaisedButton(
-                      child: Text(actionText),
+                      child: Text(actionText,style: TextStyle(color: Colors.white),),
                       onPressed: () {
                         String text = _textEditingController.text;
                         if (!text.isEmpty) {

@@ -76,7 +76,7 @@ class CommentsWidgetBuilder {
                 margin: EdgeInsets.fromLTRB(0, 5, 0, 0),
                 padding: EdgeInsets.all(replies.length == 0 ? 0 : 5),
                 decoration: BoxDecoration(
-                    color: Colors.black26,
+                    color: Colors.black12,
                     borderRadius: BorderRadius.all(Radius.circular(5))),
                 child: ListView.builder(
                   shrinkWrap: true,
