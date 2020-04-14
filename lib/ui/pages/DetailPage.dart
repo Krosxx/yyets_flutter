@@ -28,6 +28,8 @@ class _DetailPageState extends State<DetailPage>
 
   Map<String, dynamic> get resource => detail != null ? detail["resource"] : {};
 
+  var headerHeight= 282.0;
+
   bool _hasErr = false;
 
   bool _isFollow = false;
@@ -107,52 +109,50 @@ class _DetailPageState extends State<DetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        elevation: 0,
+        title: Text(title),
+        actions: detail == null
+            ? null
+            : [
+          IconButton(
+            icon: Icon(
+              Icons.star,
+              color: _isFollow ? Colors.yellow : null,
+            ),
+            onPressed: () async {
+              if (!await RRUser.isLogin) {
+                toastLong("请登录后操作");
+              } else {
+                toggleFollow();
+              }
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.share),
+            onPressed: () => share(
+                title +
+                    "\n" +
+                    detail["share_url"] +
+                    "\n\n来自 人人影视_Flutter",
+                subject: "人人影视分享"),
+          )
+        ],
+      ),
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
                 pinned: true,
-                leading: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: BackButton(),
-                ),
-                floating: false,
-                title: Text(title),
+                floating: true,
                 automaticallyImplyLeading: false,
-                expandedHeight: 282 + kToolbarHeight,
-                actions: detail == null
-                    ? null
-                    : [
-                        IconButton(
-                          icon: Icon(
-                            Icons.star,
-                            color: _isFollow ? Colors.yellow : null,
-                          ),
-                          onPressed: () async {
-                            if (!await RRUser.isLogin) {
-                              toastLong("请登录后操作");
-                            } else {
-                              toggleFollow();
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.share),
-                          onPressed: () => share(
-                              title +
-                                  "\n" +
-                                  detail["share_url"] +
-                                  "\n\n来自 人人影视_Flutter",
-                              subject: "人人影视分享"),
-                        )
-                      ],
+                expandedHeight: headerHeight,
                 flexibleSpace: FlexibleSpaceBar(
                   collapseMode: CollapseMode.parallax,
                   background: Container(
                     //头部整个背景颜色
-                    padding: EdgeInsets.only(top: kToolbarHeight),
                     height: double.infinity,
-                    child: Container(child: _buildDetail()),
+                    child: _buildDetail(),
                   ),
                 ),
                 bottom: TabBar(
@@ -216,7 +216,7 @@ class _DetailPageState extends State<DetailPage>
             data["poster_b"] ?? resource["poster_b"] ?? data["poster"],
             fit: BoxFit.cover,
             width: 150,
-            height: 280.0 - 46,
+            height: headerHeight - kToolbarHeight,
           ),
           tag: "img_${data["id"]}"),
       Expanded(

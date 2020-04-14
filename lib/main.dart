@@ -38,6 +38,9 @@ class AppState extends State<MyApp> {
       brightness: Brightness.light,
       primaryColor: Colors.white,
       cardColor: Colors.white,
+      iconTheme: IconThemeData(
+        color:Colors.grey
+      ),
       platform: TargetPlatform.fuchsia);
 
   static final ThemeData dark = ThemeData(
