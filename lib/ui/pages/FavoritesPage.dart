@@ -46,20 +46,26 @@ class _FavoritesPageState extends State<FavoritesPage> {
             },
             itemBuilder: (c) {
               return [
-                CheckedPopupMenuItem(
-                  checked: sortType == 0,
+                PopupMenuItem(
                   value: 0,
-                  child: Text("更新时间"),
+                  child: Text(
+                    "更新时间",
+                    style: _sortTextStyle(sortType == 0),
+                  ),
                 ),
-                CheckedPopupMenuItem(
-                  checked: sortType == 1,
+                PopupMenuItem(
                   value: 1,
-                  child: Text("收藏时间 ↑"),
+                  child: Text(
+                    "收藏时间 ↑",
+                    style: _sortTextStyle(sortType == 1),
+                  ),
                 ),
-                CheckedPopupMenuItem(
-                  checked: sortType == 2,
+                PopupMenuItem(
                   value: 2,
-                  child: Text("收藏时间 ↓"),
+                  child: Text(
+                    "收藏时间 ↓",
+                    style: _sortTextStyle(sortType == 2),
+                  ),
                 )
               ];
             },
@@ -68,6 +74,13 @@ class _FavoritesPageState extends State<FavoritesPage> {
       ),
       body: _body,
     );
+  }
+
+  TextStyle _sortTextStyle(bool checked) {
+    return checked
+        ? TextStyle(
+            fontWeight: FontWeight.bold, color: Theme.of(context).accentColor)
+        : null;
   }
 }
 
