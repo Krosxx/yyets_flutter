@@ -92,10 +92,10 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   leading: Icon(Icons.favorite),
                   title: Text("我的收藏"),
                   onTap: () {
+                    Scaffold.of(context).openEndDrawer();
                     RRUser.isLogin.then(
                       (value) {
                         if (value) {
-                          Scaffold.of(context).openEndDrawer();
                           Navigator.pushNamed(context, "/favorites");
                         } else {
                           toast("请先登录");
