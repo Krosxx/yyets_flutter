@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 
 ///
@@ -30,54 +31,79 @@ class EpisodeWidgetState extends State<EpisodeWidget>
   Widget build(BuildContext context) {
     super.build(context);
     return ListView.builder(
-        itemCount: episodes.length,
-        itemBuilder: (c, i) {
-          var item = episodes[i];
-          List epiList = item['episode_list'];
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(4),
-                child: Text("${item['season_cn']}"),
-              ),
-              GridView.extent(
-                physics: new NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                maxCrossAxisExtent: 120,
-                childAspectRatio: 1.5,
-                children: epiList.map((epiItem) {
+      itemCount: episodes.length,
+      itemBuilder: (c, i) {
+        var item = episodes[i];
+        List epiList = item['episode_list'];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Padding(
+              padding: EdgeInsets.all(4),
+              child: Text("${item['season_cn']}"),
+            ),
+            GridView.extent(
+              physics: new NeverScrollableScrollPhysics(),
+              shrinkWrap: true,
+              maxCrossAxisExtent: 120,
+              childAspectRatio: 1.5,
+              children: epiList.map(
+                (epiItem) {
+                  bool unPlay = epiItem['play_status_cn'] == "未播";
                   return Card(
-                      child: InkWell(
-                    onTap: () {
-                      Navigator.pushNamed(context, "/res",
-                          arguments: epiItem
-                            ..addAll(resInfo)
-                            ..["season_cn"] = item['season_cn']
-                            ..["season"] = item['season']
-                            ..['episode'] = epiItem['episode']);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.all(5),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Text(
-                            epiItem['episode'],
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blueAccent),
-                          ),
-                          Text(nullEmptyElse(epiItem['play_time'],"无时间")),
-                        ],
+                    child: InkWell(
+                      onTap: () {
+                        if (unPlay) {
+                          toastLong("未播");
+                          return;
+                        }
+                        Navigator.pushNamed(context, "/res",
+                            arguments: epiItem
+                              ..addAll(resInfo)
+                              ..["season_cn"] = item['season_cn']
+                              ..["season"] = item['season']
+                              ..['episode'] = epiItem['episode']);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.all(5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  epiItem['episode'],
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.blueAccent),
+                                ),
+                                Container(
+                                  width: 10,
+                                ),
+                                Text(
+                                  "${epiItem['play_status_cn']}",
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              nullEmptyElse(epiItem['play_time'], "无时间"),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ));
-                }).toList(),
-              )
-            ],
-          );
-        });
+                  );
+                },
+              ).toList(),
+            )
+          ],
+        );
+      },
+    );
   }
 }
