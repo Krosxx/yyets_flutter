@@ -12,7 +12,15 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+  TabController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TabController(length: 6, vsync: this);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,8 +34,23 @@ class _MyHomePageState extends State<MyHomePage> {
             icon: Icon(Icons.search),
           )
         ],
+        bottom: TabBar(
+          controller: _controller,
+          labelColor: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.black,
+          isScrollable: true,
+          tabs: <Widget>[
+            Tab(text: "今日"),
+            Tab(text: "本月"),
+            Tab(text: "电影"),
+            Tab(text: "新剧"),
+            Tab(text: "日剧"),
+            Tab(text: "全部"),
+          ],
+        ),
       ),
-      body: RankPage(),
+      body: RankPage(_controller),
       drawer: HomeDrawer(),
     );
   }

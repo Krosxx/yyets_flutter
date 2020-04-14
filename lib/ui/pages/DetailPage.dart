@@ -107,52 +107,55 @@ class _DetailPageState extends State<DetailPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        actions: detail == null
-            ? null
-            : [
-                IconButton(
-                  icon: Icon(
-                    Icons.star,
-                    color: _isFollow ? Colors.yellowAccent : null,
-                  ),
-                  onPressed: () async {
-                    if (!await RRUser.isLogin) {
-                      toastLong("请登录后操作");
-                    } else {
-                      toggleFollow();
-                    }
-                  },
-                ),
-                IconButton(
-                  icon: Icon(Icons.share),
-                  onPressed: () => share(
-                      title +
-                          "\n" +
-                          detail["share_url"] +
-                          "\n\n来自 人人影视_Flutter",
-                      subject: "人人影视分享"),
-                )
-              ],
-      ),
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
-              pinned: true,
-              floating: true,
-              automaticallyImplyLeading: false,
-              expandedHeight: 282,
-              flexibleSpace: FlexibleSpaceBar(
-                collapseMode: CollapseMode.pin,
-                background: Container(
-                  //头部整个背景颜色
-                  height: double.infinity,
-                  child: _buildDetail(),
+                pinned: true,
+                leading: IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: BackButton(),
                 ),
-              ),
-              bottom: TabBar(
+                floating: false,
+                title: Text(title),
+                automaticallyImplyLeading: false,
+                expandedHeight: 282 + kToolbarHeight,
+                actions: detail == null
+                    ? null
+                    : [
+                        IconButton(
+                          icon: Icon(
+                            Icons.star,
+                            color: _isFollow ? Colors.yellowAccent : null,
+                          ),
+                          onPressed: () async {
+                            if (!await RRUser.isLogin) {
+                              toastLong("请登录后操作");
+                            } else {
+                              toggleFollow();
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.share),
+                          onPressed: () => share(
+                              title +
+                                  "\n" +
+                                  detail["share_url"] +
+                                  "\n\n来自 人人影视_Flutter",
+                              subject: "人人影视分享"),
+                        )
+                      ],
+                flexibleSpace: FlexibleSpaceBar(
+                  collapseMode: CollapseMode.parallax,
+                  background: Container(
+                    //头部整个背景颜色
+                    padding: EdgeInsets.only(top: kToolbarHeight),
+                    height: double.infinity,
+                    child: Container(child: _buildDetail()),
+                  ),
+                ),
+                bottom: TabBar(
                   controller: _tabController,
                   labelColor: Theme.of(context).brightness == Brightness.dark
                       ? Colors.white
@@ -167,8 +170,8 @@ class _DetailPageState extends State<DetailPage>
                                 ? ""
                                 : "(${detail['comments_count']})")),
                     Tab(text: "推荐"),
-                  ],)
-            ),
+                  ],
+                )),
           ];
         },
         body: _hasErr
@@ -218,17 +221,11 @@ class _DetailPageState extends State<DetailPage>
           tag: "img_${data["id"]}"),
       Expanded(
         child: Padding(
-          padding: EdgeInsets.all(10),
+          padding: EdgeInsets.symmetric(horizontal: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Text(
-                title,
-                maxLines: 2,
-                style: TextStyle(fontSize: 18),
-                overflow: TextOverflow.fade,
-              ),
               Container(
                 height: 10,
               ),
