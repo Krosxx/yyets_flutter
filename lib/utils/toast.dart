@@ -17,11 +17,11 @@ void toast(dynamic msg, [Duration duration = LENGTH_SHORT]) {
     position: ToastPosition.bottom,
     textPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
     radius: 20,
-    backgroundColor: AppState.darkMode ? Colors.black : Color(0xffeeeeee),
+    backgroundColor: AppState.isDarkMode ? Colors.black : Color(0xffeeeeee),
     textStyle: TextStyle(
       color: (msg is Exception)
           ? Colors.red
-          : (AppState.darkMode ? null : Colors.black),
+          : (AppState.isDarkMode ? null : Colors.black),
     ),
   );
 }

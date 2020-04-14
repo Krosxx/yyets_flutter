@@ -2,6 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/toast.dart';
+import 'package:flutter_yyets/utils/tools.dart';
+
+import '../../main.dart';
 
 class HomeDrawer extends StatefulWidget {
   @override
@@ -24,93 +27,103 @@ class _HomeDrawerState extends State<HomeDrawer> {
   @override
   Widget build(BuildContext context) {
     return Drawer(
-        child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        DrawerHeader(
-            padding: EdgeInsets.all(0),
-            margin: EdgeInsets.all(0),
-            child: InkWell(
-              onTap: () {
-                if (user == null) {
-                  Scaffold.of(context).openEndDrawer();
-                  Navigator.pushNamed(context, "/login");
-                } else {
-                  showDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    builder: (c) {
-                      return AlertDialog(
-                        title: Text("退出登录?"),
-                        actions: [
-                          FlatButton(
-                            child: Text("确定"),
-                            onPressed: () {
-                              setState(() {
-                                user = null;
-                              });
-                              RRUser.logout();
-                              Navigator.pop(context);
-                            },
-                          ),
-                          FlatButton(
-                            child: Text("取消"),
-                            onPressed: () => Navigator.pop(context),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                }
-              },
-              child: Column(children: [
-                Container(
-                  height: 16,
-                ),
-                ClipOval(
-                  child: Image.network(
-                    user?.avatar ?? "https://flutter.cn/favicon.ico",
-                    width: 80,
-                    height: 80,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          DrawerHeader(
+              padding: EdgeInsets.all(0),
+              margin: EdgeInsets.all(0),
+              child: InkWell(
+                onTap: () {
+                  if (user == null) {
+                    Scaffold.of(context).openEndDrawer();
+                    Navigator.pushNamed(context, "/login");
+                  } else {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (c) {
+                        return AlertDialog(
+                          title: Text("退出登录?"),
+                          actions: [
+                            FlatButton(
+                              child: Text("确定"),
+                              onPressed: () {
+                                setState(() {
+                                  user = null;
+                                });
+                                RRUser.logout();
+                                Navigator.pop(context);
+                              },
+                            ),
+                            FlatButton(
+                              child: Text("取消"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  }
+                },
+                child: Column(children: [
+                  Container(
+                    height: 16,
                   ),
-                ),
-                Container(
-                  height: 10,
-                ),
-                Text(user?.name ?? "登录",
-                    style: TextStyle(fontWeight: FontWeight.bold)),
-                user == null ? Container() : Text(user.email),
-              ]),
-            )),
-        Expanded(
-          child: ListView(children: [
-            ListTile(
-              leading: Icon(Icons.favorite),
-              title: Text("我的收藏"),
-              onTap: () {
-                RRUser.isLogin.then(
-                  (value) {
-                    if (value) {
-                      Scaffold.of(context).openEndDrawer();
-                      Navigator.pushNamed(context, "/favorites");
-                    } else {
-                      toast("请先登录");
-                      Navigator.pushNamed(context, "/login");
-                    }
+                  ClipOval(
+                    child: Image.network(
+                      user?.avatar ?? "https://flutter.cn/favicon.ico",
+                      width: 80,
+                      height: 80,
+                    ),
+                  ),
+                  Container(
+                    height: 10,
+                  ),
+                  Text(user?.name ?? "登录",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  user == null ? Container() : Text(user.email),
+                ]),
+              )),
+          Expanded(
+            child: ListView(
+              children: [
+                ListTile(
+                  leading: Icon(Icons.favorite),
+                  title: Text("我的收藏"),
+                  onTap: () {
+                    RRUser.isLogin.then(
+                      (value) {
+                        if (value) {
+                          Scaffold.of(context).openEndDrawer();
+                          Navigator.pushNamed(context, "/favorites");
+                        } else {
+                          toast("请先登录");
+                          Navigator.pushNamed(context, "/login");
+                        }
+                      },
+                    );
                   },
-                );
-              },
+                ),
+                ListTile(
+                  leading: Icon(Icons.adb),
+                  title: Text("边下边播"),
+                  onTap: () {
+                    toast("TODO");
+                  },
+                ),
+                isMobilePhone
+                    ? Container()
+                    : ListTile(
+                        leading: Icon(Icons.palette),
+                        title: Text("切换主题"),
+                        onTap: () => AppState.toggleTheme(),
+                      ),
+              ],
             ),
-            ListTile(
-              leading: Icon(Icons.adb),
-              title: Text("边下边播"),
-              onTap: () {
-                toast("TODO");
-              },
-            )
-          ]),
-        )
-      ],
-    ));
+          )
+        ],
+      ),
+    );
   }
 }

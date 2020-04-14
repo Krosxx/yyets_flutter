@@ -54,7 +54,7 @@ class _MySp {
     }
   }
 
-  dynamic get(String key, {defaultValue}) {
+  dynamic get(String key, [defaultValue]) {
     if (Platform.isWindows) {
       return _getWindows(key, defaultValue: defaultValue);
     } else {

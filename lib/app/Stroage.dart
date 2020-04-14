@@ -7,7 +7,7 @@ import 'package:flutter_yyets/utils/mysp.dart';
 /// old
 ///
 Future<List<String>> getQueryHistory() async {
-  String qhs = (await MySp).get("query_history") ?? "";
+  String qhs = (await MySp).get("query_history", "");
   if (qhs == "") {
     return [];
   } else {
@@ -38,7 +38,7 @@ deleteQueryHistory(String q) async {
 }
 
 Future<int> get favoritesSortType async {
-  return (await MySp).get("favorites_sort_type") ?? 0;
+  return (await MySp).get("favorites_sort_type", 0);
 }
 
 Future setFavoritesSortType(int type) {

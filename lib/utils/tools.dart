@@ -62,3 +62,5 @@ dynamic nullEmptyElse(value, elseValue) {
     return value ?? elseValue;
   }
 }
+
+bool get isMobilePhone => Platform.isFuchsia || Platform.isAndroid || Platform.isIOS;
