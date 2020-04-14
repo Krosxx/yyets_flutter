@@ -126,7 +126,7 @@ class _DetailPageState extends State<DetailPage>
                         IconButton(
                           icon: Icon(
                             Icons.star,
-                            color: _isFollow ? Colors.yellowAccent : null,
+                            color: _isFollow ? Colors.yellow : null,
                           ),
                           onPressed: () async {
                             if (!await RRUser.isLogin) {

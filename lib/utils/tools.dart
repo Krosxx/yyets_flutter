@@ -32,7 +32,7 @@ setClipboardData(String data) {
       path = path.replaceAll('\\', "/");
       print(path);
       Process.run("clip < tmp_clip.txt", [],
-              runInShell: true, workingDirectory: path)
+          runInShell: true, workingDirectory: path)
           .whenComplete(() => tf.deleteSync());
       return;
     }
@@ -42,9 +42,23 @@ setClipboardData(String data) {
 
 void share(String text, {String subject}) {
   if (Platform.isWindows) {
-    //todo
-    toastLong("暂不支持Win端分享");
+    setClipboardData((subject ?? "") + "\n\n" + text);
+    toastLong("分享内容已复制");
     return;
   }
   Share.share(text, subject: subject);
+}
+
+dynamic nullEmptyElse(value, elseValue) {
+  if (value == null) {
+    return elseValue;
+  }
+  if (value is String) {
+    if (value.isEmpty) {
+      return elseValue;
+    }
+    return value;
+  } else {
+    return value ?? elseValue;
+  }
 }

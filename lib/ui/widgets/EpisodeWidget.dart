@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/utils/tools.dart';
 
 ///
 /// 季集
@@ -68,7 +69,7 @@ class EpisodeWidgetState extends State<EpisodeWidget>
                                 fontWeight: FontWeight.bold,
                                 color: Colors.blueAccent),
                           ),
-                          Text(epiItem['play_time']),
+                          Text(nullEmptyElse(epiItem['play_time'],"无时间")),
                         ],
                       ),
                     ),
