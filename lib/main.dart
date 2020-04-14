@@ -9,9 +9,30 @@ void main() {
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
+  @override
+  State createState() => AppState();
+}
 
-  final ThemeData light = ThemeData(
+class AppState extends State<MyApp> {
+  static AppState _ins;
+
+  static bool get darkMode =>
+      Theme.of(_ins.context).brightness == Brightness.dark;
+
+  @override
+  void initState() {
+    super.initState();
+    _ins = this;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _ins = null;
+  }
+
+  static final ThemeData light = ThemeData(
       primarySwatch: Colors.blue,
       buttonColor: Colors.blueAccent,
       brightness: Brightness.light,
@@ -19,13 +40,13 @@ class MyApp extends StatelessWidget {
       cardColor: Colors.white,
       platform: TargetPlatform.fuchsia);
 
-  final ThemeData dark = ThemeData(
-      primarySwatch: Colors.blue,
-      buttonColor: Colors.blueAccent,
-      brightness: Brightness.dark,
-      cardColor: Colors.black12,
-      platform: TargetPlatform.fuchsia);
-
+  static final ThemeData dark = ThemeData(
+    primarySwatch: Colors.blue,
+    buttonColor: Colors.blueAccent,
+    brightness: Brightness.dark,
+    cardColor: Colors.black12,
+    platform: TargetPlatform.fuchsia,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +55,7 @@ class MyApp extends StatelessWidget {
         title: 'yyeTs',
         debugShowCheckedModeBanner: false,
         theme: light,
+        darkTheme: dark,
         routes: ROUTES,
       ),
     );

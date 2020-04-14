@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/main.dart';
 import 'package:oktoast/oktoast.dart';
 
 const Duration LENGTH_SHORT = Duration(milliseconds: 1500);
@@ -16,6 +17,11 @@ void toast(dynamic msg, [Duration duration = LENGTH_SHORT]) {
     position: ToastPosition.bottom,
     textPadding: EdgeInsets.fromLTRB(20, 10, 20, 10),
     radius: 20,
-    textStyle: (msg is Exception) ? TextStyle(color: Colors.red) : null,
+    backgroundColor: AppState.darkMode ? Colors.black : Color(0xffeeeeee),
+    textStyle: TextStyle(
+      color: (msg is Exception)
+          ? Colors.red
+          : (AppState.darkMode ? null : Colors.black),
+    ),
   );
 }
