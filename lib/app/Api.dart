@@ -214,6 +214,7 @@ class Api {
         .get(linkUserUrl("m=comment&a=good&id=$commentId&thread=1"));
     return res.data['status'] == 1;
   }
+
   static Future<bool> commentBad(String commentId) async {
     var res = await dioClient
         .get(linkUserUrl("m=comment&a=bad&id=$commentId&thread=1"));
@@ -225,5 +226,16 @@ class Api {
     return "http://a.zmzapi.com/index.php?accesskey=519f9cab85c8059d17544947k361a827&client=2&" +
         url;
     //uid & token
+  }
+
+  static Future<Map> commentTvOrMovie(String id,String channel, String text) async {
+    var res = await dioClient
+        .get(linkUserUrl("m=comment&a=save&channel=$channel&itemid=$id&content=$text&replyid=0&thread=1"));
+
+    if (res.data['status'] == 1) {
+      return res.data['data'];
+    } else {
+      throw Exception(res.data['info']);
+    }
   }
 }

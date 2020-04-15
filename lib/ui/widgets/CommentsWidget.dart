@@ -105,7 +105,7 @@ class CommentsWidgetBuilder {
                   IconButton(
                     icon: Icon(Icons.thumb_up),
                     onPressed: () {
-                      Api.commentBad(item['id']).then((v) {
+                      Api.commentBad(item['id'].toString()).then((v) {
                         if (v) {
                           int good = int.parse(item["good"]);
                           item["good"] = (++good).toString();

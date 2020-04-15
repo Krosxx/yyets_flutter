@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
+import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
 import 'package:flutter_yyets/ui/widgets/CommentsWidget.dart';
 import 'package:flutter_yyets/utils/toast.dart';
+
+import '../utils.dart';
 
 class CommentsPage extends StatefulWidget {
   final List hotComments;
@@ -25,7 +29,7 @@ class CommentsPage extends StatefulWidget {
 /// 继承AutomaticKeepAliveClientMixin并重写wantKeepAlive为true即可。
 ///
 class _CommentsPageState extends State<CommentsPage>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, TickerProviderStateMixin {
   final List comments = [];
 
   LoadingStatus _loadStatus = LoadingStatus.NONE;
@@ -35,15 +39,47 @@ class _CommentsPageState extends State<CommentsPage>
   Function scrollListener;
   ScrollController _scrollController;
 
+  CurvedAnimation curve;
+  Animation<Offset> animation;
+  bool _floatVisible = true;
+  double lastPos = 0;
+
   @override
   void initState() {
     super.initState();
+    var controller = AnimationController(
+      duration: const Duration(milliseconds: 200),
+      vsync: this,
+    );
+    curve = CurvedAnimation(
+      parent: controller,
+      curve: Curves.fastOutSlowIn,
+    );
+    animation = Tween(
+      begin: Offset.zero,
+      end: Offset(0, 2),
+    ).animate(controller);
+
     scrollListener = () {
       // ignore: invalid_use_of_protected_member
       var ps = _scrollController.positions;
       var pos = ps.elementAt(ps.length - 1);
       double p = pos.pixels;
       double mp = pos.maxScrollExtent;
+
+      if (p > lastPos) {
+        //向上
+        if (_floatVisible) {
+          _floatVisible = false;
+          controller.forward();
+        }
+      } else {
+        if (!_floatVisible) {
+          _floatVisible = true;
+          controller.reverse();
+        }
+      }
+      lastPos = p;
       if (_loadStatus != LoadingStatus.LOADING &&
           _loadStatus != LoadingStatus.ERROR &&
           p >= mp - 50) {
@@ -117,35 +153,75 @@ class _CommentsPageState extends State<CommentsPage>
 
     int hotLen = widget.hotComments.length;
     int totalLen = comments.length + hotLen + 3;
-    return ListView.builder(
-      shrinkWrap: true,
-      itemCount: totalLen,
-      itemBuilder: (c, i) {
-        if (i == 0) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: Text("热评"),
-          );
-        } else if (i == totalLen - 1) {
-          return getWidgetByLoadingStatus(_loadStatus, loadMore);
-        } else if (i == hotLen + 1) {
-          return Padding(
-            padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-            child: Text("全部评论"),
-          );
-        } else {
-          var comment;
-          if (i <= hotLen) {
-            comment = widget.hotComments[i - 1];
-          } else {
-            comment = comments[i - 2 - hotLen];
-          }
-          return CommentsWidgetBuilder.build(context, comment, widget.channel,
-              () {
-            setState(() {});
-          });
-        }
-      },
+    return Stack(
+      children: [
+        ListView.builder(
+          shrinkWrap: true,
+          itemCount: totalLen,
+          itemBuilder: (c, i) {
+            if (i == 0) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: Text("热评"),
+              );
+            } else if (i == totalLen - 1) {
+              return getWidgetByLoadingStatus(_loadStatus, loadMore);
+            } else if (i == hotLen + 1) {
+              return Padding(
+                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: Text("全部评论"),
+              );
+            } else {
+              var comment;
+              if (i <= hotLen) {
+                comment = widget.hotComments[i - 1];
+              } else {
+                comment = comments[i - 2 - hotLen];
+              }
+              return CommentsWidgetBuilder.build(
+                  context, comment, widget.channel, () {
+                setState(() {});
+              });
+            }
+          },
+        ),
+        Positioned(
+          bottom: 40,
+          right: 30,
+          child: SlideTransition(
+            position: animation,
+            child: FloatingActionButton(
+              onPressed: () async {
+                RRUser me = await RRUser.instance;
+                if (me == null) {
+                  toast("登录后才可评论");
+                  return;
+                }
+                String text = await showInputDialog(context, "评论", Text("评论"));
+                if (text != null) {
+                  Api.commentTvOrMovie(widget.id, widget.channel, text)
+                      .then((data) {
+                    data['nickname'] = me.name;
+                    data['avatar_s'] = me.avatar;
+                    data['good'] = "0";
+                    data['bad'] = "0";
+                    setState(() {
+                      comments.insert(0, data);
+                    });
+                  }).catchError((e) {
+                    toastLong("评论失败: ${e.message}");
+                  });
+                }
+              },
+              backgroundColor: Colors.lightBlue,
+              child: Icon(
+                Icons.comment,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        )
+      ],
     );
   }
 
