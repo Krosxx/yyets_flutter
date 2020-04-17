@@ -32,12 +32,12 @@ setClipboardData(String data) {
       path = path.replaceAll('\\', "/");
       print(path);
       Process.run("clip < tmp_clip.txt", [],
-          runInShell: true, workingDirectory: path)
+              runInShell: true, workingDirectory: path)
           .whenComplete(() => tf.deleteSync());
       return;
     }
   } catch (e) {}
-  Clipboard.setData(ClipboardData(text: "123"));
+  Clipboard.setData(ClipboardData(text: data));
 }
 
 void share(String text, {String subject}) {
@@ -63,4 +63,11 @@ dynamic nullEmptyElse(value, elseValue) {
   }
 }
 
-bool get isMobilePhone => Platform.isFuchsia || Platform.isAndroid || Platform.isIOS;
+bool get isMobilePhone {
+  try {
+    return Platform.isFuchsia || Platform.isAndroid || Platform.isIOS;
+  } catch (e) {
+    //web
+    return false;
+  }
+}

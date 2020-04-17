@@ -34,7 +34,7 @@ android {
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "cn.vove7.flutter_yyets"
-        minSdkVersion 16
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -56,6 +56,9 @@ flutter {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
+    implementation "com.github.Vove7:yyets-downloader-android:1.0.3"
+    implementation 'com.google.code.gson:gson:2.8.6'
+
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
 }

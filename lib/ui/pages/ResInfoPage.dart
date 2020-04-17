@@ -1,10 +1,9 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
+import 'package:flutter_yyets/utils/RRResManager.dart';
+import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -19,21 +18,20 @@ class ResInfoPage extends StatefulWidget {
 }
 
 class _ResInfoState extends State<ResInfoPage> {
-  static const methodChannel = MethodChannel("cn.vove7.yy/download");
-
   Map _data;
   LoadingStatus _loadingStatus = LoadingStatus.LOADING;
 
   void _downloadAndPlay(String rrUri) async {
-    print(rrUri);
-    if (!Platform.isAndroid) {
-      toast("边下边播仅支持安卓系统");
-      return;
-    }
-    if (await Permission.storage.request().isGranted) {
-      methodChannel.invokeMethod("download", rrUri).then((result) {
-        print(result);
-      });
+    if (!isMobilePhone || await Permission.storage.request().isGranted) {
+      await RRResManager.addTask(
+        info['id'],
+        info['cnname'],
+        rrUri,
+        info['season'],
+        info['episode'],
+        info['poster_b'] ?? info['poster'],
+      );
+      Navigator.pushNamed(context, "/download");
     } else {
       toast("请授予存储权限");
     }
@@ -106,7 +104,7 @@ class _ResInfoState extends State<ResInfoPage> {
                 _downloadAndPlay(_data['item_app']['name']);
               },
               child: Icon(
-                Icons.play_arrow,
+                Icons.file_download,
                 color: Colors.white,
               ),
             )
@@ -119,7 +117,7 @@ class _ResInfoState extends State<ResInfoPage> {
   Widget buildBody() {
     List resList = _data['item_list'] ?? [];
     if (itemExp.length != resList.length) {
-      itemExp = resList.map((i) => false).toList();
+      itemExp = resList.map((i) => i == resList[0]).toList();
     }
     return SingleChildScrollView(
       padding: EdgeInsets.all(10),
@@ -178,13 +176,15 @@ class _ResInfoState extends State<ResInfoPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        item['format_tip'] ?? "",
+                        (item['format_tip'] ?? "") +
+                            "\t\t\t" +
+                            (item['foramt'] ?? ""),
                         style: TextStyle(color: Colors.blueAccent),
                       ),
                       size == null || size.isEmpty
                           ? Container()
                           : Text(size.toString()),
-                      Text(item['dateline'].toString() ?? "")
+                      Text(formatSeconds(int.parse(item['dateline'])) ?? "")
                     ],
                   ),
                 );

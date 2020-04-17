@@ -106,10 +106,11 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   },
                 ),
                 ListTile(
-                  leading: Icon(Icons.adb),
-                  title: Text("边下边播"),
+                  leading: Icon(Icons.file_download),
+                  title: Text("下载管理"),
                   onTap: () {
-                    toast("TODO");
+                    Scaffold.of(context).openEndDrawer();
+                    Navigator.pushNamed(context, "/download");
                   },
                 ),
                 isMobilePhone
