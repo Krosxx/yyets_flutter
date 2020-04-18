@@ -20,7 +20,6 @@ class MoviesGridWidget extends StatelessWidget {
               Navigator.of(context).pushNamed("/detail", arguments: it);
             },
             child: Stack(
-              alignment: Alignment.bottomCenter,
               children: <Widget>[
                 Hero(
                   child: Image.network(
@@ -31,21 +30,41 @@ class MoviesGridWidget extends StatelessWidget {
                   ),
                   tag: "img_${it["id"]}",
                 ),
-                Container(
-                  constraints: BoxConstraints.expand(height: 25),
-                  child: Center(
-                      child: Hero(
-                    child: Text(
-                      it["cnname"],
-//                      it["id"] + it["id"] + it["id"] + it["id"],
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: Colors.white),
+                Align(
+                  alignment: Alignment.topLeft,
+                  child: ClipRRect(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black26,
+                        borderRadius:
+                            BorderRadius.only(bottomRight: Radius.circular(5)),
+                      ),
+                      padding: EdgeInsets.fromLTRB(5, 3, 5, 3),
+                      child: Text(
+                        it['channel_cn'],
+                        style: TextStyle(fontSize: 13),
+                      ),
                     ),
-                    tag: "title_${it["id"]}",
-                  )),
-                  decoration: BoxDecoration(
-                    color: Colors.black26,
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    constraints: BoxConstraints.expand(height: 30),
+                    child: Center(
+                        child: Hero(
+                      child: Text(
+                        it["cnname"],
+//                      it["id"] + it["id"] + it["id"] + it["id"],
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      tag: "title_${it["id"]}",
+                    )),
+                    decoration: BoxDecoration(
+                      color: Colors.black26,
+                    ),
                   ),
                 ),
               ],
