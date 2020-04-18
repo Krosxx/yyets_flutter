@@ -8,10 +8,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
+import 'package:screen/screen.dart';
 import 'package:video_player/video_player.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:volume_watcher/volume_watcher.dart';
 
-///TODO 音量调节  亮度调节
 class LocalVideoPlayerPage extends StatefulWidget {
   final String resRri;
   final String title;
@@ -45,19 +45,54 @@ class _PageState extends State<LocalVideoPlayerPage> {
   //进度调节块显隐标志
   bool _centerProgressbarVisibility = false;
 
+  //亮度指示条显隐标志
+  bool _screenBrightnessPanelVisibility = false;
+
+  //音量指示条显隐标志
+  bool _volumePanelVisibility = false;
+
   //格式化当前进度时间
   String get _playTime => formatLength(_playPos);
 
   //监听进度 上次保存进度时间
   int _lastSavePos = 0;
 
+  //屏幕亮度
+  double _screenBrightness = 0;
+
+  //音量百分比
+  double _volumePercentage = 0;
+
+  //最大音量
+  int _maxVolume = 0;
+
+  //退出时恢复亮度
+  double _disposeScreenBrightness = 0;
+
   //显示模式 [DISPLAY_MODE_KEEP_PROPORTION] [DISPLAY_MODE_COVERED]
   int _displayMode;
+
+  Future<void> initPlatformState() async {
+    num initVolume = await VolumeWatcher.getCurrentVolume;
+    num maxVolume = await VolumeWatcher.getMaxVolume;
+
+    if (!mounted) return;
+    this._volumePercentage = initVolume / maxVolume;
+    this._maxVolume = maxVolume;
+    print("音量：${initVolume}/${maxVolume}");
+  }
 
   @override
   void initState() {
     super.initState();
+
+    initPlatformState();
     //横屏
+    Screen.brightness.then((value) {
+      _screenBrightness = value;
+      _disposeScreenBrightness = value;
+      print("screenBrightness: $value");
+    });
     AutoOrientation.landscapeAutoMode();
     //隐藏状态栏 导航栏
     SystemChrome.setEnabledSystemUIOverlays([]);
@@ -80,7 +115,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
               });
             });
             startDelayHidePanel();
-            Wakelock.enable();
+            Screen.keepOn(true);
           });
         });
       }).catchError((e) {
@@ -113,13 +148,14 @@ class _PageState extends State<LocalVideoPlayerPage> {
   }
 
   void togglePlayStatus() {
+    startDelayHidePanel();
     setState(() {
       if (_controller.value.isPlaying) {
         _controller.pause();
-        Wakelock.disable();
+        Screen.keepOn(false);
       } else {
         _controller.play();
-        Wakelock.enable();
+        Screen.keepOn(true);
       }
     });
   }
@@ -148,6 +184,10 @@ class _PageState extends State<LocalVideoPlayerPage> {
   }
 
   int _startDragPos = 0;
+  int verticalDragAction = 0;
+  double verticalDragStartY = 0;
+
+//  double tmpScreenBrightness = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +197,76 @@ class _PageState extends State<LocalVideoPlayerPage> {
           Center(
             child: _controller.value.initialized
                 ? GestureDetector(
+                    onVerticalDragStart: (DragStartDetails d) async {
+                      //确定 左右
+                      var size = MediaQuery.of(context).size;
+                      print("screen size: ${size.width}");
+                      verticalDragStartY = d.localPosition.dy;
+                      if (d.localPosition.dx < size.width / 2) {
+                        print("左侧");
+                        setState(() {
+                          _screenBrightnessPanelVisibility = true;
+                        });
+                        verticalDragAction = 0;
+                      } else {
+                        print("右侧");
+                        //防止 手动按键调节；重新获取音量
+                        num initVolume = await VolumeWatcher.getCurrentVolume;
+                        num maxVolume = await VolumeWatcher.getMaxVolume;
+                        this._volumePercentage = initVolume / maxVolume;
+                        setState(() {
+                          _volumePanelVisibility = true;
+                        });
+                        verticalDragAction = 1;
+                      }
+                    },
+                    onVerticalDragUpdate: (DragUpdateDetails d) {
+                      var size = MediaQuery.of(context).size;
+//                double dy = verticalDragStartY - d.localPosition.dy;
+                      double dy = d.delta.dy;
+                      double dyPercent = (dy / size.height * 1.5);
+                      if (dy == 0) {
+                        return;
+                      }
+                      print(dy);
+                      if (verticalDragAction == 0) {
+                        _screenBrightness -= dyPercent;
+                        if (_screenBrightness < 0) {
+                          _screenBrightness = 0;
+                        } else if (_screenBrightness > 1) {
+                          _screenBrightness = 1;
+                        }
+                        print("_screenBrightness $_screenBrightness");
+                        setState(() {
+                          Screen.setBrightness(_screenBrightness);
+                        });
+                      } else {
+                        _volumePercentage -= dyPercent;
+
+                        if (_volumePercentage < 0) {
+                          _volumePercentage = 0;
+                        } else if (_volumePercentage > 1) {
+                          _volumePercentage = 1;
+                        }
+                        setState(() {
+                          VolumeWatcher.setVolume(
+                              _maxVolume * _volumePercentage);
+                        });
+                        print("_volumePercentage: $_volumePercentage");
+                      }
+                    },
+                    onVerticalDragEnd: (DragEndDetails d) {
+                      if (verticalDragAction == 0) {
+                        setState(() {
+                          _screenBrightnessPanelVisibility = false;
+                        });
+                      } else {
+                        setState(() {
+                          _volumePanelVisibility = false;
+                        });
+                      }
+                      print("onVerticalDragEnd");
+                    },
                     onHorizontalDragStart: (DragStartDetails d) {
                       _startDragPos = _playPos;
                       print("onHorizontalDragStart  ${_playPos}");
@@ -203,18 +313,41 @@ class _PageState extends State<LocalVideoPlayerPage> {
                           )
                         : VideoPlayer(_controller),
                   )
-                : Container(color: Colors.black,),
+                : Container(
+                    color: Colors.black,
+                  ),
+          ),
+          _StatusPanel(
+            _screenBrightnessPanelVisibility,
+            _screenBrightness,
+            Icon(
+              _screenBrightness == 0
+                  ? Icons.brightness_low
+                  : Icons.brightness_high,
+              color: Colors.white,
+            ),
+            Alignment.centerRight,
+            60,
+          ),
+          _StatusPanel(
+            _volumePanelVisibility,
+            _volumePercentage,
+            Icon(
+              _volumePercentage == 0 ? Icons.volume_mute : Icons.volume_up,
+              color: Colors.white,
+            ),
+            Alignment.centerLeft,
+            -60,
           ),
           Offstage(
             offstage: !_centerProgressbarVisibility,
             child: Center(
               child: Container(
-                padding: EdgeInsets.all(20),
-                height: 80,
+                padding: EdgeInsets.all(10),
+                height: 70,
                 width: 200,
                 decoration: BoxDecoration(
-                  color: Colors.white10,
-                  backgroundBlendMode: BlendMode.colorDodge,
+                  color: Colors.black26,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -223,12 +356,16 @@ class _PageState extends State<LocalVideoPlayerPage> {
                   children: [
                     Container(
                       height: 5,
-                      child: LinearProgressIndicator(
-                        backgroundColor: Colors.white,
-                        value: _playPos.toDouble() / _totalLength,
+                      width: 200,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(2.5),
+                        child: LinearProgressIndicator(
+                          backgroundColor: Colors.white,
+                          value: _playPos.toDouble() / _totalLength,
+                        ),
                       ),
                     ),
-                    Container(height: 15),
+                    Container(height: 12),
                     Text(
                       () {
                         int offSecs = (_playPos - _startDragPos) ~/ 1000;
@@ -342,6 +479,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
                           },
                           onChangeEnd: (p) {
                             print("onChangeEnd:  $_cacheStatus");
+                            startDelayHidePanel();
                             _playPos = p.toInt();
                             setState(() {
                               _centerProgressbarVisibility = false;
@@ -382,7 +520,8 @@ class _PageState extends State<LocalVideoPlayerPage> {
     AutoOrientation.fullAutoMode();
     SystemChrome.setEnabledSystemUIOverlays(
         [SystemUiOverlay.top, SystemUiOverlay.bottom]);
-    Wakelock.disable();
+    Screen.keepOn(false);
+    Screen.setBrightness(_disposeScreenBrightness);
     super.dispose();
   }
 
@@ -395,5 +534,59 @@ class _PageState extends State<LocalVideoPlayerPage> {
     setState(() {
       _displayMode = mode;
     });
+  }
+}
+
+class _StatusPanel extends StatelessWidget {
+  final bool visibility;
+  final double progress;
+  final Icon icon;
+
+  final AlignmentGeometry alignment;
+  final double offsetY;
+
+  _StatusPanel(
+      this.visibility, this.progress, this.icon, this.alignment, this.offsetY);
+
+  @override
+  Widget build(BuildContext context) {
+    return Offstage(
+      offstage: !visibility,
+      child: Align(
+        alignment: alignment,
+        child: Transform.translate(
+          offset: Offset(offsetY, 0),
+          child: Container(
+            height: 20,
+            width: 250,
+            child: Transform.rotate(
+              angle: -3.1415926 / 2,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  //TODO 优化 垂直进度条
+                  Transform.rotate(
+                    child: icon,
+                    angle: 3.1415926 / 2,
+                  ),
+                  Container(width: 10,),
+                  Container(
+                    height: 5,
+                    width: 150,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(2.5),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        backgroundColor: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

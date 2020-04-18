@@ -26,11 +26,8 @@ dependencies:
 
   path_provider: any
   oktoast: ^2.3.1
-  wakelock:
-    git:
-      url: https://github.com/creativecreatorormaybenot/wakelock.git
-      ref: 74c679cb450a13493b89bc42df1d8d0d895c95ce
   url_launcher: ^5.1.4
+  volume_watcher: ^1.1.0
   url_launcher_web: ^0.1.0
   video_player: ^0.10.8+1
   auto_orientation: ^1.0.5
