@@ -58,14 +58,18 @@ class _ResInfoState extends State<ResInfoPage> {
       }
       apiCall.then((data) {
         print(data);
-        setState(() {
-          _loadingStatus = LoadingStatus.NONE;
-          _data = data;
-        });
+        if(mounted) {
+          setState(() {
+            _loadingStatus = LoadingStatus.NONE;
+            _data = data;
+          });
+        }
       }).catchError((e) {
-        setState(() {
-          _loadingStatus = LoadingStatus.ERROR;
-        });
+        if(mounted) {
+          setState(() {
+            _loadingStatus = LoadingStatus.ERROR;
+          });
+        }
         _errText = e.message;
         toast(e.message);
       });

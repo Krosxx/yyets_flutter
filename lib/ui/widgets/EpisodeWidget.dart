@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 
@@ -27,6 +28,39 @@ class EpisodeWidgetState extends State<EpisodeWidget>
 
   Map get resInfo => widget.resInfo;
 
+  Map<String, bool> downloaded = {};
+
+  @override
+  void initState() {
+    super.initState();
+    initDownloadStatus();
+  }
+
+  void initDownloadStatus() async {
+    var kl = [];
+    episodes.forEach((item) {
+      String season = item['season'];
+      item['episode_list'].forEach((epi) {
+        kl.add({
+          "filmid": resInfo['id'],
+          "season": season,
+          "episode": epi['episode'],
+          "key": resInfo['id'] +
+              "-" +
+              (season ?? "") +
+              "-" +
+              (epi['episode'] ?? ""),
+        });
+      });
+    });
+    print(kl);
+    kl.forEach((element) async {
+      downloaded[element['key']] =
+          await RRResManager.isDownloadComplete(element);
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -35,6 +69,7 @@ class EpisodeWidgetState extends State<EpisodeWidget>
       itemBuilder: (c, i) {
         var item = episodes[i];
         List epiList = item['episode_list'];
+        String season = item['season'];
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
@@ -49,8 +84,15 @@ class EpisodeWidgetState extends State<EpisodeWidget>
               childAspectRatio: 1.5,
               children: epiList.map(
                 (epiItem) {
+                  String k = resInfo['id'] +
+                      "-" +
+                      (season ?? "") +
+                      "-" +
+                      (epiItem['episode'] ?? "");
+                  bool isDownload = downloaded[k] ?? false;
                   bool unPlay = epiItem['play_status_cn'] == "未播";
                   return Card(
+                    color: isDownload ? Colors.lightGreen : null,
                     child: InkWell(
                       onTap: () {
                         if (unPlay) {

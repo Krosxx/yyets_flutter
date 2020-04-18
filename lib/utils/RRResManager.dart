@@ -13,6 +13,10 @@ class RRResManager {
 
   static bool get supportDownload => Platform.isAndroid;
 
+  static Future<bool> isDownloadComplete(Map data) {
+    return methodChannel.invokeMethod("isDownloadComplete", data);
+  }
+
   static Future<bool> addTask(
     String id,
     String filmName,

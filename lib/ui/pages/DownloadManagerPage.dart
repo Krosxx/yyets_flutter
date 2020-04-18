@@ -28,6 +28,12 @@ class _State extends State<DownloadManagerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: Text("下载管理"), actions: [
+        IconButton(
+          icon: Icon(Icons.help),
+          onPressed: () {
+            toastLong("请不要同时开启人人官方应用，否则无法使用下载功能");
+          },
+        ),
         Center(
           child: Text(totalSpeed),
         )

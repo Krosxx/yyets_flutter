@@ -42,7 +42,10 @@ class MoviesGridWidget extends StatelessWidget {
                       padding: EdgeInsets.fromLTRB(5, 3, 5, 3),
                       child: Text(
                         it['channel_cn'],
-                        style: TextStyle(fontSize: 13),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.white,
+                        ),
                       ),
                     ),
                   ),

@@ -53,13 +53,22 @@ class RRResManager implements P4PClientEvent {
         return g.toJson(DBCache.instance.getAllCacheItemsByTime());
     }
 
+    boolean isDownloadComplete(Map<String, String> data) {
+        return DBCache.instance.hasDownloadComplete(
+                data.get("filmid"),
+                data.get("season"),
+                data.get("episode")
+        );
+    }
+
     boolean startDownload(Map<String, Object> filmData) {
         FilmCacheBean bean = FilmCacheBean.parseFromUri(
                 (String) Objects.requireNonNull(filmData.get("p4pUrl")),
                 (String) filmData.get("filmId"),
                 (String) filmData.get("filmImg")
         );
-        if (DBCache.instance.getCacheByUri((String) filmData.get("p4pUrl")).isFinished()) {
+        FilmCacheBean cache = DBCache.instance.getCacheByUri((String) filmData.get("p4pUrl"));
+        if (cache!=null && cache.isFinished()) {
             Log.d("11324 :", "startDownload  ----> 已下载完成" + filmData);
             return false;
         }

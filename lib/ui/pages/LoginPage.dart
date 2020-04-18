@@ -128,15 +128,20 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                           ],
                         ),
-                        Align(alignment: Alignment.centerRight,child:
-                        Center(
-                          child: RaisedButton(
-                              elevation: 10,
-                              child: Text("登录"),
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
-                              onPressed: _login),
-                        ),),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Center(
+                            child: RaisedButton(
+                                elevation: 10,
+                                child: Text(
+                                  "登录",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20)),
+                                onPressed: _login),
+                          ),
+                        ),
                         Container(
                           height: 5,
                         ),
