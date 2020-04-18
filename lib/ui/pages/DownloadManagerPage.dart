@@ -65,7 +65,7 @@ class _State extends State<DownloadManagerPage> {
                         break;
                       case STATUS_DOWNLOADING:
                         statusIcon = Icons.pause;
-                        statusText = item['speed'] ?? "...";
+                        statusText = item['speed'] ?? "等待...";
                         break;
                       case STATUS_PAUSED:
                         statusText = "未开始下载";
@@ -95,8 +95,10 @@ class _State extends State<DownloadManagerPage> {
                           switch (status) {
                             case STATUS_COMPLETE:
                               print(item['mFileName']);
-                              Navigator.pushNamed(context, "/play",
-                                  arguments: item['mFileName']);
+                              Navigator.pushNamed(context, "/play", arguments: {
+                                'uri': item['mFileName'],
+                                'title': name,
+                              });
                               //play
                               break;
                             case STATUS_DOWNLOADING:
@@ -133,9 +135,11 @@ class _State extends State<DownloadManagerPage> {
                                   onPressed: () {
                                     print(item.toString());
                                     Navigator.pushNamed(context, "/play",
-                                        arguments: item['mFileName']);
-                                  },
-                                )
+                                        arguments: {
+                                          'uri': item['mFileName'],
+                                          'title': name,
+                                        });
+                                  })
                               : Container(),
                         ],
                       ),
@@ -190,6 +194,13 @@ class _State extends State<DownloadManagerPage> {
       }
     });
     refreshStatus();
+  }
+
+  void play(item, name) {
+    Navigator.pushNamed(context, "/play", arguments: {
+      'uri': item['mFileName'],
+      'title': name,
+    });
   }
 
   void updateStatus(String id, Map stat, int status) {
