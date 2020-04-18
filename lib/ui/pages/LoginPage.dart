@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
+import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -44,16 +45,18 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.blueAccent,
       body: Center(
         child: Card(
+            color: AppState.isDarkMode ? Colors.black87 : Colors.white,
             elevation: 10,
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
             child: Form(
                 key: _formKey,
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Container(
                     width: 250,
-                    height: 300,
+                    height: 350,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -66,12 +69,12 @@ class _LoginPageState extends State<LoginPage> {
                             //尾部添加清除按钮
                             suffixIcon: (_isShowClear)
                                 ? IconButton(
-                              icon: Icon(Icons.clear),
-                              onPressed: () {
-                                // 清空输入框内容
-                                _nameController.clear();
-                              },
-                            )
+                                    icon: Icon(Icons.clear),
+                                    onPressed: () {
+                                      // 清空输入框内容
+                                      _nameController.clear();
+                                    },
+                                  )
                                 : null,
                           ),
                           validator: (s) {
@@ -116,16 +119,16 @@ class _LoginPageState extends State<LoginPage> {
                             FlatButton(
                               child: Text("注册"),
                               onPressed: () =>
-                                  Navigator.pushNamed(context, "/regidter"),
+                                  Navigator.pushNamed(context, "/register"),
                             ),
                             FlatButton(
                               child: Text("忘记密码"),
-                              onPressed: () =>
-                                  launchUri(
-                                      "http://www.rrys2019.com/user/password/forgot"),
+                              onPressed: () => launchUri(
+                                  "http://www.rrys2019.com/user/password/forgot"),
                             ),
                           ],
                         ),
+                        Align(alignment: Alignment.centerRight,child:
                         Center(
                           child: RaisedButton(
                               elevation: 10,
@@ -133,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20)),
                               onPressed: _login),
-                        ),
+                        ),),
                         Container(
                           height: 5,
                         ),
