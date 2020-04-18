@@ -30,26 +30,28 @@ class MoviesGridWidget extends StatelessWidget {
                   ),
                   tag: "img_${it["id"]}",
                 ),
-                Align(
-                  alignment: Alignment.topLeft,
-                  child: ClipRRect(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.black26,
-                        borderRadius:
-                            BorderRadius.only(bottomRight: Radius.circular(5)),
-                      ),
-                      padding: EdgeInsets.fromLTRB(5, 3, 5, 3),
-                      child: Text(
-                        it['channel_cn'],
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.white,
+                it['channel_cn'] == null
+                    ? Container()
+                    : Align(
+                        alignment: Alignment.topLeft,
+                        child: ClipRRect(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black26,
+                              borderRadius: BorderRadius.only(
+                                  bottomRight: Radius.circular(5)),
+                            ),
+                            padding: EdgeInsets.fromLTRB(5, 3, 5, 3),
+                            child: Text(
+                              it['channel_cn'],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
