@@ -45,7 +45,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.blueAccent,
       body: Center(
         child: Card(
-            color: AppState.isDarkMode ? Colors.black87 : Colors.white,
+            color: context.isDarkMode ? Colors.black87 : Colors.white,
             elevation: 10,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),

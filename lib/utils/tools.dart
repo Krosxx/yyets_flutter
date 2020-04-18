@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:share/share.dart';
@@ -70,4 +71,8 @@ bool get isMobilePhone {
     //web
     return false;
   }
+}
+
+extension Context on BuildContext {
+  bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 }

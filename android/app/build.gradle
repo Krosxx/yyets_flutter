@@ -52,9 +52,7 @@ android {
     }
     buildTypes {
         debug {
-            if (localProperties.hasProperty('keyPath')) {
-                signingConfig signingConfigs.release
-            }
+            signingConfig signingConfigs.release
         }
         release {
             signingConfig signingConfigs.release
