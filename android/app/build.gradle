@@ -39,13 +39,28 @@ android {
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
     }
 
-    buildTypes {
+    signingConfigs {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            storeFile file(localProperties.getProperty('keyPath'))
+            keyAlias = localProperties.getProperty('keyAlias')
+            keyPassword localProperties.getProperty('keyPassword')
+            storePassword localProperties.getProperty('storePassword')
+        }
+    }
+    buildTypes {
+        debug {
+            if (localProperties.hasProperty('keyPath')) {
+                signingConfig signingConfigs.release
+            }
+        }
+        release {
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
+            useProguard false
         }
     }
 }
