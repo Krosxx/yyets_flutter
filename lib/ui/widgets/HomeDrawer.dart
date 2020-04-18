@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
+import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 
@@ -109,8 +110,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   leading: Icon(Icons.file_download),
                   title: Text("下载管理"),
                   onTap: () {
-                    Scaffold.of(context).openEndDrawer();
-                    Navigator.pushNamed(context, "/download");
+                    if (RRResManager.supportDownload) {
+                      Scaffold.of(context).openEndDrawer();
+                      Navigator.pushNamed(context, "/download");
+                    } else {
+                      toast("暂不支持该系统边下边播");
+                    }
                   },
                 ),
                 isMobilePhone

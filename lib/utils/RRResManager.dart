@@ -11,7 +11,9 @@ class RRResManager {
     return jsonDecode(await methodChannel.invokeMethod("getAllItems"));
   }
 
-  static Future addTask(
+  static bool get supportDownload => Platform.isAndroid;
+
+  static Future<bool> addTask(
     String id,
     String filmName,
     String rrUri,
@@ -26,11 +28,12 @@ class RRResManager {
     print(data);
     if (!Platform.isAndroid) {
       toast("边下边播仅支持安卓系统");
-      return;
+      return false;
     }
     methodChannel.invokeMethod("startDownload", data).then((result) {
       print(result);
     });
+    return true;
   }
 
   static Future resumeByFileId(String fileId) {

@@ -23,15 +23,18 @@ class _ResInfoState extends State<ResInfoPage> {
 
   void _downloadAndPlay(String rrUri) async {
     if (!isMobilePhone || await Permission.storage.request().isGranted) {
-      await RRResManager.addTask(
+      if (await RRResManager.addTask(
         info['id'],
         info['cnname'],
         rrUri,
         info['season'],
         info['episode'],
         info['poster_b'] ?? info['poster'],
-      );
-      Navigator.pushNamed(context, "/download");
+      )) {
+        Navigator.pushNamed(context, "/download");
+      } else {
+        toast("暂不支持该系统边下边播");
+      }
     } else {
       toast("请授予存储权限");
     }
