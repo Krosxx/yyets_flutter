@@ -472,6 +472,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
                             _startDragPos = _playPos;
                             _cacheStatus = _controller.value.isPlaying;
                             print("onChangeStart:  $_cacheStatus");
+                            delayHideTimer?.cancel();
                             setState(() {
                               _centerProgressbarVisibility = true;
                               _controller.pause();
