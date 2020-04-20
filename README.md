@@ -3,7 +3,7 @@
 ### 功能一览
 
 - 安卓端边下边播
-- 自动适应DarMode
+- 自动适应DarkMode
 - 本地播放
 - 我的收藏
 - 影视搜索
@@ -11,10 +11,17 @@
 
 ### 效果展示
 
-![](screenshots/s1.jpg) ![](screenshots/s2.jpg)
-![](screenshots/s3.jpg) ![](screenshots/s4.jpg)
-![](screenshots/s5.jpg) ![](screenshots/s6.jpg)
-![](screenshots/s7.jpg)
+github不显示图片，请转[码云/yyets_flutter](https://gitee.com/Vove/yyets_flutter)
+
+<div><img src="screenshots/s1.jpg" width="400">
+  <img src="screenshots/s2.jpg" width="400"></div>
+
+<div><img src="screenshots/s3.jpg" width="400">
+  <img src="screenshots/s4.jpg" width="400"></div>
+
+<div><img src="screenshots/s5.jpg" width="400">
+  <img src="screenshots/s6.jpg" width="400"></div>
+<div><img src="screenshots/s6.jpg" width="600"></div>
 
 ### 说明
 
