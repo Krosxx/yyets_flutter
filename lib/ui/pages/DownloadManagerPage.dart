@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart' hide Intent, Action;
 import 'package:flutter/services.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
+import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 
 class DownloadManagerPage extends StatefulWidget {
@@ -201,8 +202,14 @@ class _State extends State<DownloadManagerPage> {
     });
   }
 
-  void play(filename, name) {
+  void play(filename, name) async {
     if (!Platform.isAndroid) {
+      playOnLocal(filename, name);
+      return;
+    }
+    var sp = await MySp;
+    bool drpm = sp.get('dont_request_play_mode', false);
+    if (drpm) {
       playOnLocal(filename, name);
       return;
     }
@@ -213,6 +220,13 @@ class _State extends State<DownloadManagerPage> {
         return AlertDialog(
           title: Text("播放方式"),
           actions: [
+            FlatButton(
+              child: Text("本地[不再询问]"),
+              onPressed: () {
+                sp.set("dont_request_play_mode", true);
+                playOnLocal(filename, name);
+              },
+            ),
             FlatButton(
               child: Text("本地"),
               onPressed: () {
