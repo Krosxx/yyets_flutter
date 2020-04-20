@@ -28,3 +28,8 @@ github不显示图片，请转[码云/yyets_flutter](https://gitee.com/Vove/yyet
 - 支持全平台：Android, IOS, Windows, MAC OS, Web Server.
 - 构建请参考Flutter官方文档。
 - 目前仅支持安卓端边下边播，其他端仅支持其他方式下载。
+- **仅供学习交流使用**
+
+### Release
+
+安装包: [releases](releases)
