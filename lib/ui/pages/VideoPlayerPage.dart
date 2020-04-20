@@ -1,23 +1,23 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tencentplayer/controller/tencent_player_controller.dart';
+import 'package:flutter_tencentplayer/flutter_tencentplayer.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:screen/screen.dart';
-import 'package:video_player/video_player.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 
 class LocalVideoPlayerPage extends StatefulWidget {
-  final String resRri;
+  final String resUri;
   final String title;
 
   LocalVideoPlayerPage(Map data)
-      : this.resRri = data['uri'],
+      : this.resUri = data['uri'],
         this.title = data['title'];
 
   @override
@@ -28,7 +28,7 @@ const DISPLAY_MODE_KEEP_ASPECT = 0;
 const DISPLAY_MODE_COVERED = 1;
 
 class _PageState extends State<LocalVideoPlayerPage> {
-  VideoPlayerController _controller;
+  TencentPlayerController _controller;
 
   //滑动调节进度结束后是否继续播放状态
   bool _cacheStatus;
@@ -96,62 +96,66 @@ class _PageState extends State<LocalVideoPlayerPage> {
     AutoOrientation.landscapeAutoMode();
     //隐藏状态栏 导航栏
     SystemChrome.setEnabledSystemUIOverlays([]);
-    _controller = VideoPlayerController.file(File(widget.resRri))
+    _controller = TencentPlayerController.file(widget.resUri,
+        playerConfig: PlayerConfig(autoPlay: false, progressInterval: 900))
       ..initialize().then((_) {
         //上次播放进度
-        MySp.then((sp) {
+        Future.delayed(Duration(milliseconds: 500), () async {
+          var sp = await MySp;
           _displayMode = sp.get("display_mode", DISPLAY_MODE_KEEP_ASPECT);
-          setState(() {
-            int pos = sp.get("pos_${widget.resRri.hashCode}", 0);
-            _totalLength = _controller.value.duration.inMilliseconds;
-            //结尾
-            if (_totalLength - pos < 3000) {
-              pos = 0;
-            }
-            _controller.seekTo(Duration(milliseconds: pos)).whenComplete(() {
-              setState(() {
-                _playPos = pos;
-                _controller.play();
-              });
+          int pos = sp.get("pos_${widget.resUri.hashCode}", 0);
+          print("seek to $pos");
+
+          _totalLength = _controller.value.duration.inMilliseconds;
+          //结尾
+          if (_totalLength - pos < 3000 || pos == 0) {
+            //todo 播放起始位置 跳过广告
+            pos = 5000;
+          }
+          //后退2s
+          if (pos > 10000) {
+            pos -= 2000;
+          }
+          _controller.seekTo(Duration(milliseconds: pos)).whenComplete(() {
+            setState(() {
+              _playPos = pos;
+              _controller.play();
             });
-            startDelayHidePanel();
-            Screen.keepOn(true);
           });
+          startDelayHidePanel();
+          Screen.keepOn(true);
         });
       }).catchError((e) {
         print(e);
         toast(e);
       });
     _controller.addListener(() {
+      //未在调节进度时
+      if (!_controller.value.initialized || _centerProgressbarVisibility) {
+        return;
+      }
       int now = DateTime.now().millisecondsSinceEpoch;
-      _controller.position.then((p) {
-        int pos = p.inMilliseconds;
-        if (pos >= _totalLength) {
-          onPlayFinished();
-        }
+      var p = _controller.value.position;
+      int pos = p.inMilliseconds;
+      if (pos >= _totalLength) {
+        onPlayFinished();
+      }
 
-        //未在调节进度时
-        if (!_centerProgressbarVisibility) {
-          _playPos = pos;
-        }
-        if (now - _lastSavePos > 800) {
-          _lastSavePos = now;
-          MySp.then((sp) {
-            sp.set("pos_${widget.resRri.hashCode}", pos);
-          });
-        }
-        //更新进度条
-        if (_playControlVisibility) {
-          if (mounted) {
-            setState(() {});
-          }
-        }
-      });
+      if (now - _lastSavePos > 800 && pos > 0) {
+        _lastSavePos = now;
+        MySp.then((sp) {
+          sp.set("pos_${widget.resUri.hashCode}", pos);
+        });
+      }
+      //更新进度条
+      if (_playControlVisibility && mounted) {
+        setState(() {});
+      }
     });
   }
 
   void onPlayFinished() {
-    Navigator.pop(context);
+//    Navigator.pop(context);
   }
 
   void togglePlayStatus() {
@@ -302,7 +306,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
                     onHorizontalDragUpdate: (DragUpdateDetails d) {
                       double dx = d.delta.dx;
                       if (dx == 0.0) return;
-                      _playPos += (d.delta.dx * 100).toInt();
+                      _playPos += (d.delta.dx * 500).toInt();
                       print("$dx,  ${_playPos}");
 
                       if (_playPos > _totalLength) {
@@ -316,9 +320,9 @@ class _PageState extends State<LocalVideoPlayerPage> {
                     child: _displayMode == 0
                         ? AspectRatio(
                             aspectRatio: _controller.value.aspectRatio,
-                            child: VideoPlayer(_controller),
+                            child: TencentPlayer(_controller),
                           )
-                        : VideoPlayer(_controller),
+                        : TencentPlayer(_controller),
                   )
                 : Container(
                     color: Colors.black,
@@ -524,6 +528,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
 
   @override
   void dispose() {
+    _controller.pause();
     _controller.dispose();
     AutoOrientation.fullAutoMode();
     SystemChrome.setEnabledSystemUIOverlays(

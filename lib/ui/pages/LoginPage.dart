@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
-import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';

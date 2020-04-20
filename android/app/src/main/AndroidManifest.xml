@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="cn.vove7.flutter_yyets">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -13,6 +14,7 @@
         android:name="io.flutter.app.FlutterApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="flutter_yyets"
+        tools:replace="android:label"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
