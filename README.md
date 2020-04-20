@@ -21,7 +21,7 @@ github不显示图片，请转[码云/yyets_flutter](https://gitee.com/Vove/yyet
 
 <div><img src="screenshots/s5.jpg" width="400">
   <img src="screenshots/s6.jpg" width="400"></div>
-<div><img src="screenshots/s6.jpg" width="600"></div>
+<div><img src="screenshots/s7.jpg" width="600"></div>
 
 ### 说明
 
