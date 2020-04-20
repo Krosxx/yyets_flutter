@@ -71,4 +71,12 @@ class RRResManager {
     });
     return data;
   }
+
+  static Future playByExternal(filename) {
+    return methodChannel
+        .invokeMethod("playByExternal", filename)
+        .catchError((e) {
+      toast(e);
+    });
+  }
 }

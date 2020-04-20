@@ -129,15 +129,22 @@ class _PageState extends State<LocalVideoPlayerPage> {
         if (pos >= _totalLength) {
           onPlayFinished();
         }
-        if (now - _lastSavePos > 1000) {
+
+        //未在调节进度时
+        if (!_centerProgressbarVisibility) {
+          _playPos = pos;
+        }
+        if (now - _lastSavePos > 800) {
           _lastSavePos = now;
           MySp.then((sp) {
             sp.set("pos_${widget.resRri.hashCode}", pos);
           });
         }
-        //未在调节进度时
-        if (!_centerProgressbarVisibility) {
-          _playPos = pos;
+        //更新进度条
+        if (_playControlVisibility) {
+          if (mounted) {
+            setState(() {});
+          }
         }
       });
     });
@@ -379,137 +386,137 @@ class _PageState extends State<LocalVideoPlayerPage> {
               ),
             ),
           ),
-          Transform.translate(
-            offset: Offset(0, _playControlVisibility ? 0 : -panelHeight),
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                  colors: [Colors.black54, Colors.transparent],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                )),
-                height: panelHeight,
-                alignment: Alignment.centerLeft,
-                child: AppBar(
-                  title: Text(
-                    widget.title,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.aspect_ratio,
-                        color: _displayMode == DISPLAY_MODE_KEEP_ASPECT
-                            ? Colors.blueAccent
-                            : Colors.white,
-                      ),
-                      onPressed: () =>
-                          changeDisplayMode(DISPLAY_MODE_KEEP_ASPECT),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.settings_overscan,
-                        color: _displayMode == DISPLAY_MODE_COVERED
-                            ? Colors.blueAccent
-                            : Colors.white,
-                      ),
-                      onPressed: () => changeDisplayMode(DISPLAY_MODE_COVERED),
-                    ),
-                  ],
-                  elevation: 0,
-                  backgroundColor: Colors.transparent,
-                  leading: BackButton(
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Transform.translate(
-            offset: Offset(0, _playControlVisibility ? 0 : panelHeight),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Container(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                  colors: [Colors.black54, Colors.transparent],
-                  begin: Alignment.bottomCenter,
-                  end: Alignment.topCenter,
-                )),
-                width: double.infinity,
-                height: panelHeight,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 10),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        onPressed: togglePlayStatus,
-                        icon: Icon(
-                          _controller.value.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
-                          color: Colors.white,
-                        ),
-                      ),
-                      Text(
-                        _playTime,
+          _playControlVisibility
+              ? Align(
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                      colors: [Colors.black54, Colors.transparent],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    )),
+                    height: panelHeight,
+                    alignment: Alignment.centerLeft,
+                    child: AppBar(
+                      title: Text(
+                        widget.title,
                         style: TextStyle(color: Colors.white),
                       ),
-                      Expanded(
-                        child: Slider(
-                          activeColor: Colors.white,
-                          inactiveColor: Colors.white24,
-                          min: 0.0,
-                          label: _playTime,
-                          max: _totalLength.toDouble(),
-                          value: _playPos > _totalLength
-                              ? _totalLength.toDouble()
-                              : _playPos.toDouble(),
-                          onChangeStart: (d) {
-                            _startDragPos = _playPos;
-                            _cacheStatus = _controller.value.isPlaying;
-                            print("onChangeStart:  $_cacheStatus");
-                            delayHideTimer?.cancel();
-                            setState(() {
-                              _centerProgressbarVisibility = true;
-                              _controller.pause();
-                            });
-                          },
-                          onChangeEnd: (p) {
-                            print("onChangeEnd:  $_cacheStatus");
-                            startDelayHidePanel();
-                            _playPos = p.toInt();
-                            setState(() {
-                              _centerProgressbarVisibility = false;
-                              _controller
-                                  .seekTo(Duration(milliseconds: (p).toInt()))
-                                  .whenComplete(() {
-                                if (_cacheStatus) {
-                                  setState(() => _controller.play());
-                                }
-                              });
-                            });
-                          },
-                          onChanged: (p) =>
-                              setState(() => _playPos = p.toInt()),
+                      actions: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.aspect_ratio,
+                            color: _displayMode == DISPLAY_MODE_KEEP_ASPECT
+                                ? Colors.blueAccent
+                                : Colors.white,
+                          ),
+                          onPressed: () =>
+                              changeDisplayMode(DISPLAY_MODE_KEEP_ASPECT),
                         ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.settings_overscan,
+                            color: _displayMode == DISPLAY_MODE_COVERED
+                                ? Colors.blueAccent
+                                : Colors.white,
+                          ),
+                          onPressed: () =>
+                              changeDisplayMode(DISPLAY_MODE_COVERED),
+                        ),
+                      ],
+                      elevation: 0,
+                      backgroundColor: Colors.transparent,
+                      leading: BackButton(
+                        color: Colors.white,
                       ),
-                      Text(
-                        formatLength(_totalLength),
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      Container(
-                        width: 10,
-                      )
-                    ],
+                    ),
                   ),
-                ),
-              ),
-            ),
-          ),
+                )
+              : Container(),
+          _playControlVisibility
+              ? Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                      colors: [Colors.black54, Colors.transparent],
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                    )),
+                    width: double.infinity,
+                    height: panelHeight,
+                    child: Padding(
+                      padding: EdgeInsets.only(right: 10),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            onPressed: togglePlayStatus,
+                            icon: Icon(
+                              _controller.value.isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            _playTime,
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Expanded(
+                            child: Slider(
+                              activeColor: Colors.white,
+                              inactiveColor: Colors.white24,
+                              min: 0.0,
+                              label: _playTime,
+                              max: _totalLength.toDouble(),
+                              value: _playPos > _totalLength
+                                  ? _totalLength.toDouble()
+                                  : _playPos.toDouble(),
+                              onChangeStart: (d) {
+                                _startDragPos = _playPos;
+                                _cacheStatus = _controller.value.isPlaying;
+                                print("onChangeStart:  $_cacheStatus");
+                                delayHideTimer?.cancel();
+                                setState(() {
+                                  _centerProgressbarVisibility = true;
+                                  _controller.pause();
+                                });
+                              },
+                              onChangeEnd: (p) {
+                                print("onChangeEnd:  $_cacheStatus");
+                                startDelayHidePanel();
+                                _playPos = p.toInt();
+                                setState(() {
+                                  _centerProgressbarVisibility = false;
+                                  _controller
+                                      .seekTo(
+                                          Duration(milliseconds: (p).toInt()))
+                                      .whenComplete(() {
+                                    if (_cacheStatus) {
+                                      _controller.play();
+                                    }
+                                  });
+                                });
+                              },
+                              onChanged: (p) =>
+                                  setState(() => _playPos = p.toInt()),
+                            ),
+                          ),
+                          Text(
+                            formatLength(_totalLength),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          Container(
+                            width: 10,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              : Container(),
         ],
       ),
     );
@@ -559,7 +566,7 @@ class _StatusPanel extends StatelessWidget {
           offset: Offset(offsetY, 0),
           child: Container(
             height: 20,
-            width: 250,
+            width: 200,
             child: Transform.rotate(
               angle: -3.1415926 / 2,
               child: Row(
@@ -570,7 +577,9 @@ class _StatusPanel extends StatelessWidget {
                     child: icon,
                     angle: 3.1415926 / 2,
                   ),
-                  Container(width: 10,),
+                  Container(
+                    width: 10,
+                  ),
                   Container(
                     height: 5,
                     width: 150,

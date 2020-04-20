@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_yyets/main.dart';
 import 'package:oktoast/oktoast.dart';
 
-const Duration LENGTH_SHORT = Duration(milliseconds: 1500);
-const Duration LENGTH_LONG = Duration(seconds: 2);
+const Duration LENGTH_SHORT = Duration(milliseconds: 2000);
+const Duration LENGTH_LONG = Duration(seconds: 3500);
 
 void toastLong(dynamic msg) {
   toast(msg, LENGTH_LONG);

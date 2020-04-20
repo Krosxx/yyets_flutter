@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Intent, Action;
 import 'package:flutter/services.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -100,11 +100,7 @@ class _State extends State<DownloadManagerPage> {
                         onPressed: () {
                           switch (status) {
                             case STATUS_COMPLETE:
-                              print(item['mFileName']);
-                              Navigator.pushNamed(context, "/play", arguments: {
-                                'uri': item['mFileName'],
-                                'title': name,
-                              });
+                              play(item['mFileName'], name);
                               //play
                               break;
                             case STATUS_DOWNLOADING:
@@ -139,12 +135,7 @@ class _State extends State<DownloadManagerPage> {
                               ? IconButton(
                                   icon: Icon(Icons.play_arrow),
                                   onPressed: () {
-                                    print(item.toString());
-                                    Navigator.pushNamed(context, "/play",
-                                        arguments: {
-                                          'uri': item['mFileName'],
-                                          'title': name,
-                                        });
+                                    play(item['mFileName'], name);
                                   })
                               : Container(),
                         ],
@@ -202,11 +193,43 @@ class _State extends State<DownloadManagerPage> {
     refreshStatus();
   }
 
-  void play(item, name) {
+  void playOnLocal(filename, name) {
+    Navigator.pop(context);
     Navigator.pushNamed(context, "/play", arguments: {
-      'uri': item['mFileName'],
+      'uri': filename,
       'title': name,
     });
+  }
+
+  void play(filename, name) {
+    if (!Platform.isAndroid) {
+      playOnLocal(filename, name);
+      return;
+    }
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (c) {
+        return AlertDialog(
+          title: Text("播放方式"),
+          actions: [
+            FlatButton(
+              child: Text("本地"),
+              onPressed: () {
+                playOnLocal(filename, name);
+              },
+            ),
+            FlatButton(
+              child: Text("外部App"),
+              onPressed: () {
+                Navigator.pop(context);
+                RRResManager.playByExternal(filename);
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void updateStatus(String id, Map stat, int status) {
