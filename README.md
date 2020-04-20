@@ -32,4 +32,4 @@ github不显示图片，请转[码云/yyets_flutter](https://gitee.com/Vove/yyet
 
 ### Release
 
-安装包: [releases](releases)
+安装包: [Releases](https://gitee.com/Vove/yyets_flutter/releases)
