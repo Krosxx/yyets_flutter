@@ -147,6 +147,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
           sp.set("pos_${widget.resUri.hashCode}", pos);
         });
       }
+      _playPos = pos;
       //更新进度条
       if (_playControlVisibility && mounted) {
         setState(() {});
@@ -156,6 +157,7 @@ class _PageState extends State<LocalVideoPlayerPage> {
 
   void onPlayFinished() {
 //    Navigator.pop(context);
+    setState(() {});
   }
 
   void togglePlayStatus() {
@@ -198,11 +200,10 @@ class _PageState extends State<LocalVideoPlayerPage> {
   int verticalDragAction = 0;
   double verticalDragStartY = 0;
 
-//  double tmpScreenBrightness = 0;
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
           Center(
