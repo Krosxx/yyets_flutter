@@ -27,11 +27,17 @@
 
 ### 说明
 
+- **仅供学习交流使用**
 - 支持全平台：Android, IOS, Windows, MAC OS, Web Server.
 - 构建请参考Flutter官方文档。
 - 目前仅支持安卓端边下边播，其他端仅支持其他方式下载。
-- **仅供学习交流使用**
-
+- 安卓打包请在`android/local.properties`中配置签名文件信息: `keyPath`, `keyAlias`, `keyPassword`, `storePassword`>
+```properties
+keyPath=F:\\..\\..
+keyAlias=...
+keyPassword=...
+storePassword=...
+```
 ### Release
 
 安装包: [Releases](https://gitee.com/Vove/yyets_flutter/releases)
