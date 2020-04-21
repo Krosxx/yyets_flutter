@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/app/AppIcons.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -125,6 +126,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         title: Text("切换主题"),
                         onTap: () => AppState.toggleTheme(),
                       ),
+                ListTile(
+                  onTap: () =>
+                      launchUri("https://github.com/Vove7/yyets_flutter"),
+                  leading: Icon(AppIcons.github),
+                  title: Text("Github"),
+                )
               ],
             ),
           )
