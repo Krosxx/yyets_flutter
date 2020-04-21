@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
+import 'package:flutter_yyets/utils/tools.dart';
 
 /// 网络请求Api
 class Api {
@@ -54,17 +55,17 @@ class Api {
     return _dioClient;
   }
 
-  static String get rankUrl => linkUserUrl("m=index&a=HOT&limit=50&g=api/v3");
+  static String get rankUrl => linkUrl("m=index&a=HOT&limit=50&g=api/v3");
 
   static String detailUrl(String id) =>
-      linkUserUrl("m=index&a=resource&rid=$id&g=api/v2");
+      linkUrl("m=index&a=resource&rid=$id&g=api/v2");
 
-  static String commentUrl(String id, String channel, int page) => linkUserUrl(
+  static String commentUrl(String id, String channel, int page) => linkUrl(
       "a=fetch&itemid=$id&channel=$channel&pagesize=20&page=$page&m=comment");
 
   static String resUrl(String id, String itemid, String channel, String season,
           String episode) =>
-      linkUserUrl(
+      linkUrl(
           "g=api/v2&m=index&a=resource_item&id=$id&season=$season&episode=$episode&itemid=$itemid");
 
   static Future<Map<String, dynamic>> loadRank() async {
@@ -102,19 +103,19 @@ class Api {
   }
 
   static Future<List> myFavorites(int page, {int limit = 20}) async {
-    var res = await dioClient.get(linkUserUrl(
+    var res = await dioClient.get(linkUrl(
         "g=api/v2&m=index&a=fav_list&ft=resource&page=$page&limit=$limit"));
     return res.data['data'] ?? [];
   }
 
   static Future<List> search(String query, int page) async {
-    var res = await dioClient.get(linkUserUrl(
+    var res = await dioClient.get(linkUrl(
         "st=resource&a=search&g=api%2Fv2&limit=10&k=$query&page=$page&m=index"));
     return res.data['data']["list"] ?? [];
   }
 
   static Future<Map> userInfo() async {
-    var res = await dioClient.get(linkUserUrl("g=api/public&m=v2&a=userinfo"));
+    var res = await dioClient.get(linkUrl("g=api/public&m=v2&a=userinfo"));
     return res.data['data'] ?? [];
   }
 
@@ -132,7 +133,7 @@ class Api {
     for (int i = 0; i < 19; i++) {
       id += ran.nextInt(9).toString();
     }
-    var res = await dioClient.get(linkUserUrl(
+    var res = await dioClient.get(linkUrl(
         "g=api/public&m=v2&a=login&account=$account&password=$pass&registration_id=$id"));
     var data = res.data['data'];
     if (data == null || data == '') {
@@ -146,7 +147,7 @@ class Api {
   /// area 暂时只支持中国
   static Future<Map> _loginWithPhone(String phone, String pass,
       {String area = "86"}) async {
-    var res = await dioClient.get(linkUserUrl(
+    var res = await dioClient.get(linkUrl(
         "g=api/public&m=v2&a=mobile_login&area=$area&mobile=$phone&password=$pass"));
     var data = res.data['data'];
     if (data == null || data == '') {
@@ -164,7 +165,7 @@ class Api {
       "password": pass,
       "repassword": pass,
     });
-    var res = await dioClient.post(linkUserUrl("g=api/public&m=v2/a=register"),
+    var res = await dioClient.post(linkUrl("g=api/public&m=v2/a=register"),
         data: formData);
     var data = res.data['data'];
     if (data == null) {
@@ -174,8 +175,8 @@ class Api {
   }
 
   static Future<bool> isFollow(String id) async {
-    var res = await dioClient.get(
-        linkUserUrl("g=api/v2&m=index&a=fav_check_follow&id=$id&ft=resource"));
+    var res = await dioClient
+        .get(linkUrl("g=api/v2&m=index&a=fav_check_follow&id=$id&ft=resource"));
     try {
       return res.data['data'] == "1";
     } catch (e) {
@@ -186,20 +187,20 @@ class Api {
   ///收藏
   static Future<bool> follow(String id) async {
     var res = await dioClient
-        .get(linkUserUrl("g=api/v2&m=index&a=fav_follow&id=$id&ft=resource"));
+        .get(linkUrl("g=api/v2&m=index&a=fav_follow&id=$id&ft=resource"));
     return res.data["status"] == 1;
   }
 
   ///收藏
   static Future<bool> unFollow(String id) async {
     var res = await dioClient
-        .get(linkUserUrl("g=api/v2&m=index&a=fav_unfollow&id=$id&ft=resource"));
+        .get(linkUrl("g=api/v2&m=index&a=fav_unfollow&id=$id&ft=resource"));
     return res.data["status"] == 1;
   }
 
   static Future<Map> commentUser(
       String replyId, String content, String channel) async {
-    var res = await dioClient.get(linkUserUrl(
+    var res = await dioClient.get(linkUrl(
         "m=comment&a=save&channel=$channel&itemid=39790&content=$content&replyid=$replyId"));
 
     if (res.data['status'] == 1) {
@@ -210,27 +211,36 @@ class Api {
   }
 
   static Future<bool> commentGood(String commentId) async {
-    var res = await dioClient
-        .get(linkUserUrl("m=comment&a=good&id=$commentId&thread=1"));
+    var res =
+        await dioClient.get(linkUrl("m=comment&a=good&id=$commentId&thread=1"));
     return res.data['status'] == 1;
   }
 
   static Future<bool> commentBad(String commentId) async {
-    var res = await dioClient
-        .get(linkUserUrl("m=comment&a=bad&id=$commentId&thread=1"));
+    var res =
+        await dioClient.get(linkUrl("m=comment&a=bad&id=$commentId&thread=1"));
     return res.data['status'] == 1;
   }
 
   //统一 accKey  client
-  static String linkUserUrl(String url) {
-    return "http://a.zmzapi.com/index.php?accesskey=519f9cab85c8059d17544947k361a827&client=2&" +
-        url;
-    //uid & token
+  static String linkUrl(String url) {
+    String baseUrl;
+    if (PlatformExt.isWeb) {
+      //转发api跨域问题
+      baseUrl = "http://yyets.vove7.cn/yyets/api";
+    } else {
+      baseUrl = "http://a.zmzapi.com";
+    }
+    String linkUrl =
+        "${baseUrl}/index.php/?accesskey=519f9cab85c8059d17544947k361a827&client=2&" +
+            url;
+    return linkUrl;
   }
 
-  static Future<Map> commentTvOrMovie(String id,String channel, String text) async {
-    var res = await dioClient
-        .get(linkUserUrl("m=comment&a=save&channel=$channel&itemid=$id&content=$text&replyid=0&thread=1"));
+  static Future<Map> commentTvOrMovie(
+      String id, String channel, String text) async {
+    var res = await dioClient.get(linkUrl(
+        "m=comment&a=save&channel=$channel&itemid=$id&content=$text&replyid=0&thread=1"));
 
     if (res.data['status'] == 1) {
       return res.data['data'];

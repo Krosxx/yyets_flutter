@@ -76,3 +76,7 @@ bool get isMobilePhone {
 extension Context on BuildContext {
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 }
+
+extension PlatformExt on Platform {
+  static bool get isWeb => Platform.operatingSystem == null;
+}

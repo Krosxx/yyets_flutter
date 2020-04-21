@@ -11,7 +11,9 @@
 
 ### 效果展示
 
-github不显示图片，请转[码云/yyets_flutter](https://gitee.com/Vove/yyets_flutter)
+**[Web端体验](http://vove.gitee.io/yyets_flutter_web_demo)**
+
+若github不显示图片，请转[码云/yyets_flutter](https://gitee.com/Vove/yyets_flutter)
 
 <div><img src="screenshots/s1.jpg" width="400">
   <img src="screenshots/s2.jpg" width="400"></div>

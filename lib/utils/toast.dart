@@ -21,7 +21,7 @@ void toast(dynamic msg, [Duration duration = LENGTH_SHORT]) {
     textStyle: TextStyle(
       color: (msg is Exception)
           ? Colors.red
-          : (AppState.isDarkMode ? null : Colors.black),
+          : (AppState.isDarkMode ? Colors.white : Colors.black),
     ),
   );
 }
