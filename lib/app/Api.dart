@@ -227,7 +227,7 @@ class Api {
     String baseUrl;
     if (PlatformExt.isWeb) {
       //转发api跨域问题
-      baseUrl = "http://yyets.vove7.cn/yyets/api";
+      baseUrl = "https://bird.ioliu.cn/v1?url=http://a.zmzapi.com";
     } else {
       baseUrl = "http://a.zmzapi.com";
     }
