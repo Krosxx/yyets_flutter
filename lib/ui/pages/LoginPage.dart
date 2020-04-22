@@ -36,6 +36,39 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
     _passController = TextEditingController();
+    webUserHint();
+  }
+
+  void webUserHint(){
+    if (PlatformExt.isWeb) {
+      Future.delayed(
+        Duration(seconds: 1),
+            () {
+          if (!mounted) return;
+          showDialog(
+            context: context,
+            builder: (c) => AlertDialog(
+              title: Text("提示"),
+              content: Text("由于浏览器存在跨域问题，此web app使用bird.ioliu.cn作为代理。\n"
+                  "您需要了解的是：yyets原生登录接口采用明文传输，若您使用此方式登录造成损失，此App将不负任何责任。感谢理解！"),
+              actions: [
+                FlatButton(
+                  onPressed: () => Navigator.pop(c),
+                  child: Text("我知道了"),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    Navigator.pop(c);
+                    Navigator.pop(context);
+                  },
+                  child: Text("不登录了"),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -116,10 +149,10 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           children: [
                             FlatButton(
-                              child: Text("注册"),
-                              onPressed: () =>
-                                  Navigator.pushNamed(context, "/register"),
-                            ),
+                                child: Text("注册"),
+                                onPressed: () => toast("TODO")
+//                                  Navigator.pushNamed(context, "/register"),
+                                ),
                             FlatButton(
                               child: Text("忘记密码"),
                               onPressed: () => launchUri(
