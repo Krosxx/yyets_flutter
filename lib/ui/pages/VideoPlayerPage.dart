@@ -198,7 +198,6 @@ class _PageState extends State<LocalVideoPlayerPage> {
 
   int _startDragPos = 0;
   int verticalDragAction = 0;
-  double verticalDragStartY = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -210,10 +209,16 @@ class _PageState extends State<LocalVideoPlayerPage> {
             child: _controller.value.initialized
                 ? GestureDetector(
                     onVerticalDragStart: (DragStartDetails d) async {
-                      //确定 左右
                       var size = MediaQuery.of(context).size;
                       print("screen size: ${size.width}");
-                      verticalDragStartY = d.localPosition.dy;
+                      double boundary = size.height * 0.2;
+                      var dy = d.globalPosition.dy;
+                      //上下边缘不处理
+                      if (dy < boundary || dy > size.height - boundary) {
+                        verticalDragAction = -1;
+                        return;
+                      }
+                      //确定 左右
                       if (d.localPosition.dx < size.width / 2) {
                         print("左侧");
                         setState(() {
@@ -233,8 +238,10 @@ class _PageState extends State<LocalVideoPlayerPage> {
                       }
                     },
                     onVerticalDragUpdate: (DragUpdateDetails d) {
+                      if (verticalDragAction == -1) {
+                        return;
+                      }
                       var size = MediaQuery.of(context).size;
-//                double dy = verticalDragStartY - d.localPosition.dy;
                       double dy = d.delta.dy;
                       double dyPercent = (dy / size.height * 1.5);
                       if (dy == 0) {
@@ -268,6 +275,9 @@ class _PageState extends State<LocalVideoPlayerPage> {
                       }
                     },
                     onVerticalDragEnd: (DragEndDetails d) {
+                      if (verticalDragAction == -1) {
+                        return;
+                      }
                       if (verticalDragAction == 0) {
                         setState(() {
                           _screenBrightnessPanelVisibility = false;
@@ -280,6 +290,14 @@ class _PageState extends State<LocalVideoPlayerPage> {
                       print("onVerticalDragEnd");
                     },
                     onHorizontalDragStart: (DragStartDetails d) {
+                      //todo 利用onHorizontalDragDown拦截?
+                      var size = MediaQuery.of(context).size;
+                      double boundary = size.width * 0.1;
+                      var x = d.globalPosition.dx;
+                      //左右边缘不处理
+                      if (x < boundary || x > size.width - boundary) {
+                        return;
+                      }
                       _startDragPos = _playPos;
                       print("onHorizontalDragStart  ${_playPos}");
                       _cacheStatus = _controller.value.isPlaying;
@@ -289,6 +307,9 @@ class _PageState extends State<LocalVideoPlayerPage> {
                       });
                     },
                     onHorizontalDragEnd: (DragEndDetails d) {
+                      if (!_centerProgressbarVisibility) {
+                        return;
+                      }
                       startDelayHidePanel();
                       print("DragEndDetails  ${_playPos}");
                       setState(() {
@@ -305,6 +326,9 @@ class _PageState extends State<LocalVideoPlayerPage> {
                       });
                     },
                     onHorizontalDragUpdate: (DragUpdateDetails d) {
+                      if (!_centerProgressbarVisibility) {
+                        return;
+                      }
                       double dx = d.delta.dx;
                       if (dx == 0.0) return;
                       _playPos += (d.delta.dx * 500).toInt();
