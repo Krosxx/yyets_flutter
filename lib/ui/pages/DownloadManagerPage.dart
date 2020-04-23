@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart' hide Intent, Action;
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -22,8 +23,6 @@ class _State extends State<DownloadManagerPage> {
   List dataSet;
 
   String totalSpeed = "";
-  EventChannel eventChannel =
-      EventChannel('cn.vove7.flutter_yyets/download_event');
 
   @override
   Widget build(BuildContext context) {
@@ -31,9 +30,7 @@ class _State extends State<DownloadManagerPage> {
       appBar: AppBar(title: Text("下载管理"), actions: [
         IconButton(
           icon: Icon(Icons.help),
-          onPressed: () {
-            toastLong("请不要同时开启人人官方应用，否则无法使用下载功能");
-          },
+          onPressed: _showTipsDialog,
         ),
         Center(
           child: Text(totalSpeed),
@@ -44,130 +41,41 @@ class _State extends State<DownloadManagerPage> {
   }
 
   Widget _buildBody() {
-    return dataSet == null
-        ? Center(
-            child: CircularProgressIndicator(),
-          )
-        : Column(
+    if (dataSet == null) {
+      return Center(
+        child: CircularProgressIndicator(),
+      );
+    } else {
+      return Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: dataSet.length,
+              itemBuilder: (c, i) => buildItem(dataSet[i]),
+            ),
+          ),
+          Row(
             children: [
-              Expanded(
-                child: ListView.builder(
-                  itemCount: dataSet.length,
-                  itemBuilder: (c, i) {
-                    Map item = dataSet[i];
-                    String name = item['mFilmName'];
-                    String season = item['mSeason'];
-                    if (season != null && season != "") {
-                      name += " S${season}E${item['mEpisode']}";
-                    }
-                    int status = item['status'];
-
-                    String statusText = "...";
-                    IconData statusIcon = Icons.refresh;
-                    double progress = item['mLoadPosition'] / item['mLength'];
-                    switch (status) {
-                      case STATUS_COMPLETE:
-                        statusIcon = Icons.play_arrow;
-                        statusText = "下载完成";
-                        break;
-                      case STATUS_DOWNLOADING:
-                        statusIcon = Icons.pause;
-                        statusText = item['speed'] ?? "等待...";
-                        break;
-                      case STATUS_PAUSED:
-                        statusText = "未开始下载";
-                        statusIcon = Icons.file_download;
-                        break;
-                      case STATUS_UNKNOWN:
-                        statusText = "未开始下载";
-                        statusIcon = Icons.adb;
-                        break;
-                    }
-                    return ListTile(
-                      leading: InkWell(
-                        child: Image.network(item['mFilmImg']),
-                        onTap: () {
-                          var data = {
-                            "id": item['mFilmId'],
-                            "cnname": item['mFilmName'],
-                            "poster_b": item['mFilmImg'],
-                          };
-                          Navigator.pushNamed(context, "/detail",
-                              arguments: data);
-                        },
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(statusIcon),
-                        onPressed: () {
-                          switch (status) {
-                            case STATUS_COMPLETE:
-                              play(item['mFileName'], name);
-                              //play
-                              break;
-                            case STATUS_DOWNLOADING:
-                              RRResManager.pauseByFileId(item['mFileId']);
-                              totalSpeed = "";
-                              refreshStatus();
-                              break;
-                            case STATUS_PAUSED:
-                              RRResManager.resumeByFileId(item['mFileId']);
-                              totalSpeed = "";
-                              refreshStatus();
-                              break;
-                            case STATUS_UNKNOWN:
-                              break;
-                          }
-                        },
-                      ),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(statusText),
-                          Container(
-                            height: 5,
-                          ),
-                          Container(
-                            height: 3,
-                            child: LinearProgressIndicator(
-                              value: progress,
-                            ),
-                          ),
-                          (status == STATUS_DOWNLOADING && progress > 0.05)
-                              ? IconButton(
-                                  icon: Icon(Icons.play_arrow),
-                                  onPressed: () {
-                                    play(item['mFileName'], name);
-                                  })
-                              : Container(),
-                        ],
-                      ),
-//                      subtitle: LinearProgressIndicator(semanticsValue: ,),
-                      title: Text(name),
-                    );
-                  },
-                ),
+              FlatButton(
+                onPressed: () async {
+                  await RRResManager.pauseAll();
+                  totalSpeed = "";
+                  refreshStatus();
+                },
+                child: Text("暂停全部"),
               ),
-              Row(
-                children: [
-                  FlatButton(
-                    onPressed: () async {
-                      await RRResManager.pauseAll();
-                      totalSpeed = "";
-                      refreshStatus();
-                    },
-                    child: Text("暂停全部"),
-                  ),
-                  FlatButton(
-                    onPressed: () async {
-                      await RRResManager.resumeAll();
-                      refreshStatus();
-                    },
-                    child: Text("开始全部"),
-                  ),
-                ],
+              FlatButton(
+                onPressed: () async {
+                  await RRResManager.resumeAll();
+                  refreshStatus();
+                },
+                child: Text("开始全部"),
               ),
             ],
-          );
+          ),
+        ],
+      );
+    }
   }
 
   // {"downSpeed":1223802,"stats":[
@@ -266,6 +174,108 @@ class _State extends State<DownloadManagerPage> {
     }
   }
 
+  Widget buildItem(Map item) {
+    String name = item['mFilmName'];
+    String season = item['mSeason'];
+    if (season != null && season != "") {
+      name += " S${season}E${item['mEpisode']}";
+    }
+    int status = item['status'];
+
+    String statusText = "...";
+    IconData statusIcon = Icons.refresh;
+    double progress = item['mLoadPosition'] / item['mLength'];
+    switch (status) {
+      case STATUS_COMPLETE:
+        statusIcon = Icons.play_arrow;
+        statusText = "下载完成";
+        break;
+      case STATUS_DOWNLOADING:
+        statusIcon = Icons.pause;
+        statusText = item['speed'] ?? "等待...";
+        break;
+      case STATUS_PAUSED:
+        statusText = "未开始下载";
+        statusIcon = Icons.file_download;
+        break;
+      case STATUS_UNKNOWN:
+        statusText = "未开始下载";
+        statusIcon = Icons.adb;
+        break;
+    }
+    return Slidable(
+      child: ListTile(
+        leading: InkWell(
+          child: Image.network(item['mFilmImg']),
+          onTap: () {
+            var data = {
+              "id": item['mFilmId'],
+              "cnname": item['mFilmName'],
+              "poster_b": item['mFilmImg'],
+            };
+            Navigator.pushNamed(context, "/detail", arguments: data);
+          },
+        ),
+        trailing: IconButton(
+          icon: Icon(statusIcon),
+          onPressed: () {
+            switch (status) {
+              case STATUS_COMPLETE:
+                play(item['mFileName'], name);
+                //play
+                break;
+              case STATUS_DOWNLOADING:
+                RRResManager.pauseByFileId(item['mFileId']);
+                totalSpeed = "";
+                refreshStatus();
+                break;
+              case STATUS_PAUSED:
+                RRResManager.resumeByFileId(item['mFileId']);
+                totalSpeed = "";
+                refreshStatus();
+                break;
+              case STATUS_UNKNOWN:
+                break;
+            }
+          },
+        ),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(statusText),
+            Container(
+              height: 5,
+            ),
+            Container(
+              height: 3,
+              child: LinearProgressIndicator(
+                value: progress,
+              ),
+            ),
+            (status == STATUS_DOWNLOADING && progress > 0.05)
+                ? IconButton(
+                    icon: Icon(Icons.play_arrow),
+                    onPressed: () {
+                      play(item['mFileName'], name);
+                    })
+                : Container(),
+          ],
+        ),
+//                      subtitle: LinearProgressIndicator(semanticsValue: ,),
+        title: Text(name),
+      ),
+      secondaryActions: [
+        IconSlideAction(
+          caption: "删除",
+          icon: Icons.delete,
+          color: Colors.redAccent,
+          onTap: () => _requestDelete(item['mFileId']),
+        )
+      ],
+      actionPane: SlidableScrollActionPane(),
+    );
+  }
+
   void refreshStatus() {
     Future.wait(dataSet.map((item) {
       return RRResManager.getStatus(item).then((value) {
@@ -279,7 +289,11 @@ class _State extends State<DownloadManagerPage> {
   @override
   void initState() {
     super.initState();
-    eventChannel.receiveBroadcastStream().listen(onReceiverData);
+    RRResManager.addEventListener(onReceiverData);
+    refreshList();
+  }
+
+  void refreshList() {
     RRResManager.getAllItems().then((value) {
       print(value.toString());
       dataSet = value ?? [];
@@ -292,7 +306,49 @@ class _State extends State<DownloadManagerPage> {
 
   @override
   void dispose() {
+    RRResManager.removeEventListener(onReceiverData);
     super.dispose();
-    eventChannel.receiveBroadcastStream().listen(null);
   }
+
+  void _requestDelete(String fileId) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (c) => AlertDialog(
+        title: Text("确认删除？"),
+        actions: [
+          FlatButton(
+            child: Text("确认"),
+            onPressed: () async {
+              if (await RRResManager.deleteDownload(fileId)) {
+                refreshList();
+              } else {
+                toast("删除失败");
+              }
+              Navigator.pop(c);
+            },
+          ),
+          FlatButton(
+              child: Text("取消"),
+              onPressed: () {
+                Navigator.pop(c);
+              }),
+        ],
+      ),
+    );
+  }
+
+  void _showTipsDialog() => showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (c) => AlertDialog(
+          title: Text("提示"),
+          content: Text(
+            "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
+            "2. 下载5%即可播放。\n"
+            "3. 侧滑删除。\n"
+            "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download",
+          ),
+        ),
+      );
 }

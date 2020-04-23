@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   permission_handler: ^5.0.0+hotfix.3
   intent: ^1.1.0
+  flutter_slidable: ^0.5.4
 
   share: ^0.6.3+6
 

@@ -7,6 +7,12 @@ import 'package:flutter_yyets/utils/toast.dart';
 class RRResManager {
   static var methodChannel = MethodChannel("cn.vove7.flutter_yyets/channel");
 
+  static List _eventListeners = [];
+
+  static bool ecIsInit = false;
+  static EventChannel eventChannel =
+      EventChannel('cn.vove7.flutter_yyets/download_event');
+
   static Future getAllItems() async {
     return jsonDecode(await methodChannel.invokeMethod("getAllItems"));
   }
@@ -60,6 +66,10 @@ class RRResManager {
     return methodChannel.invokeMethod("getStatus", bean);
   }
 
+  static Future<bool> deleteDownload(String fileId) {
+    return methodChannel.invokeMethod("deleteDownload", fileId);
+  }
+
   //yyets://N=....mp4|S=....|H=.....|
   static Map parseRRUri(String rrUri) {
     String s = rrUri.substring(8, rrUri.length - 1);
@@ -78,5 +88,21 @@ class RRResManager {
         .catchError((e) {
       toast(e);
     });
+  }
+
+  static void addEventListener<T>(void onData(T data)) {
+    if (!ecIsInit) {
+      ecIsInit = true;
+      eventChannel.receiveBroadcastStream().listen((data) {
+        _eventListeners.forEach((lis) {
+          lis(data);
+        });
+      });
+    }
+    _eventListeners.add(onData);
+  }
+
+  static void removeEventListener<T>(void onData(T data)) {
+    _eventListeners.remove(onData);
   }
 }

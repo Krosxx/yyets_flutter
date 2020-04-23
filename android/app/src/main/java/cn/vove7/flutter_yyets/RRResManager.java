@@ -117,6 +117,10 @@ class RRResManager implements P4PClientEvent {
         }
     }
 
+    boolean deleteDownload(String fileId) {
+        return RRFilmDownloadManager.instance.cancelDownload(fileId);
+    }
+
     void pauseByFileId(String fileId) {
         RRFilmDownloadManager.instance.pauseLoading(fileId);
     }
