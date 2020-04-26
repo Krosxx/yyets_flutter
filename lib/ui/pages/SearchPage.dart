@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/app/Stroage.dart';
 import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
+import 'package:flutter_yyets/ui/widgets/movie_tile.dart';
 
 class SearchPageDelegate extends SearchDelegate<Map> {
   @override
@@ -125,60 +126,14 @@ class ResultPageState extends LoadingPageState<ResultPage> {
 
   @override
   Widget buildItem(BuildContext context, int index, dynamic item) {
-    return Container(
-      padding: EdgeInsets.all(5),
-      child: InkWell(
-        onTap: () {
-          var data = Map();
-          data.addAll(item);
-          data.putIfAbsent('id', () => item["itemid"]);
-          data.remove('itemid');
-          data.putIfAbsent("poster", () => item["poster_b"]);
-          Navigator.pushNamed(context, "/detail", arguments: data);
-          print(data);
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Hero(
-              tag: "img_${item["itemid"]}",
-              child: Image.network(
-                item["poster_b"],
-                width: 100,
-                fit: BoxFit.cover,
-                height: 125,
-              ),
-            ),
-            Container(
-              width: 5,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item['title'],
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  Container(
-                    height: 5,
-                  ),
-                  Wrap(
-                    children: [
-                      tagText(item['area']),
-                      tagText(item['score']),
-                      tagText(item['play_status']),
-                      tagText(item['category']),
-                    ],
-                  )
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+    item.putIfAbsent('id', () => item["itemid"]);
+    item.remove('itemid');
+    return MovieTile(item, item['title'], Container(), [
+      item['area'],
+      item['score'],
+      item['play_status'],
+      item['category'],
+    ]);
   }
 
   Widget tagText(String s) {

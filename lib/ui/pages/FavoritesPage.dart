@@ -4,6 +4,7 @@ import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/app/Stroage.dart';
 import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
 import 'package:flutter_yyets/ui/utils.dart';
+import 'package:flutter_yyets/ui/widgets/movie_tile.dart';
 import 'package:flutter_yyets/utils/times.dart';
 
 class FavoritesPage extends StatefulWidget {
@@ -122,55 +123,20 @@ class _FavoriteListState extends LoadingPageState<_Body> {
   @override
   Widget buildItem(BuildContext context, int index, dynamic item) {
     var detail = item['detail'];
-    return Container(
-      padding: EdgeInsets.all(5),
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, "/detail", arguments: detail);
-        },
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
+    return MovieTile(
+        detail,
+        detail['cnname'],
+        Column(
           children: [
-            Hero(
-              tag: "img_${detail["id"]}",
-              child: Image.network(
-                detail['poster_b'],
-                width: 100,
-                fit: BoxFit.cover,
-                height: 125,
-              ),
-            ),
-            Container(
-              width: 5,
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    detail['cnname'],
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  Container(
-                    height: 5,
-                  ),
-                  Text("更新时间：${formatSeconds(int.parse(item['updatetime']))}"),
-                  Text('收藏时间：${formatSeconds(int.parse(item['dateline']))}'),
-                  Wrap(
-                    children: [
-                      tagText(detail['score']),
-                      tagText(detail['type_name']),
-                      tagText(detail['category']),
-                      tagText(detail['play_status']),
-                    ],
-                  )
-                ],
-              ),
-            )
+            Text("更新时间：${formatSeconds(int.parse(item['updatetime']))}"),
+            Text('收藏时间：${formatSeconds(int.parse(item['dateline']))}'),
           ],
         ),
-      ),
-    );
+        [
+          detail['score'],
+          detail['type_name'],
+          detail['category'],
+          detail['play_status'],
+        ]);
   }
 }
