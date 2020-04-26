@@ -36,18 +36,17 @@ class _CommentsPageState extends State<CommentsPage>
 
   int _page = 1;
 
-  Function scrollListener;
-  ScrollController _scrollController;
-
   CurvedAnimation curve;
   Animation<Offset> animation;
   bool _floatVisible = true;
   double lastPos = 0;
 
+  AnimationController controller;
+
   @override
   void initState() {
     super.initState();
-    var controller = AnimationController(
+    controller = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
@@ -59,40 +58,7 @@ class _CommentsPageState extends State<CommentsPage>
       begin: Offset.zero,
       end: Offset(0, 2),
     ).animate(controller);
-
-    scrollListener = () {
-      // ignore: invalid_use_of_protected_member
-      var ps = _scrollController.positions;
-      var pos = ps.elementAt(ps.length - 1);
-      double p = pos.pixels;
-      double mp = pos.maxScrollExtent;
-
-      if (p > lastPos) {
-        //向上
-        if (_floatVisible) {
-          _floatVisible = false;
-          controller.forward();
-        }
-      } else {
-        if (!_floatVisible) {
-          _floatVisible = true;
-          controller.reverse();
-        }
-      }
-      lastPos = p;
-      if (_loadStatus != LoadingStatus.LOADING &&
-          _loadStatus != LoadingStatus.ERROR &&
-          p >= mp - 50) {
-        loadMore();
-      }
-    };
     loadMore();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _scrollController?.removeListener(scrollListener);
   }
 
   void loadMore() {
@@ -140,50 +106,70 @@ class _CommentsPageState extends State<CommentsPage>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    //获取父级（NestedScrollView）ScrollController
-    var pc = PrimaryScrollController.of(context);
-    if (pc != null) {
-      print("got PrimaryScrollController!!");
-      _scrollController = pc;
-      // ignore: invalid_use_of_protected_member
-      if (!pc.hasListeners) {
-        pc.addListener(scrollListener);
-      }
-    }
 
     int hotLen = widget.hotComments.length;
     int totalLen = comments.length + hotLen + 3;
     return Stack(
       children: [
-        ListView.builder(
-          shrinkWrap: true,
-          itemCount: totalLen,
-          itemBuilder: (c, i) {
-            if (i == 0) {
-              return Padding(
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                child: Text("热评"),
-              );
-            } else if (i == totalLen - 1) {
-              return getWidgetByLoadingStatus(_loadStatus, loadMore);
-            } else if (i == hotLen + 1) {
-              return Padding(
-                padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
-                child: Text("全部评论"),
-              );
-            } else {
-              var comment;
-              if (i <= hotLen) {
-                comment = widget.hotComments[i - 1];
-              } else {
-                comment = comments[i - 2 - hotLen];
+        NotificationListener(
+          onNotification: (n) {
+            if (n.runtimeType == ScrollUpdateNotification) {
+              var un = n as ScrollUpdateNotification;
+              if (_loadStatus != LoadingStatus.LOADING &&
+                  _loadStatus != LoadingStatus.ERROR &&
+                  un.metrics.extentAfter < 50) {
+                loadMore();
               }
-              return CommentsWidgetBuilder.build(
-                  context, comment, widget.channel, () {
-                setState(() {});
-              });
+              var dd = un.dragDetails;
+              if (dd != null) {
+                if (dd.delta.dy > 0) {
+                  //显示
+                  if (!_floatVisible) {
+                    _floatVisible = true;
+                    controller.reverse();
+                  }
+                } else {
+                  if (_floatVisible) {
+                    _floatVisible = false;
+                    controller.forward();
+                  }
+                }
+              }
             }
+            return false;
           },
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: totalLen,
+            itemBuilder: (c, i) {
+              if (i == 0) {
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Text("热评"),
+                );
+              } else if (i == totalLen - 1) {
+                return getWidgetByLoadingStatus(_loadStatus, loadMore);
+              } else if (i == hotLen + 1) {
+                return Padding(
+                  padding: EdgeInsets.fromLTRB(10, 10, 10, 0),
+                  child: Text("全部评论"),
+                );
+              } else {
+                var comment;
+                if (i <= hotLen) {
+                  comment = widget.hotComments[i - 1];
+                } else {
+                  comment = comments[i - 2 - hotLen];
+                }
+                return CommentsWidgetBuilder.build(
+                  context,
+                  comment,
+                  widget.channel,
+                  () => setState(() {}),
+                );
+              }
+            },
+          ),
         ),
         Positioned(
           bottom: 40,
