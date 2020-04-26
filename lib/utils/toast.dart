@@ -4,7 +4,7 @@ import 'package:flutter_yyets/main.dart';
 import 'package:oktoast/oktoast.dart';
 
 const Duration LENGTH_SHORT = Duration(milliseconds: 2000);
-const Duration LENGTH_LONG = Duration(seconds: 3500);
+const Duration LENGTH_LONG = Duration(milliseconds: 3500);
 
 void toastLong(dynamic msg) {
   toast(msg, LENGTH_LONG);

@@ -22,19 +22,16 @@ class _ResInfoState extends State<ResInfoPage> {
   LoadingStatus _loadingStatus = LoadingStatus.LOADING;
 
   void _downloadAndPlay(String rrUri) async {
-    if (!isMobilePhone || await Permission.storage.request().isGranted) {
-      if (await RRResManager.addTask(
+    if (await Permission.storage.request().isGranted) {
+      await RRResManager.addTask(
         info['id'],
         info['cnname'],
         rrUri,
         info['season'],
         info['episode'],
         info['poster_b'] ?? info['poster'],
-      )) {
-        Navigator.pushNamed(context, "/download");
-      } else {
-        toast("暂不支持该系统边下边播");
-      }
+      );
+      Navigator.pushNamed(context, "/download");
     } else {
       toast("请授予存储权限");
     }
@@ -58,14 +55,14 @@ class _ResInfoState extends State<ResInfoPage> {
       }
       apiCall.then((data) {
         print(data);
-        if(mounted) {
+        if (mounted) {
           setState(() {
             _loadingStatus = LoadingStatus.NONE;
             _data = data;
           });
         }
       }).catchError((e) {
-        if(mounted) {
+        if (mounted) {
           setState(() {
             _loadingStatus = LoadingStatus.ERROR;
           });
@@ -108,7 +105,9 @@ class _ResInfoState extends State<ResInfoPage> {
               tooltip: "边下边播",
               backgroundColor: Colors.lightBlue,
               onPressed: () {
-                _downloadAndPlay(_data['item_app']['name']);
+                if (RRResManager.checkPlatform()) {
+                  _downloadAndPlay(_data['item_app']['name']);
+                }
               },
               child: Icon(
                 Icons.file_download,

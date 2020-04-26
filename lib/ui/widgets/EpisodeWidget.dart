@@ -37,6 +37,9 @@ class EpisodeWidgetState extends State<EpisodeWidget>
   }
 
   void initDownloadStatus() async {
+    if (!RRResManager.isSupportThisPlatForm) {
+      return;
+    }
     var kl = [];
     episodes.forEach((item) {
       String season = item['season'];

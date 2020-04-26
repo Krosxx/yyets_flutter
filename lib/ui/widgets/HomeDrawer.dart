@@ -111,11 +111,9 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   leading: Icon(Icons.file_download),
                   title: Text("下载管理"),
                   onTap: () {
-                    if (RRResManager.supportDownload) {
+                    if (RRResManager.checkPlatform()) {
                       Scaffold.of(context).openEndDrawer();
                       Navigator.pushNamed(context, "/download");
-                    } else {
-                      toast("暂不支持该系统边下边播");
                     }
                   },
                 ),
