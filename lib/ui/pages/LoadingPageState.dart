@@ -9,7 +9,6 @@ import 'package:flutter_yyets/utils/toast.dart';
 abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
     with AutomaticKeepAliveClientMixin {
   final List items = [];
-  ScrollController _scrollController;
   LoadingStatus _status = LoadingStatus.NONE;
   int _page = 1;
 
@@ -18,15 +17,6 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
-    _scrollController.addListener(() {
-      if (_status != LoadingStatus.LOADING &&
-          _status != LoadingStatus.ERROR &&
-          _scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 50) {
-        loadMore();
-      }
-    });
     loadMore();
   }
 
@@ -81,8 +71,19 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
         child: CircularProgressIndicator(),
       );
     else
-      return ListView.builder(
-          controller: _scrollController,
+      return NotificationListener(
+        onNotification: (notification) {
+          if (notification.runtimeType == ScrollUpdateNotification) {
+            var n = notification as ScrollUpdateNotification;
+            if (_status != LoadingStatus.LOADING &&
+                _status != LoadingStatus.ERROR &&
+                n.metrics.extentAfter < 50) {
+              loadMore();
+            }
+          }
+          return true;
+        },
+        child: ListView.builder(
           itemCount: items.length + 1,
           itemBuilder: (c, i) {
             if (i == items.length) {
@@ -90,7 +91,9 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
             } else {
               return buildItem(context, i, items[i]);
             }
-          });
+          },
+        ),
+      );
   }
 
   @override
