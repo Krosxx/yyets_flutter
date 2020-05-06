@@ -1,5 +1,13 @@
 # 人人影视客户端 for Flutter
 
+- [功能一览](#功能一览)
+- [效果展示](#效果展示)
+- [说明](#说明)
+- [Build](#build)
+- [Release](#release)
+
+
+
 ### 功能一览
 
 - 安卓端边下边播
@@ -40,6 +48,47 @@ keyAlias=...
 keyPassword=...
 storePassword=...
 ```
+
+### Build
+
+环境：
+```
+❯ flutter doctor
+Doctor summary (to see all details, run flutter doctor -v):
+[√] Flutter (Channel master, v1.18.0-5.0.pre.35, on Microsoft Windows [Version 10.0.19613.1000], locale zh-CN)
+
+[√] Android toolchain - develop for Android devices (Android SDK version 29.0.2)
+[√] Chrome - develop for the web
+[√] Visual Studio - develop for Windows (Visual Studio Community 2019 16.5.3)
+[√] Android Studio (version 3.6)
+[√] VS Code, 64-bit edition (version 1.44.2)
+[√] Connected device (4 available)
+```
+
+- Android
+
+```shell script
+flutter build apk
+```
+
+- IOS
+
+```shell script
+flutter build ios
+```
+
+- Windows
+
+```shell script
+flutter build windows
+```
+
+- Web
+
+```shell script
+flutter build web
+```
+
 ### Release
 
 安装包: [Releases](https://gitee.com/Vove/yyets_flutter/releases)
