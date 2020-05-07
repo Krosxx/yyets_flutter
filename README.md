@@ -92,7 +92,7 @@ flutter build web
 ```
 build output dir: `build/web`
 
-web 发布：可以将 web 目录下文件直接静态发布，你可以放到自己服务器，或者使用 [Github Pages]() 和 [Gitee Pages]() 来发布。
+web 发布：可以将 web 目录下文件直接静态发布，你可以放到自己服务器，或者使用 [Github Pages](https://pages.github.com/) 和 [Gitee Pages](https://gitee.com/help/articles/4136#article-header0) 来发布。
 
 
 
