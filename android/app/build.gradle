@@ -59,6 +59,10 @@ android {
             minifyEnabled false
             shrinkResources false
             useProguard false
+
+            ndk {
+                abiFilters "armeabi-v7a"
+            }
         }
     }
 }

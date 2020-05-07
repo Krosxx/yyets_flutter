@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/ui/pages/SearchPage.dart';
 import 'package:flutter_yyets/ui/widgets/HomeDrawer.dart';
+import 'package:flutter_yyets/utils/tools.dart';
 
 import 'RankPage.dart';
 
@@ -12,13 +13,18 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage>
+    with SingleTickerProviderStateMixin {
   TabController _controller;
 
   @override
   void initState() {
     super.initState();
     _controller = TabController(length: 6, vsync: this);
+    //非web检查更新
+    if (!PlatformExt.isWeb) {
+      checkUpgrade(context);
+    }
   }
 
   @override

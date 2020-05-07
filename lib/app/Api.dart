@@ -248,4 +248,10 @@ class Api {
       throw Exception(res.data['info']);
     }
   }
+
+  static Future<Map> checkUpgrade() async {
+    var res = await dioClient.get(
+        "https://gitee.com/api/v5/repos/vove/yyets_flutter/releases/latest");
+    return res.data;
+  }
 }

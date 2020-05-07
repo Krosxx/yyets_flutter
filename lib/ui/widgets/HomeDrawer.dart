@@ -117,7 +117,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     }
                   },
                 ),
-                isMobilePhone
+                PlatformExt.isMobilePhone
                     ? Container()
                     : ListTile(
                         leading: Icon(Icons.palette),
@@ -125,16 +125,59 @@ class _HomeDrawerState extends State<HomeDrawer> {
                         onTap: () => AppState.toggleTheme(),
                       ),
                 ListTile(
-                  onTap: () =>
-                      launchUri("https://github.com/Vove7/yyets_flutter"),
-                  leading: Icon(AppIcons.github),
-                  title: Text("Github"),
+                  onTap: () => _showAbout(),
+                  leading: Icon(Icons.info),
+                  title: Text("关于"),
                 )
               ],
             ),
           )
         ],
       ),
+    );
+  }
+
+  _showAbout() {
+    //todo hide action buttons
+    showAboutDialog(
+      context: context,
+      applicationIcon: FlutterLogo(
+        size: 80,
+      ),
+      useRootNavigator: true,
+      applicationName: "YYeTs for Flutter",
+      applicationVersion: MyApp.VERSION,
+      applicationLegalese: "copyright Vove.\n仅供学习交流使用",
+      children: [
+        Container(height: 20),
+        FlatButton(
+          padding: EdgeInsets.all(0),
+          child: Chip(
+            shadowColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            avatar: Icon(Icons.history),
+            label: Text("检查更新"),
+          ),
+          onPressed: () {
+            toast("正在检查更新...");
+            checkUpgrade(context).then((hasUpgrade) {
+              if (!hasUpgrade) {
+                toast("已是最新版本");
+              }
+            });
+          },
+        ),
+        FlatButton(
+          padding: EdgeInsets.all(0),
+          child: Chip(
+            shadowColor: Colors.transparent,
+            backgroundColor: Colors.transparent,
+            avatar: Icon(AppIcons.github),
+            label: Text("  Github  "),
+          ),
+          onPressed: () => launchUri("https://github.com/Vove7/yyets_flutter"),
+        )
+      ],
     );
   }
 }

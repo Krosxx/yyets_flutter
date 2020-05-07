@@ -70,6 +70,7 @@ Doctor summary (to see all details, run flutter doctor -v):
 ```shell script
 flutter build apk
 ```
+build output dir: `build/app/outputs/apk/release/app-release.apk`
 
 - IOS
 
@@ -82,13 +83,27 @@ flutter build ios
 ```shell script
 flutter build windows
 ```
+build output dir: `build/windows/x64/Release/Runner`
 
 - Web
 
 ```shell script
 flutter build web
 ```
+build output dir: `build/web`
+
+web 发布：可以将 web 目录下文件直接静态发布，你可以放到自己服务器，或者使用 [Github Pages]() 和 [Gitee Pages]() 来发布。
+
+
 
 ### Release
 
 安装包: [Releases](https://gitee.com/Vove/yyets_flutter/releases)
+
+### TODO
+
+- 注册
+- 首页资讯
+- 评分
+- 按类型搜索
+- 下载管理按剧折叠

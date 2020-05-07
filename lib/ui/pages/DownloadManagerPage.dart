@@ -103,7 +103,12 @@ class _State extends State<DownloadManagerPage> {
   }
 
   void playOnLocal(filename, name) {
-    Navigator.pop(context);
+    if (filename.endsWith(".mkv")) {
+      toast("本地不支持mkv视频格式，将打开外部播放器播放");
+      Future.delayed(
+          Duration(seconds: 1), () => RRResManager.playByExternal(filename));
+      return;
+    }
     Navigator.pushNamed(context, "/play", arguments: {
       'uri': filename,
       'title': name,
@@ -138,13 +143,14 @@ class _State extends State<DownloadManagerPage> {
             FlatButton(
               child: Text("本地"),
               onPressed: () {
+                Navigator.pop(c);
                 playOnLocal(filename, name);
               },
             ),
             FlatButton(
               child: Text("外部App"),
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pop(c);
                 RRResManager.playByExternal(filename);
               },
             ),
@@ -207,6 +213,7 @@ class _State extends State<DownloadManagerPage> {
       child: ListTile(
         leading: InkWell(
           child: Image.network(item['mFilmImg']),
+          onLongPress: () => _showDetail(item),
           onTap: () {
             var data = {
               "id": item['mFilmId'],
@@ -351,4 +358,14 @@ class _State extends State<DownloadManagerPage> {
           ),
         ),
       );
+
+  void _showDetail(Map item) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (c) => AlertDialog(
+        content: Text(item.toString()),
+      ),
+    );
+  }
 }

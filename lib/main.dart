@@ -12,6 +12,7 @@ void main() {
 }
 
 class MyApp extends StatefulWidget {
+  static final String VERSION = "1.0.5";
   @override
   State createState() => AppState();
 }
@@ -42,7 +43,7 @@ class AppState extends State<MyApp> {
     _ins = this;
     super.initState();
     _theme = light;
-    if (!isMobilePhone) {
+    if (!PlatformExt.isMobilePhone) {
       MySp.then((sp) {
         if (sp.get("theme", 0) == 1) {
           setState(() {
