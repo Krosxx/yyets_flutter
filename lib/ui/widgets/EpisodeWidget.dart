@@ -42,7 +42,7 @@ class EpisodeWidgetState extends State<EpisodeWidget>
     }
     var kl = [];
     episodes.forEach((item) {
-      String season = item['season'];
+      String season = item['season'].toString();
       item['episode_list'].forEach((epi) {
         kl.add({
           "filmid": resInfo['id'],
@@ -72,7 +72,7 @@ class EpisodeWidgetState extends State<EpisodeWidget>
       itemBuilder: (c, i) {
         var item = episodes[i];
         List epiList = item['episode_list'];
-        String season = item['season'];
+        String season = item['season'].toString();
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[

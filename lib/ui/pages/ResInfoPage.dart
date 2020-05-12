@@ -49,7 +49,7 @@ class _ResInfoState extends State<ResInfoPage> {
     Future.delayed(Duration(milliseconds: 200), () {
       if (channel == 'tv') {
         apiCall = Api.getResInfo(
-            id: info['id'], episode: info['episode'], season: info['season']);
+            id: info['id'], episode: info['episode'], season: info['season'].toString());
       } else if (channel == 'movie') {
         apiCall = Api.getResInfo(id: info['id'], itemid: info['itemid']);
       }
