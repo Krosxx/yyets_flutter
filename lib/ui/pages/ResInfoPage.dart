@@ -49,7 +49,9 @@ class _ResInfoState extends State<ResInfoPage> {
     Future.delayed(Duration(milliseconds: 200), () {
       if (channel == 'tv') {
         apiCall = Api.getResInfo(
-            id: info['id'], episode: info['episode'], season: info['season'].toString());
+            id: info['id'],
+            episode: info['episode'],
+            season: info['season'].toString());
       } else if (channel == 'movie') {
         apiCall = Api.getResInfo(id: info['id'], itemid: info['itemid']);
       }
@@ -144,6 +146,15 @@ class _ResInfoState extends State<ResInfoPage> {
                 children: fs.map((file) {
                   return Card(
                       child: InkWell(
+                    onLongPress: () {
+                      String addr = file['address'];
+                      String pwd = file['passwd'];
+                      if (pwd != null && pwd.isNotEmpty) {
+                        addr = addr + "\n密码：" + pwd;
+                      }
+                      setClipboardData(addr);
+                      toastLong("资源链接已复制");
+                    },
                     onTap: () {
                       String addr = file['address'];
                       print(addr);
