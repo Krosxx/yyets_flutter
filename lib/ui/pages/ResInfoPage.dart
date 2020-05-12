@@ -27,7 +27,7 @@ class _ResInfoState extends State<ResInfoPage> {
         info['id'],
         info['cnname'],
         rrUri,
-        info['season'],
+        info['season'].toString(),
         info['episode'],
         info['poster_b'] ?? info['poster'],
       );
