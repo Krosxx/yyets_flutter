@@ -23,7 +23,9 @@ class MoviesGridWidget extends StatelessWidget {
               children: <Widget>[
                 Hero(
                   child: Image.network(
-                    it["poster"] ?? "https://flutter.cn/favicon.ico",
+                    it["poster"] ??
+                        it["poster_b"] ??
+                        "https://flutter.cn/favicon.ico",
                     fit: BoxFit.cover,
                     width: 180,
                     height: 255,
