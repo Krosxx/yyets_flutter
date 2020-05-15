@@ -28,7 +28,7 @@ class _DetailPageState extends State<DetailPage>
 
   Map<String, dynamic> get resource => detail != null ? detail["resource"] : {};
 
-  var headerHeight= 282.0;
+  var headerHeight = 282.0;
 
   bool _hasErr = false;
 
@@ -115,29 +115,29 @@ class _DetailPageState extends State<DetailPage>
         actions: detail == null
             ? null
             : [
-          IconButton(
-            icon: Icon(
-              Icons.star,
-              color: _isFollow ? Colors.yellow : null,
-            ),
-            onPressed: () async {
-              if (!await RRUser.isLogin) {
-                toastLong("请登录后操作");
-              } else {
-                toggleFollow();
-              }
-            },
-          ),
-          IconButton(
-            icon: Icon(Icons.share),
-            onPressed: () => share(
-                title +
-                    "\n" +
-                    detail["share_url"] +
-                    "\n\n来自 人人影视_Flutter",
-                subject: "人人影视分享"),
-          )
-        ],
+                IconButton(
+                  icon: Icon(
+                    Icons.star,
+                    color: _isFollow ? Colors.yellow : null,
+                  ),
+                  onPressed: () async {
+                    if (!await RRUser.isLogin) {
+                      toastLong("请登录后操作");
+                    } else {
+                      toggleFollow();
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.share),
+                  onPressed: () => share(
+                      title +
+                          "\n" +
+                          detail["share_url"] +
+                          "\n\n来自 人人影视_Flutter",
+                      subject: "人人影视分享"),
+                )
+              ],
       ),
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -190,7 +190,8 @@ class _DetailPageState extends State<DetailPage>
                 : TabBarView(
                     controller: _tabController,
                     children: <Widget>[
-                      detail["season_list"] == null
+                      detail["season_list"] == null ||
+                              detail["season_list"].length == 0
                           ? MovieResWidget(detail['movie_items'], resource)
                           : EpisodeWidget(detail["season_list"], resource),
                       SingleChildScrollView(
