@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/app/Stroage.dart';
 import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
-import 'package:flutter_yyets/ui/utils.dart';
 import 'package:flutter_yyets/ui/widgets/movie_tile.dart';
 import 'package:flutter_yyets/utils/times.dart';
 
@@ -23,7 +22,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     favoritesSortType.then((value) {
       setState(() {
         sortType = value;
-        _body = _Body(0);
+        _body = _Body(sortType);
       });
     });
   }
