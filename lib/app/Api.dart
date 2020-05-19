@@ -254,4 +254,24 @@ class Api {
         "https://gitee.com/api/v5/repos/vove/yyets_flutter/releases/latest");
     return res.data;
   }
+
+  static Future<bool> rating(rid, String score) async {
+    var res = await dioClient
+        .get(linkUrl("g=api/v2&m=index&a=score_post&rid=$rid&score=$score"));
+    if (res.data['status'] == 1) {
+      return true;
+    } else {
+      throw Exception(res.data['info'] ?? "评分失败，稍后再试");
+    }
+  }
+
+  static Future<String> myRatingScore(rid) async {
+    var res =
+        await dioClient.get(linkUrl("g=api/v2&m=index&a=my_score&rid=$rid"));
+    if (res.data['status'] == 1) {
+      return res.data['data']['score'];
+    } else {
+      return null;
+    }
+  }
 }

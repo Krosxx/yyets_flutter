@@ -34,7 +34,6 @@ setClipboardData(String data) {
       tf.writeAsStringSync(data);
       String path = tf.absolute.parent.path;
       path = path.replaceAll('\\', "/");
-      print(path);
       Process.run("clip < tmp_clip.txt", [],
               runInShell: true, workingDirectory: path)
           .whenComplete(() => tf.deleteSync());
