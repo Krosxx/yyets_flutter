@@ -54,7 +54,7 @@ class NewState extends LoadingPageState<NewsPage> {
             if (url != null) {
               BottomWebViewDialog.show(context, url, title ?? username);
             }
-          } else  {
+          } else {
             var url = "http://m1.rryslink.com/article/${item['id']}";
             BottomWebViewDialog.show(context, url, title ?? username);
           }
@@ -89,8 +89,12 @@ class NewState extends LoadingPageState<NewsPage> {
                 childBuilder: () => isVideo
                     ? InkWell(
                         onTap: () {
+                          var videoUrl = item['video_720'];
+                          if (videoUrl == null || videoUrl == "") {
+                            videoUrl = item['video_480'];
+                          }
                           Navigator.pushNamed(context, "/play", arguments: {
-                            "uri": item['video_720'],
+                            "uri": videoUrl,
                             "title": item['title'] ?? "",
                             "type": 1
                           });
