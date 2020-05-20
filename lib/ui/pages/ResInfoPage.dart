@@ -43,9 +43,12 @@ class _ResInfoState extends State<ResInfoPage> {
     _loadData();
   }
 
+  Map get info => widget.info;
+
+  String get channel => info['channel'];
+
   void _loadData() {
     Future apiCall;
-    String channel = info['channel'];
     Future.delayed(Duration(milliseconds: 200), () {
       if (channel == 'tv') {
         apiCall = Api.getResInfo(
@@ -75,8 +78,6 @@ class _ResInfoState extends State<ResInfoPage> {
     });
   }
 
-  Map get info => widget.info;
-
   String title() {
     String t = info['cnname'];
     if (info.containsKey('number')) {
@@ -97,6 +98,14 @@ class _ResInfoState extends State<ResInfoPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(title()),
+        actions: channel == 'tv'
+            ? [
+                FlatButton(
+                  child: Text("查看更多资源"),
+                  onPressed: _viewMoreDlLink,
+                )
+              ]
+            : null,
       ),
       body: _loadingStatus == LoadingStatus.NONE
           ? buildBody()
@@ -121,6 +130,12 @@ class _ResInfoState extends State<ResInfoPage> {
   }
 
   var itemExp = <bool>[];
+
+  _viewMoreDlLink() {
+    String url = "http://m1.rrys2019.com/resource/"
+        "item?rid=${info['id']}&season=${info['season']}&episode=${info['episode']}";
+    launchUri(url);
+  }
 
   Widget buildBody() {
     List resList = _data['item_list'] ?? [];
