@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
+import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/ui/utils.dart';
+import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 
 class CommentsWidgetBuilder {
-  static Widget build(
-      BuildContext context, Map item, String channel, Function refresh) {
+  static Widget build(BuildContext context, Map item, String channel,
+      String itemId, Function refresh) {
+    print(item);
     var rep = item['reply'];
     List replies;
     if (rep is Map) {
@@ -20,8 +23,7 @@ class CommentsWidgetBuilder {
       margin: EdgeInsets.all(10),
       child: InkWell(
         onTap: () async {
-          RRUser me = await RRUser.instance;
-          if (me == null) {
+          if (!RRUser.isLogin) {
             toast("登录后才可评论");
             return;
           }
@@ -30,9 +32,10 @@ class CommentsWidgetBuilder {
 
           print(text);
           if (text != null) {
-            Api.commentUser(item['id'], itemId, text, channel).then((commentData) {
+            Api.commentUser(item['id'], itemId, text, channel)
+                .then((commentData) {
               replies.add(commentData);
-              commentData['nickname'] = me.name;
+              commentData['nickname'] = AppState.rrUser.name;
               item['reply'] = replies;
               refresh();
             }).catchError((e) {
@@ -100,8 +103,13 @@ class CommentsWidgetBuilder {
                 ),
               ),
               Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
+                  Expanded(
+                    child: Text(
+                      friendlyFormat(int.parse(item['dateline'])),
+                      style: Theme.of(context).textTheme.caption,
+                    ),
+                  ),
                   IconButton(
                     icon: Icon(Icons.thumb_up),
                     onPressed: () {
