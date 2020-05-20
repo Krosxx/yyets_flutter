@@ -274,4 +274,10 @@ class Api {
       return null;
     }
   }
+
+  static Future<List> news(int page) async {
+    var res = await dioClient
+        .get(linkUrl("g=api/v2&m=index&a=new_article_list&page=$page"));
+    return res.data['data'];
+  }
 }

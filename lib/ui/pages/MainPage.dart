@@ -58,6 +58,17 @@ class _MyHomePageState extends State<MyHomePage>
       ),
       body: RankPage(_controller),
       drawer: HomeDrawer(),
+      floatingActionButton: FloatingActionButton(
+        tooltip: "资讯",
+        foregroundColor: Colors.blueAccent,
+        onPressed: () {
+          Navigator.pushNamed(context, "/news");
+        },
+        child: Icon(
+          Icons.inbox,
+          color: Colors.white,
+        ),
+      ),
     );
   }
 }

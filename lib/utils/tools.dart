@@ -12,7 +12,7 @@ import 'package:url_launcher/url_launcher.dart';
 Future launchUri(String uri) async {
   try {
     if (Platform.isWindows) {
-      Process.start("explorer ", [uri]);
+      Process.start('explorer "$uri"', []);
       return true;
     }
   } catch (e) {}
@@ -71,7 +71,13 @@ extension Context on BuildContext {
 }
 
 extension PlatformExt on Platform {
-  static bool get isWeb => Platform.operatingSystem == null;
+  static bool get isWeb {
+    try {
+      return Platform.operatingSystem == null;
+    }catch(e) {
+      return true;
+    }
+  }
 
   static bool get isMobilePhone {
     try {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart'
     show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
@@ -7,12 +9,15 @@ import 'package:flutter_yyets/utils/tools.dart';
 import 'package:oktoast/oktoast.dart';
 
 void main() {
-  debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  if (Platform.isWindows) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
   runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
   static final String VERSION = "1.0.7";
+
   @override
   State createState() => AppState();
 }
@@ -61,20 +66,19 @@ class AppState extends State<MyApp> {
   }
 
   static final ThemeData light = ThemeData(
-      primarySwatch: Colors.blue,
-      buttonColor: Colors.blueAccent,
-      brightness: Brightness.light,
-      primaryColor: Colors.white,
-      cardColor: Colors.white,
-      iconTheme: IconThemeData(color: Colors.grey),
-      platform: TargetPlatform.fuchsia);
+    primarySwatch: Colors.blue,
+    buttonColor: Colors.blueAccent,
+    brightness: Brightness.light,
+    primaryColor: Colors.white,
+    cardColor: Colors.white,
+    iconTheme: IconThemeData(color: Colors.grey),
+  );
 
   static final ThemeData dark = ThemeData(
     primarySwatch: Colors.blue,
     buttonColor: Colors.blueAccent,
     brightness: Brightness.dark,
     cardColor: Colors.black12,
-    platform: TargetPlatform.fuchsia,
   );
 
   @override

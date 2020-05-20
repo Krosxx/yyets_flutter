@@ -21,13 +21,20 @@ Future<_MySp> get MySp async {
 
 class _MySp {
   static SharedPreferences _sp;
+  bool isWin = false;
 
   get sp => _sp;
 
   init() async {
     if (_sp != null) return;
     try {
-      if (Platform.isWindows) {
+      var isWin = false;
+      try {
+        isWin = Platform.isWindows;
+      } catch (e) {
+        isWin = false;
+      }
+      if (isWin) {
         _initFile();
       } else {
         _sp = await SharedPreferences.getInstance();
@@ -38,7 +45,7 @@ class _MySp {
   }
 
   has(String key) {
-    if (Platform.isWindows) {
+    if (isWin) {
       return _configMap.containsKey(key);
     } else {
       return _sp.getKeys().contains(key);
@@ -46,7 +53,7 @@ class _MySp {
   }
 
   remove(String key) {
-    if (Platform.isWindows) {
+    if (isWin) {
       _configMap.remove(key);
       _toFile();
     } else {
@@ -55,7 +62,7 @@ class _MySp {
   }
 
   dynamic get(String key, [defaultValue]) {
-    if (Platform.isWindows) {
+    if (isWin) {
       return _getWindows(key, defaultValue: defaultValue);
     } else {
       return _getMobile(key, defaultValue: defaultValue);
@@ -78,7 +85,7 @@ class _MySp {
     if (encrypt && value.runtimeType != String) {
       throw Exception("不支持String外类型加密");
     }
-    if (Platform.isWindows) {
+    if (isWin) {
       //
       _setOnWindows(key, value, encrypt: encrypt);
       return;
