@@ -347,7 +347,7 @@ class _DetailPageState extends State<DetailPage>
               Text(ratingValue),
               RatingBar(
                 initialRating:
-                    _myScore == null ? null : double.parse(_myScore) / 2,
+                    _myScore == null ? 0 : double.parse(_myScore) / 2,
                 allowHalfRating: true,
                 onRatingUpdate: (double value) {
                   ratingValue = (value * 2).toInt().toString();
