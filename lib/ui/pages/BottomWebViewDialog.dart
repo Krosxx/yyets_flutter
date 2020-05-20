@@ -14,9 +14,14 @@ class BottomWebViewDialog {
       context: context,
       isScrollControlled: false,
       enableDrag: false,
-      heightP: 14.0 / 16,
+      backgroundColor: Colors.transparent,
+      heightP: 13.0 / 16,
       builder: (c) => Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15), topRight: Radius.circular(15))),
           leading: CloseButton(),
           title: Text(title ?? ""),
           actions: [
@@ -34,5 +39,4 @@ class BottomWebViewDialog {
       ),
     );
   }
-
 }
