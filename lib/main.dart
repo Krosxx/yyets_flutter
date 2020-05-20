@@ -9,9 +9,11 @@ import 'package:flutter_yyets/utils/tools.dart';
 import 'package:oktoast/oktoast.dart';
 
 void main() {
-  if (Platform.isWindows) {
-    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-  }
+  try {
+    if (Platform.isWindows) {
+      debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+    }
+  } catch (e) {}
   runApp(MyApp());
 }
 
