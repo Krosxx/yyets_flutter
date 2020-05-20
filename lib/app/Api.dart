@@ -199,9 +199,9 @@ class Api {
   }
 
   static Future<Map> commentUser(
-      String replyId, String content, String channel) async {
+      String replyId, String itemId, String content, String channel) async {
     var res = await dioClient.get(linkUrl(
-        "m=comment&a=save&channel=$channel&itemid=39790&content=$content&replyid=$replyId"));
+        "m=comment&a=save&channel=$channel&itemid=$itemId&content=$content&replyid=$replyId"));
 
     if (res.data['status'] == 1) {
       return res.data['data'];

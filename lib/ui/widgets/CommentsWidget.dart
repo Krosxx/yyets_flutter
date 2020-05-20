@@ -30,7 +30,7 @@ class CommentsWidgetBuilder {
 
           print(text);
           if (text != null) {
-            Api.commentUser(item['id'], text, channel).then((commentData) {
+            Api.commentUser(item['id'], itemId, text, channel).then((commentData) {
               replies.add(commentData);
               commentData['nickname'] = me.name;
               item['reply'] = replies;

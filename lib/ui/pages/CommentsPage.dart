@@ -165,7 +165,8 @@ class _CommentsPageState extends State<CommentsPage>
                   context,
                   comment,
                   widget.channel,
-                  () => setState(() {}),
+                  widget.id,
+                      () => setState(() {}),
                 );
               }
             },
