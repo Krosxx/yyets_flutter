@@ -110,7 +110,9 @@ class _FavoriteListState extends LoadingPageState<_Body> {
   @override
   void didUpdateWidget(_Body oldWidget) {
     super.didUpdateWidget(oldWidget);
-    refresh();
+    if (oldWidget?.sortType != widget.sortType) {
+      refresh();
+    }
   }
 
   @override

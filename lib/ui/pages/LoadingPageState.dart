@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
@@ -21,11 +23,14 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
   }
 
   void refresh() {
+    _fetchDataStream?.cancel();
     items.clear();
     _page = 1;
     _status = LoadingStatus.NONE;
     loadMore();
   }
+
+  StreamSubscription _fetchDataStream;
 
   void loadMore() {
     if (_status == LoadingStatus.NO_MORE || _status == LoadingStatus.LOADING) {
@@ -35,31 +40,34 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
     setState(() {
       _status = LoadingStatus.LOADING;
     });
-    fetchData(_page).then((data) {
-      print("load data: ${data.length}");
-      if (data.isEmpty) {
-        setState(() {
-          _status = LoadingStatus.NO_MORE;
+    _fetchDataStream = fetchData(_page)
+        .catchError((e) {
+          debugPrint(e.toString());
+          if (mounted) {
+            setState(() {
+              _status = LoadingStatus.ERROR;
+            });
+            toast(e);
+          }
+        })
+        .asStream()
+        .listen((data) {
+          print("load data: ${data.length}");
+          if (data.isEmpty) {
+            setState(() {
+              _status = LoadingStatus.NO_MORE;
+            });
+          } else {
+            _page++;
+            if (mounted) {
+              setState(() {
+                _status = LoadingStatus.NONE;
+                items.addAll(data);
+                onLoadComplete();
+              });
+            }
+          }
         });
-      } else {
-        _page++;
-        if (mounted) {
-          setState(() {
-            _status = LoadingStatus.NONE;
-            items.addAll(data);
-            onLoadComplete();
-          });
-        }
-      }
-    }).catchError((e) {
-      debugPrint(e.toString());
-      if (mounted) {
-        setState(() {
-          _status = LoadingStatus.ERROR;
-        });
-        toast(e);
-      }
-    });
   }
 
   void onLoadComplete() {}
