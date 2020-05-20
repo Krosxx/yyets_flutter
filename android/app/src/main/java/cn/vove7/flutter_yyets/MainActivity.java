@@ -1,7 +1,10 @@
 package cn.vove7.flutter_yyets;
 
+import android.content.res.Configuration;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 
 import java.lang.reflect.Method;
 
@@ -19,13 +22,21 @@ public class MainActivity extends FlutterActivity {
 
     public static EventChannel.EventSink eventSink;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         rrResManager = new RRResManager();
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
+
+        bindChannel();
+    }
+
+
+    private void bindChannel() {
         PluginRegistry.Registrar registrar = registrarFor(DOWNLOAD_EVENT_CHANNEL);
         EventChannel downloadEventChannel = new EventChannel(registrar.messenger(), DOWNLOAD_EVENT_CHANNEL);
+
         downloadEventChannel.setStreamHandler(new EventChannel.StreamHandler() {
             @Override
             public void onListen(Object o, EventChannel.EventSink es) {
@@ -59,7 +70,6 @@ public class MainActivity extends FlutterActivity {
                 result.error(e.getMessage(), null, null);
             }
         });
-
     }
 
 }

@@ -60,7 +60,7 @@ class _MyHomePageState extends State<MyHomePage>
       drawer: HomeDrawer(),
       floatingActionButton: FloatingActionButton(
         tooltip: "资讯",
-        foregroundColor: Colors.blueAccent,
+        backgroundColor: Colors.blueAccent,
         onPressed: () {
           Navigator.pushNamed(context, "/news");
         },
