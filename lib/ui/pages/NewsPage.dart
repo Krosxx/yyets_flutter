@@ -38,10 +38,13 @@ class NewState extends LoadingPageState<NewsPage> {
     if (imgUrl == "") {
       imgUrl = null;
     }
+    var roundBorder =
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(10));
     return Card(
       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: roundBorder,
       child: InkWell(
+        customBorder: roundBorder,
         onTap: () {
           print(item.toString());
           var url = item['url'];
