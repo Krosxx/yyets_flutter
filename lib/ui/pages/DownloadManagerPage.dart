@@ -7,6 +7,8 @@ import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
+import 'package:flutter_yyets/utils/tools.dart';
+import 'package:material_dialog/material_dialog.dart';
 
 class DownloadManagerPage extends StatefulWidget {
   @override
@@ -130,7 +132,7 @@ class _State extends State<DownloadManagerPage> {
       context: context,
       barrierDismissible: true,
       builder: (c) {
-        return AlertDialog(
+        return MaterialDialog(
           title: Text("播放方式"),
           actions: [
             FlatButton(
@@ -321,7 +323,7 @@ class _State extends State<DownloadManagerPage> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (c) => AlertDialog(
+      builder: (c) => MaterialDialog(
         title: Text("确认删除？"),
         actions: [
           FlatButton(
@@ -348,7 +350,7 @@ class _State extends State<DownloadManagerPage> {
   void _showTipsDialog() => showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (c) => AlertDialog(
+        builder: (c) => MaterialDialog(
           title: Text("提示"),
           content: Text(
             "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
@@ -360,12 +362,6 @@ class _State extends State<DownloadManagerPage> {
       );
 
   void _showDetail(Map item) {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (c) => AlertDialog(
-        content: Text(item.toString()),
-      ),
-    );
+    showDebugInfo(context, item);
   }
 }

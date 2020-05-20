@@ -2,9 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
-import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
+import 'package:material_dialog/material_dialog.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -48,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
           if (!mounted) return;
           showDialog(
             context: context,
-            builder: (c) => AlertDialog(
+            builder: (c) => MaterialDialog(
               title: Text("提示"),
               content: Text("由于浏览器存在跨域问题，此web app使用bird.ioliu.cn作为代理。\n"
                   "您需要了解的是：yyets原生登录接口采用明文传输，若您使用此方式登录造成损失，此App将不负任何责任。感谢理解！"),

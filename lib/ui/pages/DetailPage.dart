@@ -11,6 +11,7 @@ import 'package:flutter_yyets/ui/widgets/MoviesGridWidget.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
+import 'package:material_dialog/material_dialog.dart';
 import 'package:tutorial_coach_mark/content_target.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
@@ -338,7 +339,7 @@ class _DetailPageState extends State<DetailPage>
     var ratingValue = _myScore ?? "";
     showDialog(
       context: context,
-      builder: (c) => AlertDialog(
+      builder: (c) => MaterialDialog(
         title: Text("评分"),
         content: Builder(
           builder: (c) => Column(

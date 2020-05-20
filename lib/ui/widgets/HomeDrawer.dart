@@ -5,9 +5,11 @@ import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
+import 'package:material_dialog/material_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
+import 'about.dart';
 
 class HomeDrawer extends StatelessWidget {
   @override
@@ -32,7 +34,7 @@ class HomeDrawer extends StatelessWidget {
                         context: context,
                         barrierDismissible: true,
                         builder: (c) {
-                          return AlertDialog(
+                          return MaterialDialog(
                             title: Text("退出登录?"),
                             actions: [
                               FlatButton(
@@ -121,8 +123,7 @@ class HomeDrawer extends StatelessWidget {
   }
 
   _showAbout(context) {
-    //todo hide action buttons
-    showAboutDialog(
+    showCustomAboutDialog(
       context: context,
       applicationIcon: FlutterLogo(
         size: 80,
@@ -133,33 +134,44 @@ class HomeDrawer extends StatelessWidget {
       applicationLegalese: "copyright Vove.\n仅供学习交流使用",
       children: [
         Container(height: 20),
-        FlatButton(
-          padding: EdgeInsets.all(0),
-          child: Chip(
-            shadowColor: Colors.transparent,
-            backgroundColor: Colors.transparent,
-            avatar: Icon(Icons.history),
-            label: Text("检查更新"),
+        Container(
+          width: double.maxFinite,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FlatButton(
+                child: Chip(
+                  shadowColor: Colors.transparent,
+                  backgroundColor: Colors.transparent,
+                  avatar: Icon(AppIcons.github),
+                  label: Text("  Github  "),
+                ),
+                onPressed: () =>
+                    launchUri("https://github.com/Vove7/yyets_flutter"),
+              ),
+              Container(width: 10),
+              FlatButton(
+                child: Chip(
+                  shadowColor: Colors.transparent,
+                  backgroundColor: Colors.transparent,
+                  avatar: Icon(Icons.history),
+                  label: Text("检查更新"),
+                ),
+                onPressed: () {
+                  toast("正在检查更新...");
+                  checkUpgrade(context).then(
+                    (hasUpgrade) {
+                      if (!hasUpgrade) {
+                        toast("已是最新版本");
+                      }
+                    },
+                  );
+                },
+              ),
+            ],
           ),
-          onPressed: () {
-            toast("正在检查更新...");
-            checkUpgrade(context).then((hasUpgrade) {
-              if (!hasUpgrade) {
-                toast("已是最新版本");
-              }
-            });
-          },
         ),
-        FlatButton(
-          padding: EdgeInsets.all(0),
-          child: Chip(
-            shadowColor: Colors.transparent,
-            backgroundColor: Colors.transparent,
-            avatar: Icon(AppIcons.github),
-            label: Text("  Github  "),
-          ),
-          onPressed: () => launchUri("https://github.com/Vove7/yyets_flutter"),
-        )
       ],
     );
   }

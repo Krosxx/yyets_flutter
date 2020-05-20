@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/utils/toast.dart';
+import 'package:material_dialog/material_dialog.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -163,7 +164,7 @@ Future<bool> checkUpgrade(context) async {
 void showDebugInfo(BuildContext context, data) {
   showDialog(
     context: context,
-    builder: (c) => AlertDialog(
+    builder: (c) => MaterialDialog(
       content: Text(data.toString()),
     ),
   );
