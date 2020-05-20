@@ -28,12 +28,11 @@ class _MySp {
   init() async {
     if (_sp != null) return;
     try {
-      var isWin = false;
-      try {
-        isWin = Platform.isWindows;
-      } catch (e) {
-        isWin = false;
-      }
+      isWin = Platform.isWindows;
+    } catch (e) {
+      isWin = false;
+    }
+    try {
       if (isWin) {
         _initFile();
       } else {

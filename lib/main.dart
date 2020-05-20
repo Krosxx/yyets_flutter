@@ -1,7 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart'
-    show debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/ui/routes.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
@@ -9,11 +5,6 @@ import 'package:flutter_yyets/utils/tools.dart';
 import 'package:oktoast/oktoast.dart';
 
 void main() {
-  try {
-    if (Platform.isWindows) {
-      debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
-    }
-  } catch (e) {}
   runApp(MyApp());
 }
 

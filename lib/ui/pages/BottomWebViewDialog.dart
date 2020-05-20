@@ -12,6 +12,7 @@ class BottomWebViewDialog {
       heightP: 12.0 / 16,
       builder: (c) => Scaffold(
         appBar: AppBar(
+          leading: CloseButton(),
           title: Text(title ?? ""),
           actions: [
             IconButton(
