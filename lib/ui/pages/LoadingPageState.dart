@@ -23,6 +23,7 @@ abstract class LoadingPageState<P extends StatefulWidget> extends State<P>
   void refresh() {
     items.clear();
     _page = 1;
+    _status = LoadingStatus.NONE;
     loadMore();
   }
 
