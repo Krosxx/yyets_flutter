@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
+import 'package:flutter_yyets/ui/widgets/visibility.dart';
 import 'package:flutter_yyets/utils/times.dart';
 
 import 'BottomWebViewDialog.dart';
@@ -34,6 +35,7 @@ class NewState extends LoadingPageState<NewsPage> {
     var title = item["title"];
     var content = item['content'] ?? item['intro'];
     var username = item['username'] ?? item['author_name'];
+    var type = item['type'];
 
     if (imgUrl == "") {
       imgUrl = null;
@@ -47,13 +49,18 @@ class NewState extends LoadingPageState<NewsPage> {
         customBorder: roundBorder,
         onTap: () {
           print(item.toString());
-          var url = item['url'];
-          if (url != null) {
+          if (type == "weibo") {
+            var url = item['url'];
+            if (url != null) {
+              BottomWebViewDialog.show(context, url, title ?? username);
+            }
+          } else  {
+            var url = "http://m1.rryslink.com/article/${item['id']}";
             BottomWebViewDialog.show(context, url, title ?? username);
           }
         },
         child: Container(
-          padding: EdgeInsets.fromLTRB(15, 15, 0, 0),
+          padding: EdgeInsets.fromLTRB(15, 15, 15, 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -61,44 +68,47 @@ class NewState extends LoadingPageState<NewsPage> {
               Container(
                 height: 5,
               ),
-              title == null
-                  ? Container()
-                  : Text(
-                      title,
-                      style: TextStyle(fontSize: 16),
-                    ),
-              content == null || content == ""
-                  ? Container()
-                  : Html(
-                      data: content,
-                      onLinkTap: (link) => BottomWebViewDialog.show(
-                          context, link, title ?? username),
-                    ),
+              Visible(
+                visible: title != null,
+                childBuilder: () => Text(
+                  title,
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              Visible(
+                visible: content != null,
+                childBuilder: () => Html(
+                  data: content,
+                  onLinkTap: (link) => BottomWebViewDialog.show(
+                      context, link, title ?? username),
+                ),
+              ),
               Container(height: 5),
-              imgUrl == null
-                  ? Container()
-                  : isVideo
-                      ? InkWell(
-                          onTap: () {
-                            Navigator.pushNamed(context, "/play", arguments: {
-                              "uri": item['video_720'],
-                              "title": item['title'] ?? "",
-                              "type": 1
-                            });
-                          },
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Image.network(imgUrl),
-                              Icon(
-                                Icons.play_arrow,
-                                color: Colors.white,
-                                size: 50,
-                              ),
-                            ],
-                          ),
-                        )
-                      : Image.network(imgUrl),
+              Visible(
+                visible: imgUrl != null,
+                childBuilder: () => isVideo
+                    ? InkWell(
+                        onTap: () {
+                          Navigator.pushNamed(context, "/play", arguments: {
+                            "uri": item['video_720'],
+                            "title": item['title'] ?? "",
+                            "type": 1
+                          });
+                        },
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Image.network(imgUrl),
+                            Icon(
+                              Icons.play_arrow,
+                              color: Colors.white,
+                              size: 50,
+                            ),
+                          ],
+                        ),
+                      )
+                    : Image.network(imgUrl),
+              ),
               _footer(item)
             ],
           ),

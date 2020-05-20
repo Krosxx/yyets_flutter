@@ -5,11 +5,16 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class BottomWebViewDialog {
   static Future show(BuildContext context, String url, [String title]) {
+    if (PlatformExt.isWindows || PlatformExt.isWeb) {
+      print("Win Web 不支持WebView");
+      launchUri(url);
+      return Future.value();
+    }
     return showAdjustableBottomSheet(
       context: context,
       isScrollControlled: false,
       enableDrag: false,
-      heightP: 12.0 / 16,
+      heightP: 14.0 / 16,
       builder: (c) => Scaffold(
         appBar: AppBar(
           leading: CloseButton(),
@@ -30,13 +35,4 @@ class BottomWebViewDialog {
     );
   }
 
-//  @override
-//  State createState() => BWVState();
 }
-
-//class BWVState extends State<BottomWebViewDialog> {
-//  @override
-//  Widget build(BuildContext context) {
-//    return
-//  }
-//}
