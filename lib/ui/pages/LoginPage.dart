@@ -5,6 +5,7 @@ import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -39,11 +40,11 @@ class _LoginPageState extends State<LoginPage> {
     webUserHint();
   }
 
-  void webUserHint(){
+  void webUserHint() {
     if (PlatformExt.isWeb) {
       Future.delayed(
         Duration(seconds: 1),
-            () {
+        () {
           if (!mounted) return;
           showDialog(
             context: context,
@@ -201,12 +202,11 @@ class _LoginPageState extends State<LoginPage> {
     }
     Api.login(_nameController.text, _passController.text).then((data) async {
       //uid token
-      var sp = await MySp;
-      sp.set("uid", data['uid']);
-      sp.set("token", data['token']);
+      Provider.of<RRUser>(context, listen: false)
+          .setUidAndToken(data['uid'], data['token']);
       return Api.userInfo();
     }).then((data) {
-      return RRUser.save(data);
+      return Provider.of<RRUser>(context, listen: false).save(data);
     }).then((value) {
       toast("登录成功");
       Navigator.pop(context);

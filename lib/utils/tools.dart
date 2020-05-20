@@ -74,8 +74,16 @@ extension PlatformExt on Platform {
   static bool get isWeb {
     try {
       return Platform.operatingSystem == null;
-    }catch(e) {
+    } catch (e) {
       return true;
+    }
+  }
+
+  static bool get isWindows {
+    try {
+      return Platform.isWindows;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -150,4 +158,13 @@ Future<bool> checkUpgrade(context) async {
   } else {
     return false;
   }
+}
+
+void showDebugInfo(BuildContext context, data) {
+  showDialog(
+    context: context,
+    builder: (c) => AlertDialog(
+      content: Text(data.toString()),
+    ),
+  );
 }

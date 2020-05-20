@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
+import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
 import 'package:flutter_yyets/ui/widgets/CommentsWidget.dart';
@@ -179,8 +180,7 @@ class _CommentsPageState extends State<CommentsPage>
             position: animation,
             child: FloatingActionButton(
               onPressed: () async {
-                RRUser me = await RRUser.instance;
-                if (me == null) {
+                if (!RRUser.isLogin) {
                   toast("登录后才可评论");
                   return;
                 }
@@ -188,8 +188,8 @@ class _CommentsPageState extends State<CommentsPage>
                 if (text != null) {
                   Api.commentTvOrMovie(widget.id, widget.channel, text)
                       .then((data) {
-                    data['nickname'] = me.name;
-                    data['avatar_s'] = me.avatar;
+                    data['nickname'] = AppState.rrUser.name;
+                    data['avatar_s'] = AppState.rrUser.avatar;
                     data['good'] = "0";
                     data['bad'] = "0";
                     setState(() {

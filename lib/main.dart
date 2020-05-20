@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/model/RRUser.dart';
 import 'package:flutter_yyets/ui/routes.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 import 'package:oktoast/oktoast.dart';
+import 'package:provider/provider.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,6 +20,8 @@ class MyApp extends StatefulWidget {
 class AppState extends State<MyApp> {
   static AppState _ins;
   ThemeData _theme;
+
+  static var rrUser = RRUser();
 
   static bool get isDarkMode => _ins?._theme?.brightness == Brightness.dark;
 
@@ -77,12 +81,17 @@ class AppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return OKToast(
-      child: MaterialApp(
-        title: 'yyeTs',
-        debugShowCheckedModeBanner: false,
-        theme: _theme,
-        darkTheme: dark,
-        routes: ROUTES,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => rrUser),
+        ],
+        child: MaterialApp(
+          title: 'yyeTs',
+          debugShowCheckedModeBanner: false,
+          theme: _theme,
+          darkTheme: dark,
+          routes: ROUTES,
+        ),
       ),
     );
   }

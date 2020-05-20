@@ -2,81 +2,75 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/app/Stroage.dart';
+import 'package:flutter_yyets/model/provider/favor_sort_type.dart';
 import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
 import 'package:flutter_yyets/ui/widgets/movie_tile.dart';
 import 'package:flutter_yyets/utils/times.dart';
+import 'package:provider/provider.dart';
 
-class FavoritesPage extends StatefulWidget {
-  @override
-  State createState() => _FavoritesPageState();
-}
-
-class _FavoritesPageState extends State<FavoritesPage> {
-  int sortType = 0;
-
-  _Body _body;
-
-  @override
-  void initState() {
-    super.initState();
-    favoritesSortType.then((value) {
-      setState(() {
-        sortType = value;
-        _body = _Body(sortType);
-      });
-    });
-  }
+class FavoritesPage extends StatelessWidget {
+  final FavSortType sortTypeModel = FavSortType();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("我的收藏"),
-        actions: [
-          PopupMenuButton(
-            icon: Icon(Icons.sort),
-            onSelected: (value) {
-              if (sortType != value) {
-                setFavoritesSortType(value);
-                setState(() {
-                  _body = _Body(value);
-                  sortType = value;
-                });
-              }
-            },
-            itemBuilder: (c) {
-              return [
-                PopupMenuItem(
-                  value: 0,
-                  child: Text(
-                    "更新时间",
-                    style: _sortTextStyle(sortType == 0),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Text(
-                    "收藏时间 ↑",
-                    style: _sortTextStyle(sortType == 1),
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 2,
-                  child: Text(
-                    "收藏时间 ↓",
-                    style: _sortTextStyle(sortType == 2),
-                  ),
-                )
-              ];
-            },
-          )
-        ],
+    return MultiProvider(
+      providers: [ChangeNotifierProvider(create: (c) => sortTypeModel)],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("我的收藏"),
+          actions: [
+            Consumer<FavSortType>(
+              builder: (BuildContext context, FavSortType stm, Widget child) {
+                return PopupMenuButton(
+                  icon: Icon(Icons.sort),
+                  onSelected: (value) {
+                    if (stm.sortType != value) {
+                      setFavoritesSortType(value);
+                      Provider.of<FavSortType>(context, listen: false)
+                          .setType(value);
+                    }
+                  },
+                  itemBuilder: (c) {
+                    return [
+                      PopupMenuItem(
+                        value: 0,
+                        child: Text(
+                          "更新时间",
+                          style: _sortTextStyle(context, stm.sortType == 0),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 1,
+                        child: Text(
+                          "收藏时间 ↑",
+                          style: _sortTextStyle(context, stm.sortType == 1),
+                        ),
+                      ),
+                      PopupMenuItem(
+                        value: 2,
+                        child: Text(
+                          "收藏时间 ↓",
+                          style: _sortTextStyle(context, stm.sortType == 2),
+                        ),
+                      )
+                    ];
+                  },
+                );
+              },
+            )
+          ],
+        ),
+        body: Consumer<FavSortType>(
+          builder: (BuildContext context, FavSortType value, Widget child) {
+            print("build body");
+            return _Body(value.sortType);
+          },
+        ),
       ),
-      body: _body,
     );
   }
 
-  TextStyle _sortTextStyle(bool checked) {
+  TextStyle _sortTextStyle(context, bool checked) {
     return checked
         ? TextStyle(
             fontWeight: FontWeight.bold, color: Theme.of(context).accentColor)

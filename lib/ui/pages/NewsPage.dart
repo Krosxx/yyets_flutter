@@ -5,6 +5,7 @@ import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/ui/pages/LoadingPageState.dart';
 import 'package:flutter_yyets/ui/widgets/visibility.dart';
 import 'package:flutter_yyets/utils/times.dart';
+import 'package:flutter_yyets/utils/tools.dart';
 
 import 'BottomWebViewDialog.dart';
 
@@ -47,6 +48,7 @@ class NewState extends LoadingPageState<NewsPage> {
       shape: roundBorder,
       child: InkWell(
         customBorder: roundBorder,
+        onLongPress: () => showDebugInfo(context, item),
         onTap: () {
           print(item.toString());
           if (type == "weibo") {
@@ -140,7 +142,7 @@ class NewState extends LoadingPageState<NewsPage> {
             Text(item['username'] ?? item['author_name']),
             Text(
               friendlyFormat(int.parse(item['dateline'] ?? item['time'])),
-              style: TextStyle(fontSize: 12),
+              style: Theme.of(context).textTheme.caption,
             )
           ],
         )

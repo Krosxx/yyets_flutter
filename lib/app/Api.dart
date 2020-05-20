@@ -2,8 +2,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_yyets/model/RRUser.dart';
-import 'package:flutter_yyets/utils/mysp.dart';
+import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 
 /// 网络请求Api
@@ -14,42 +13,32 @@ class Api {
     if (_dioClient == null) {
       _dioClient = Dio();
       _dioClient.interceptors.add(
-        InterceptorsWrapper(onError: (e) {
-          print("dio err: " + e.toString());
-        }, onResponse: (res) {
-          try {
-            var status = res.data["status"];
-            if (status != null) {
-              if (status != 1) {
-                print("status err: " + res.data.toString());
-              } else {
+        InterceptorsWrapper(
+          onError: (e) {
+            print("dio err: " + e.toString());
+          },
+          onResponse: (res) {
+            try {
+              var status = res.data["status"];
+              if (status != null) {
+                if (status != 1) {
+                  print("status err: " + res.data.toString());
+                } else {
 //                print("dio data: ${res.data['data']}");
+                }
               }
+            } catch (e) {
+              print("error" + e.toString());
             }
-          } catch (e) {
-            print("error" + e.toString());
-          }
-        }, onRequest: (RequestOptions options) {
-          _dioClient.lock();
-          String uid;
-          String token;
-          RRUser.instance.then((value) async {
-            if (value != null) {
-              uid = value.uid;
-              token = value.token;
-            } else {
-              var sp = await MySp;
-              if (sp.has("uid")) {
-                uid = sp.get("uid");
-                token = sp.get("token");
-              }
+          },
+          onRequest: (RequestOptions options) {
+            if (AppState.rrUser.uid != null) {
+              options.queryParameters.addAll(
+                {"uid": AppState.rrUser.uid, "token": AppState.rrUser.token},
+              );
             }
-            if (uid != null) {
-              options.queryParameters.addAll({"uid": uid, "token": token});
-            }
-            print(options.uri);
-          }).whenComplete(() => _dioClient.unlock());
-        }),
+          },
+        ),
       );
     }
     return _dioClient;
