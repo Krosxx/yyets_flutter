@@ -73,10 +73,18 @@ class SuggestionPage extends StatefulWidget {
 class _SuggestionState extends State<SuggestionPage> {
   String get query => widget.query;
 
+  Future apiCall;
+
+  @override
+  void initState() {
+    super.initState();
+    apiCall = getQueryHistory();
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: query != "" ? querySuggest(query) : getQueryHistory(),
+      future: apiCall,
       builder: (c, snap) {
         if (snap.connectionState == ConnectionState.done && !snap.hasError) {
           var suggestions = snap.data;
