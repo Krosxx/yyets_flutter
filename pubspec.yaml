@@ -60,7 +60,10 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
 
-  # The following line ensures that the Material Icons font is
+  assets:
+    - images/donate_alipay.jpg
+    - images/donate_wx.jpg
+      # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true

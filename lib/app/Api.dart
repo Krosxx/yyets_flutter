@@ -269,4 +269,16 @@ class Api {
         .get(linkUrl("g=api/v2&m=index&a=new_article_list&page=$page"));
     return res.data['data'];
   }
+
+  static Future<List> latestResource(int page) async {
+    var res =
+        await dioClient.get("http://file.apicvn.com/file/list?page=$page");
+    return res.data ?? [];
+  }
+
+  static Future<List> queryRRResource(String query, int page) async {
+    var res = await dioClient
+        .get("http://file.apicvn.com/file/search?keyword=$query&page=$page");
+    return res.data ?? [];
+  }
 }

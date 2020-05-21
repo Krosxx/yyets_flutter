@@ -2,10 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/AppIcons.dart';
 import 'package:flutter_yyets/model/RRUser.dart';
+import 'package:flutter_yyets/ui/widgets/visibility.dart';
+import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
-import 'package:material_dialog/material_dialog.dart';
 import 'package:provider/provider.dart';
 
 import '../../main.dart';
@@ -34,7 +35,8 @@ class HomeDrawer extends StatelessWidget {
                         context: context,
                         barrierDismissible: true,
                         builder: (c) {
-                          return MaterialDialog(
+                          return WrappedMaterialDialog(
+                            c,
                             title: Text("退出登录?"),
                             actions: [
                               FlatButton(
@@ -93,6 +95,11 @@ class HomeDrawer extends StatelessWidget {
                   },
                 ),
                 ListTile(
+                  onTap: () => Navigator.pushNamed(context, "/latest"),
+                  leading: Icon(Icons.autorenew),
+                  title: Text("最新资源"),
+                ),
+                ListTile(
                   leading: Icon(Icons.file_download),
                   title: Text("下载管理"),
                   onTap: () {
@@ -113,7 +120,7 @@ class HomeDrawer extends StatelessWidget {
                   onTap: () => _showAbout(context),
                   leading: Icon(Icons.info),
                   title: Text("关于"),
-                )
+                ),
               ],
             ),
           )
@@ -173,6 +180,62 @@ class HomeDrawer extends StatelessWidget {
           ),
         ),
       ],
+      actions: [
+        FlatButton(
+          child: Text("支持一下"),
+          onPressed: () {
+            _showSupportDialog(context);
+//            Navigator.pop(context);
+          },
+        ),
+      ],
+    );
+  }
+
+  _showSupportDialog(context) {
+    showDialog(
+      context: context,
+      builder: (c) => WrappedMaterialDialog(
+        c,
+        children: [
+          Text("你的支持就是我的动力"),
+          ListTile(
+            onTap: () {
+              Navigator.pop(context);
+              if (PlatformExt.isMobilePhone) {
+                launchUri(
+                    "https://qr.alipay.com/fkx10497j8a6bjbqjhe3qd8?t=1590064517265");
+              } else {
+                _showQrCodeDialog(c, 0);
+              }
+            },
+            title: Text("支付宝"),
+          ),
+          ListTile(
+            title: Text("微信"),
+            onTap: () {
+              Navigator.pop(context);
+              _showQrCodeDialog(c, 1);
+            },
+          )
+        ],
+      ),
+    );
+  }
+
+  _showQrCodeDialog(context, int what) {
+    var donateWay = what == 0 ? "支付宝" : "微信";
+    showDialog(
+      context: context,
+      builder: (c) =>
+          WrappedMaterialDialog(c, title: Text("请使用${donateWay}扫码"), children: [
+        Visible(
+          visible: !PlatformExt.isMobilePhone,
+          childBuilder: () => Text("可截图到本地后扫码"),
+        ),
+        Image.asset(
+            what == 0 ? "images/donate_alipay.jpg" : "images/donate_wx.jpg"),
+      ]),
     );
   }
 }

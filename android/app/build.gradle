@@ -73,7 +73,7 @@ flutter {
 
 dependencies {
     testImplementation 'junit:junit:4.12'
-    implementation "com.github.Vove7:yyets-downloader-android:1.0.6"
+    implementation "com.github.Vove7:yyets-downloader-android:1.0.8"
     implementation 'com.google.code.gson:gson:2.8.6'
 
     androidTestImplementation 'com.android.support.test:runner:1.0.2'

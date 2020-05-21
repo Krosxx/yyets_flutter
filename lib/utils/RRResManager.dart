@@ -40,10 +40,7 @@ class RRResManager {
 
   static Future addTask(
     String id,
-    String filmName,
     String rrUri,
-    String season,
-    String episode,
     String filmImg,
   ) async {
     Map data = parseRRUri(rrUri);

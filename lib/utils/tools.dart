@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/main.dart';
+import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/toast.dart';
-import 'package:material_dialog/material_dialog.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -164,8 +164,32 @@ Future<bool> checkUpgrade(context) async {
 void showDebugInfo(BuildContext context, data) {
   showDialog(
     context: context,
-    builder: (c) => MaterialDialog(
-      content: Text(data.toString()),
+    builder: (c) => WrappedMaterialDialog(
+      c,
+      title: Text("DebugInfo"),
+      content: SelectableText(_prettyFormat(data)),
     ),
   );
+}
+
+String _prettyFormat(data) {
+  if (data is Map) {
+    return data.entries.map((e) => "${e.key}: ${e.value}").join("\n");
+  }
+
+  return data.toString();
+}
+
+//格式化文件大小
+String renderSize(int value) {
+  if (null == value) {
+    return "0 B";
+  }
+  var unitArr = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  var index = 0;
+  var srcsize = value.toDouble();
+  index = (log(srcsize) / log(1024)).floor();
+  dynamic size = srcsize / pow(1024, index);
+  size = size.toStringAsFixed(2); //保留的小数位数
+  return size + unitArr[index];
 }

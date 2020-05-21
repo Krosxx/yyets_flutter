@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter_yyets/ui/pages/DetailPage.dart';
 import 'package:flutter_yyets/ui/pages/DownloadManagerPage.dart';
 import 'package:flutter_yyets/ui/pages/FavoritesPage.dart';
+import 'package:flutter_yyets/ui/pages/LatestResourcePage.dart';
 import 'package:flutter_yyets/ui/pages/LoginPage.dart';
 import 'package:flutter_yyets/ui/pages/MainPage.dart';
 import 'package:flutter_yyets/ui/pages/NewsPage.dart';
@@ -23,6 +24,7 @@ final Map<String, WidgetBuilder> ROUTES = {
   "/play": (c) => (PlatformExt.isMobilePhone)
       ? VideoPlayerPage(argsFromContext(c))
       : VideoPlayerPageForWeb(argsFromContext(c)),
+  "/latest": (c) => LatestResourcePage()
 };
 
 dynamic argsFromContext(BuildContext context) {

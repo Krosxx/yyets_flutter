@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart' hide Intent, Action;
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flutter_yyets/ui/widgets/ink_con_button.dart';
+import 'package:flutter_yyets/ui/widgets/visibility.dart';
+import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -85,7 +88,7 @@ class _State extends State<DownloadManagerPage> {
   // "id":"9c4ca974d5dd4dcbea2c394a8355d7ff4f7d71ca","state":1,"upSpeed":0}],
   // "upSpeed":0}
   void onReceiverData(dynamic event) {
-    print(event.toString());
+    print("onReceiverData:==>>" + event.toString());
     Map data = jsonDecode(event);
     totalSpeed = formatSpeed(data['downSpeed']) ?? "";
     List statList = (data['stats'] ?? []);
@@ -132,7 +135,8 @@ class _State extends State<DownloadManagerPage> {
       context: context,
       barrierDismissible: true,
       builder: (c) {
-        return MaterialDialog(
+        return WrappedMaterialDialog(
+          c,
           title: Text("播放方式"),
           actions: [
             FlatButton(
@@ -165,6 +169,7 @@ class _State extends State<DownloadManagerPage> {
   void updateStatus(String id, Map stat, int status) {
     dataSet.forEach((data) {
       if (data['mFileId'] == id) {
+        print("updateStatus:=>>" + data.toString());
         data['speed'] = formatSpeed(stat['downSpeed']);
         data['mLoadPosition'] = stat['finishedSize'];
         data['status'] = status;
@@ -190,33 +195,47 @@ class _State extends State<DownloadManagerPage> {
     }
     int status = item['status'];
 
-    String statusText = "...";
+    String statusText = "初始化...";
     IconData statusIcon = Icons.refresh;
+    Color color = null;
     double progress = item['mLoadPosition'] / item['mLength'];
     switch (status) {
       case STATUS_COMPLETE:
         statusIcon = Icons.play_arrow;
         statusText = "下载完成";
+        color = Colors.greenAccent;
+
         break;
       case STATUS_DOWNLOADING:
         statusIcon = Icons.pause;
+        color = Colors.redAccent;
         statusText = item['speed'] ?? "等待...";
         break;
       case STATUS_PAUSED:
         statusText = "未开始下载";
         statusIcon = Icons.file_download;
+        color = Colors.blueAccent;
         break;
       case STATUS_UNKNOWN:
         statusText = "未开始下载";
         statusIcon = Icons.adb;
         break;
     }
+    var img = item['mFilmImg'];
+    if (img == null || img == "") {
+      img = "https://flutter.cn/favicon.ico";
+    }
+
     return Slidable(
       child: ListTile(
         leading: InkWell(
-          child: Image.network(item['mFilmImg']),
+          child: Image.network(img),
           onLongPress: () => _showDetail(item),
           onTap: () {
+            var id = int.parse(item['mFilmId']);
+            if (id < 0) {
+              return;
+            }
             var data = {
               "id": item['mFilmId'],
               "cnname": item['mFilmName'],
@@ -225,8 +244,17 @@ class _State extends State<DownloadManagerPage> {
             Navigator.pushNamed(context, "/detail", arguments: data);
           },
         ),
-        trailing: IconButton(
-          icon: Icon(statusIcon),
+        trailing: InkIconButton(
+          icon: Icon(
+            statusIcon,
+            size: 28,
+            color: color,
+          ),
+          onLongPress: () {
+            if (status == STATUS_COMPLETE) {
+              RRResManager.playByExternal(item['mFileName']);
+            }
+          },
           onPressed: () {
             switch (status) {
               case STATUS_COMPLETE:
@@ -251,7 +279,19 @@ class _State extends State<DownloadManagerPage> {
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(statusText),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(statusText),
+                ),
+                Visible(
+                  visible: item['status'] != 1,
+                  childBuilder: () =>
+                      Text(renderSize(item['mLoadPosition']) + "/"),
+                ),
+                Text(renderSize(item['mSize']))
+              ],
+            ),
             Container(
               height: 5,
             ),
@@ -262,8 +302,11 @@ class _State extends State<DownloadManagerPage> {
               ),
             ),
             (status == STATUS_DOWNLOADING && progress > 0.05)
-                ? IconButton(
+                ? InkIconButton(
                     icon: Icon(Icons.play_arrow),
+                    onLongPress: () {
+                      RRResManager.playByExternal(item['mFileName']);
+                    },
                     onPressed: () {
                       play(item['mFileName'], name);
                     })
@@ -304,7 +347,7 @@ class _State extends State<DownloadManagerPage> {
 
   void refreshList() {
     RRResManager.getAllItems().then((value) {
-      print(value.toString());
+      print("list: ==> " + value.toString());
       dataSet = value ?? [];
       refreshStatus();
     }).catchError((e) {
@@ -356,7 +399,8 @@ class _State extends State<DownloadManagerPage> {
             "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
             "2. 下载5%即可播放。\n"
             "3. 侧滑删除。\n"
-            "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download",
+            "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
+            "5. 长按播放按钮直接使用外部播放器",
           ),
         ),
       );

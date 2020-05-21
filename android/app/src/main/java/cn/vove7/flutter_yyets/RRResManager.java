@@ -43,11 +43,13 @@ class RRResManager implements P4PClientEvent {
 
     }
 
+    Gson gson = new Gson();
+
     @Override
     public void onTaskStat(P4PStat p4PStat) {
         EventChannel.EventSink es = MainActivity.eventSink;
         if (es != null) {
-            es.success(new Gson().toJson(p4PStat));
+            es.success(gson.toJson(p4PStat));
         }
     }
 
@@ -56,8 +58,7 @@ class RRResManager implements P4PClientEvent {
     }
 
     String getAllItems() {
-        Gson g = new Gson();
-        return g.toJson(DBCache.instance.getAllCacheItemsByTime());
+        return gson.toJson(DBCache.instance.getAllCacheItemsByTime());
     }
 
     boolean isDownloadComplete(Map<String, String> data) {

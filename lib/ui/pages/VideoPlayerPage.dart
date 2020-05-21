@@ -6,11 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tencentplayer/controller/tencent_player_controller.dart';
 import 'package:flutter_tencentplayer/flutter_tencentplayer.dart';
+import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
-import 'package:material_dialog/material_dialog.dart';
 import 'package:screen/screen.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 
@@ -602,7 +602,8 @@ class _PageState extends State<VideoPlayerPage> {
   void showUnSupportDialog() {
     showDialog(
       context: context,
-      builder: (c) => MaterialDialog(
+      builder: (c) => WrappedMaterialDialog(
+        c,
         title: Text("不支持该视频，"),
         content: Text("请使用外部播放器播放"),
         actions: [

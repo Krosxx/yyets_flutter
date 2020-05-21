@@ -25,10 +25,7 @@ class _ResInfoState extends State<ResInfoPage> {
     if (await Permission.storage.request().isGranted) {
       await RRResManager.addTask(
         info['id'],
-        info['cnname'],
         rrUri,
-        info['season'].toString(),
-        info['episode'],
         info['poster_b'] ?? info['poster'],
       );
       Navigator.pushNamed(context, "/download");

@@ -8,90 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart' hide Flow;
 import 'package:flutter_yyets/main.dart';
-import 'package:material_dialog/material_dialog.dart';
+import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 
-/// A [ListTile] that shows an about box.
-///
-/// This widget is often added to an app's [Drawer]. When tapped it shows
-/// an about box dialog with [showAboutDialog].
-///
-/// The about box will include a button that shows licenses for software used by
-/// the application. The licenses shown are those returned by the
-/// [LicenseRegistry] API, which can be used to add more licenses to the list.
-///
-/// If your application does not have a [Drawer], you should provide an
-/// affordance to call [showAboutDialog] or (at least) [showLicensePage].
-/// {@tool dartpad --template=stateless_widget_material}
-///
-/// This sample shows two ways to open [AboutDialog]. The first one
-/// uses an [AboutListTile], and the second uses the [showAboutDialog] function.
-///
-/// ```dart
-///
-///  Widget build(BuildContext context) {
-///    final TextStyle textStyle = Theme.of(context).textTheme.bodyText2;
-///    final List<Widget> aboutBoxChildren = <Widget>[
-///      SizedBox(height: 24),
-///      RichText(
-///        text: TextSpan(
-///          children: <TextSpan>[
-///            TextSpan(
-///              style: textStyle,
-///              text: 'Flutter is Google’s UI toolkit for building beautiful, '
-///              'natively compiled applications for mobile, web, and desktop '
-///              'from a single codebase. Learn more about Flutter at '
-///            ),
-///            TextSpan(
-///              style: textStyle.copyWith(color: Theme.of(context).accentColor),
-///              text: 'https://flutter.dev'
-///            ),
-///            TextSpan(
-///              style: textStyle,
-///              text: '.'
-///            ),
-///          ],
-///        ),
-///      ),
-///    ];
-///
-///    return Scaffold(
-///      appBar: AppBar(
-///        title: Text('Show About Example'),
-///      ),
-///      drawer: Drawer(
-///        child: SingleChildScrollView(
-///          child: SafeArea(
-///            child: AboutListTile(
-///              icon: Icon(Icons.info),
-///              applicationIcon: FlutterLogo(),
-///              applicationName: 'Show About Example',
-///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
-///              aboutBoxChildren: aboutBoxChildren,
-///            ),
-///          ),
-///        ),
-///      ),
-///      body: Center(
-///        child: RaisedButton(
-///          child: Text('Show About Example'),
-///          onPressed: () {
-///            showAboutDialog(
-///              context: context,
-///              applicationIcon: FlutterLogo(),
-///              applicationName: 'Show About Example',
-///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2014 The Flutter Authors',
-///              children: aboutBoxChildren,
-///            );
-///          },
-///        ),
-///      ),
-///    );
-///}
-/// ```
-/// {@end-tool}
-///
 class AboutListTile extends StatelessWidget {
   /// Creates a list tile for showing an about box.
   ///
@@ -179,9 +97,10 @@ class AboutListTile extends StatelessWidget {
     assert(debugCheckHasMaterialLocalizations(context));
     return ListTile(
       leading: icon,
-      title: child ?? Text(MaterialLocalizations.of(context).aboutListTileTitle(
-        applicationName ?? _defaultApplicationName(context),
-      )),
+      title: child ??
+          Text(MaterialLocalizations.of(context).aboutListTileTitle(
+            applicationName ?? _defaultApplicationName(context),
+          )),
       dense: dense,
       onTap: () {
         showAboutDialog(
@@ -197,22 +116,6 @@ class AboutListTile extends StatelessWidget {
   }
 }
 
-/// Displays an [AboutDialog], which describes the application and provides a
-/// button to show licenses for software used by the application.
-///
-/// The arguments correspond to the properties on [AboutDialog].
-///
-/// If the application has a [Drawer], consider using [AboutListTile] instead
-/// of calling this directly.
-///
-/// If you do not need an about box in your application, you should at least
-/// provide an affordance to call [showLicensePage].
-///
-/// The licenses shown on the [LicensePage] are those returned by the
-/// [LicenseRegistry] API, which can be used to add more licenses to the list.
-///
-/// The [context], [useRootNavigator] and [routeSettings] arguments are passed to
-/// [showDialog], the documentation for which discusses how it is used.
 void showCustomAboutDialog({
   @required BuildContext context,
   String applicationName,
@@ -222,6 +125,7 @@ void showCustomAboutDialog({
   List<Widget> children,
   bool useRootNavigator = true,
   RouteSettings routeSettings,
+  List<Widget> actions,
 }) {
   assert(context != null);
   assert(useRootNavigator != null);
@@ -235,6 +139,7 @@ void showCustomAboutDialog({
         applicationIcon: applicationIcon,
         applicationLegalese: applicationLegalese,
         children: children,
+        actions: actions,
       );
     },
     routeSettings: routeSettings,
@@ -268,6 +173,7 @@ class AboutDialog extends StatelessWidget {
     this.applicationIcon,
     this.applicationLegalese,
     this.children,
+    this.actions,
   }) : super(key: key);
 
   /// The name of the application.
@@ -275,6 +181,7 @@ class AboutDialog extends StatelessWidget {
   /// Defaults to the value of [Title.title], if a [Title] widget can be found.
   /// Otherwise, defaults to [Platform.resolvedExecutable].
   final String applicationName;
+  final List<Widget> actions;
 
   /// The version of this build of the application.
   ///
@@ -310,25 +217,30 @@ class AboutDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final String name = applicationName ?? _defaultApplicationName(context);
-    final String version = applicationVersion ?? _defaultApplicationVersion(context);
+    final String version =
+        applicationVersion ?? _defaultApplicationVersion(context);
     final Widget icon = applicationIcon ?? _defaultApplicationIcon(context);
-    return MaterialDialog(
+    return WrappedMaterialDialog(
+      context,
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              if (icon != null) IconTheme(data: Theme.of(context).iconTheme, child: icon),
+              if (icon != null)
+                IconTheme(data: Theme.of(context).iconTheme, child: icon),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: ListBody(
                     children: <Widget>[
                       Text(name, style: Theme.of(context).textTheme.headline5),
-                      Text(version, style: Theme.of(context).textTheme.bodyText2),
+                      Text(version,
+                          style: Theme.of(context).textTheme.bodyText2),
                       Container(height: 18.0),
-                      Text(applicationLegalese ?? '', style: Theme.of(context).textTheme.caption),
+                      Text(applicationLegalese ?? '',
+                          style: Theme.of(context).textTheme.caption),
                     ],
                   ),
                 ),
@@ -338,14 +250,7 @@ class AboutDialog extends StatelessWidget {
           ...?children,
         ],
       ),
-      actions: <Widget>[
-        FlatButton(
-          child: Text(MaterialLocalizations.of(context).closeButtonLabel),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ],
+      actions: actions,
     );
   }
 }
@@ -358,7 +263,8 @@ String _defaultApplicationName(BuildContext context) {
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
   final Title ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
-  return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
+  return ancestorTitle?.title ??
+      Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 
 String _defaultApplicationVersion(BuildContext context) {
