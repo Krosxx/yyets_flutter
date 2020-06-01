@@ -182,8 +182,9 @@ String _prettyFormat(data) {
 
 //格式化文件大小
 String renderSize(int value) {
-  if (null == value) {
-    return "0 B";
+  print("renderSize $value");
+  if (null == value || value == 0) {
+    return "0B";
   }
   var unitArr = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
   var index = 0;
