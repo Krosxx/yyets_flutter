@@ -9,6 +9,7 @@ import 'package:flutter_yyets/ui/widgets/EpisodeWidget.dart';
 import 'package:flutter_yyets/ui/widgets/MovieResWidget.dart';
 import 'package:flutter_yyets/ui/widgets/MoviesGridWidget.dart';
 import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
+import 'package:flutter_yyets/utils/constants.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
@@ -85,10 +86,10 @@ class _DetailPageState extends State<DetailPage>
 
   _showTutorial() async {
     var sp = await MySp;
-    if (!mounted || sp.has("like_key")) {
+    if (!mounted || sp.has(Constants.KEY_TUTORIAL_DETAIL_LIKE)) {
       return;
     }
-    sp.set("like_key", 1);
+    sp.set(Constants.KEY_TUTORIAL_DETAIL_LIKE, 1);
 
     TutorialCoachMark(
       context,

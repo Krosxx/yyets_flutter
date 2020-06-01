@@ -8,6 +8,7 @@ import 'package:flutter_yyets/ui/widgets/ink_con_button.dart';
 import 'package:flutter_yyets/ui/widgets/visibility.dart';
 import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
+import 'package:flutter_yyets/utils/constants.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
@@ -343,6 +344,16 @@ class _State extends State<DownloadManagerPage> {
     super.initState();
     RRResManager.addEventListener(onReceiverData);
     refreshList();
+    Future.delayed(Duration(seconds: 1), _showTutorial);
+  }
+
+  _showTutorial() async {
+    var sp = await MySp;
+    if (!mounted || sp.has(Constants.KEY_TUTORIAL_OF_DL)) {
+      return;
+    }
+    sp.set(Constants.KEY_TUTORIAL_OF_DL, true);
+    _showTipsDialog();
   }
 
   void refreshList() {
@@ -402,6 +413,12 @@ class _State extends State<DownloadManagerPage> {
             "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
             "5. 长按播放按钮直接使用外部播放器",
           ),
+          actions: [
+            FlatButton(
+              child: Text("我知道了"),
+              onPressed: () => Navigator.pop(c),
+            )
+          ],
         ),
       );
 
