@@ -97,7 +97,7 @@ class NewState extends LoadingPageState<NewsPage> {
                           }
                           Navigator.pushNamed(context, "/play", arguments: {
                             "uri": videoUrl,
-                            "title": item['title'] ?? "",
+                            "title": title ?? username ?? "",
                             "type": 1
                           });
                         },
