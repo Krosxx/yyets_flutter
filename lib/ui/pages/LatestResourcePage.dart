@@ -131,7 +131,9 @@ class _ResPageState extends LoadingPageState<LatestResourcePage> {
             onPressed: () {
               var id = item['fileid'].hashCode;
               if (id > 0) id = -id;
-              RRResManager.addTask(id.toString(), rrUri, "").then((value) {
+              RRResManager.addTask(id.toString(), rrUri, "",
+                      filmName: item['file_name'])
+                  .then((value) {
                 Navigator.pushReplacementNamed(c, "/download");
               }).catchError((e) => toast(e.toString()));
             },

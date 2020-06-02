@@ -38,17 +38,21 @@ class RRResManager {
     return methodChannel.invokeMethod("isDownloadComplete", data);
   }
 
-  //todo  fix ep0x uri格式; eg:国王
   static Future addTask(
     String id,
     String rrUri,
     String filmImg, {
     String filmName,
+    String season,
+    String episode,
   }) async {
     Map data = parseRRUri(rrUri);
     if (filmName != null) {
       data['filmName'] = filmName;
     }
+    data['season'] = season;
+    data['episode'] = episode;
+
     data['filmId'] = id;
     data['p4pUrl'] = rrUri;
     data['filmImg'] = filmImg;

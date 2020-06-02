@@ -79,6 +79,14 @@ class RRResManager implements P4PClientEvent {
         if (fn != null) {
             bean.mFilmName = fn;
         }
+        String season = (String) filmData.get("season");
+        if (season != null) {
+            bean.mSeason = season;
+        }
+        String episode = (String) filmData.get("episode");
+        if (episode != null) {
+            bean.mEpisode = episode;
+        }
 
         FilmCacheBean cache = DBCache.instance.getCacheByUri((String) filmData.get("p4pUrl"));
         if (cache != null && cache.isFinished()) {

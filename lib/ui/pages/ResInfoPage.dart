@@ -24,11 +24,10 @@ class _ResInfoState extends State<ResInfoPage> {
   void _downloadAndPlay(String rrUri) async {
     if (await Permission.storage.request().isGranted) {
       await RRResManager.addTask(
-        info['id'],
-        rrUri,
-        info['poster_b'] ?? info['poster'],
-        filmName: info['cnname'],
-      );
+          info['id'], rrUri, info['poster_b'] ?? info['poster'],
+          filmName: info['cnname'],
+          episode: info['episode'].toString(),
+          season: info['season'].toString());
       Navigator.pushReplacementNamed(context, "/download");
     } else {
       toast("请授予存储权限");
