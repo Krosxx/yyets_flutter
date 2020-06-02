@@ -80,9 +80,6 @@ class _PageState extends State<VideoPlayerPage> {
   //倍速
   double _speed = null;
 
-  //显示模式 [DISPLAY_MODE_KEEP_PROPORTION] [DISPLAY_MODE_COVERED]
-  int _displayMode;
-
   Future<void> initPlatformState() async {
     num initVolume = await VolumeWatcher.getCurrentVolume;
     num maxVolume = await VolumeWatcher.getMaxVolume;
@@ -119,7 +116,6 @@ class _PageState extends State<VideoPlayerPage> {
     Future.delayed(Duration(milliseconds: 300), () async {
       //上次播放进度
       var sp = await MySp;
-      _displayMode = sp.get("display_mode", DISPLAY_MODE_KEEP_ASPECT);
       int pos = sp.get("pos_${widget.resUri.hashCode}", 0);
       print("seek to $pos");
 
@@ -365,20 +361,11 @@ class _PageState extends State<VideoPlayerPage> {
               },
               onDoubleTap: togglePlayStatus,
               onTap: toggleControllerPanel,
-              child: _displayMode == 0
-                  ? AspectRatio(
-                      aspectRatio: aspectRatio,
-                      child: IjkPlayer(
-                        controllerWidgetBuilder: (a) => Container(),
-                        statusWidgetBuilder: (a, b, v) => Container(),
-                        mediaController: _controller,
-                      ),
-                    )
-                  : IjkPlayer(
-                      controllerWidgetBuilder: (a) => Container(),
-                      statusWidgetBuilder: (a, b, v) => Container(),
-                      mediaController: _controller,
-                    ),
+              child: IjkPlayer(
+                controllerWidgetBuilder: (a) => Container(),
+                statusWidgetBuilder: (a, b, v) => Container(),
+                mediaController: _controller,
+              ),
             ),
           ),
           _StatusPanel(
@@ -462,27 +449,6 @@ class _PageState extends State<VideoPlayerPage> {
                     widget.title,
                     style: TextStyle(color: Colors.white),
                   ),
-                  actions: [
-                    IconButton(
-                      icon: Icon(
-                        Icons.aspect_ratio,
-                        color: _displayMode == DISPLAY_MODE_KEEP_ASPECT
-                            ? Colors.blueAccent
-                            : Colors.white,
-                      ),
-                      onPressed: () =>
-                          changeDisplayMode(DISPLAY_MODE_KEEP_ASPECT),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.settings_overscan,
-                        color: _displayMode == DISPLAY_MODE_COVERED
-                            ? Colors.blueAccent
-                            : Colors.white,
-                      ),
-                      onPressed: () => changeDisplayMode(DISPLAY_MODE_COVERED),
-                    ),
-                  ],
                   elevation: 0,
                   backgroundColor: Colors.transparent,
                   leading: BackButton(
@@ -616,17 +582,6 @@ class _PageState extends State<VideoPlayerPage> {
     Screen.setBrightness(-1);
 
     super.dispose();
-  }
-
-  void changeDisplayMode(int mode) {
-    startDelayHidePanel();
-    if (_displayMode == mode) {
-      return;
-    }
-    MySp.then((sp) => sp.set("display_mode", mode));
-    setState(() {
-      _displayMode = mode;
-    });
   }
 
   void showUnSupportDialog(e) {
