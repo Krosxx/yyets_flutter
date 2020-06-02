@@ -75,6 +75,11 @@ class RRResManager implements P4PClientEvent {
                 (String) filmData.get("filmId"),
                 (String) filmData.get("filmImg")
         );
+        String fn = (String) filmData.get("filmName");
+        if (fn != null) {
+            bean.mFilmName = fn;
+        }
+
         FilmCacheBean cache = DBCache.instance.getCacheByUri((String) filmData.get("p4pUrl"));
         if (cache != null && cache.isFinished()) {
             Log.d("11324 :", "startDownload  ----> 已下载完成" + filmData);

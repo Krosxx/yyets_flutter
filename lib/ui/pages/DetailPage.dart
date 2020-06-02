@@ -43,7 +43,7 @@ class _DetailPageState extends State<DetailPage>
 
   String get title => () {
         var enname = data['enname'];
-        return data["cnname"] + (enname == null ? "" : "($enname)");
+        return (data["cnname"]??"") + (enname == null ? "" : "($enname)");
       }();
 
   void toggleFollow() {

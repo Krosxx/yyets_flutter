@@ -27,6 +27,7 @@ class _ResInfoState extends State<ResInfoPage> {
         info['id'],
         rrUri,
         info['poster_b'] ?? info['poster'],
+        filmName: info['cnname'],
       );
       Navigator.pushReplacementNamed(context, "/download");
     } else {
