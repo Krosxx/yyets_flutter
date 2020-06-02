@@ -42,7 +42,9 @@ class _PageState extends State<VideoPlayerPage> {
   bool _cacheStatus;
 
   //视频总长度
-  int _totalLength = 100;
+  int _totalLength = 0;
+
+  double get playProgress => _totalLength == 0 ? 0.0 : _playPos / _totalLength;
 
   //视频当前进度
   int _playPos = 0;
@@ -106,12 +108,14 @@ class _PageState extends State<VideoPlayerPage> {
     SystemChrome.setEnabledSystemUIOverlays([]);
 
     if (widget.type == VideoPlayerPage.TYPE_FILE) {
-      _controller.setFileDataSource(File(widget.resUri));
+      _controller.setFileDataSource(File(widget.resUri),autoPlay: true);
     } else {
-      _controller.setNetworkDataSource(widget.resUri);
+      _controller.setNetworkDataSource(widget.resUri,autoPlay: true);
     }
-
-    _controller.play();
+//
+//    _controller.play().catchError((e) {
+//      showUnSupportDialog(e);
+//    });
     Future.delayed(Duration(milliseconds: 300), () async {
       //上次播放进度
       var sp = await MySp;
@@ -148,14 +152,13 @@ class _PageState extends State<VideoPlayerPage> {
     });
 
     timer = Timer.periodic(Duration(milliseconds: 800), (t) async {
-      print("timer");
       //未在调节进度时
       if (!mounted || _centerProgressbarVisibility || !_controller.isPlaying) {
-        print("ret");
         return;
       }
       var vi = await _controller.getVideoInfo();
       int now = DateTime.now().millisecondsSinceEpoch;
+      _totalLength = (vi.duration * 1000).toInt();
       int pos = (vi.currentPosition * 1000).toInt();
       if (pos >= _totalLength) {
         onPlayFinished();
@@ -355,6 +358,8 @@ class _PageState extends State<VideoPlayerPage> {
                 if (_playPos > _totalLength) {
                   print("_playPos > _totalLength");
                   _playPos = _totalLength;
+                } else if (_playPos < 0) {
+                  _playPos = 0;
                 }
                 setState(() {});
               },
@@ -420,7 +425,7 @@ class _PageState extends State<VideoPlayerPage> {
                         borderRadius: BorderRadius.circular(2.5),
                         child: LinearProgressIndicator(
                           backgroundColor: Colors.white,
-                          value: _playPos.toDouble() / _totalLength,
+                          value: playProgress,
                         ),
                       ),
                     ),
