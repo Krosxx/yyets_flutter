@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
+import 'package:flutter_yyets/utils/constants.dart';
+import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 
 class ResInfoPage extends StatefulWidget {
   final Map info;
@@ -44,6 +47,11 @@ class _ResInfoState extends State<ResInfoPage> {
 
   String get channel => info['channel'];
 
+  bool get canDownPlay =>
+      _data != null &&
+      _data['item_app'] != null &&
+      _data['item_app']['name'] != null;
+
   void _loadData() {
     Future apiCall;
     Future.delayed(Duration(milliseconds: 200), () {
@@ -61,6 +69,9 @@ class _ResInfoState extends State<ResInfoPage> {
           setState(() {
             _loadingStatus = LoadingStatus.NONE;
             _data = data;
+            if (canDownPlay) {
+              _showTutorial();
+            }
           });
         }
       }).catchError((e) {
@@ -89,9 +100,6 @@ class _ResInfoState extends State<ResInfoPage> {
 
   @override
   Widget build(BuildContext context) {
-    bool canDownPlay = _data != null &&
-        _data['item_app'] != null &&
-        _data['item_app']['name'] != null;
     return Scaffold(
       appBar: AppBar(
         title: Text(title()),
@@ -110,6 +118,7 @@ class _ResInfoState extends State<ResInfoPage> {
               errText: _errText),
       floatingActionButton: canDownPlay
           ? FloatingActionButton(
+              key: _dlKey,
               tooltip: "边下边播",
               backgroundColor: Colors.lightBlue,
               onPressed: () {
@@ -124,6 +133,45 @@ class _ResInfoState extends State<ResInfoPage> {
             )
           : null,
     );
+  }
+
+  var _dlKey = GlobalKey();
+
+  _showTutorial() async {
+    var sp = await MySp;
+    if (!mounted || sp.has(Constants.KEY_TUTORIAL_RES_DL)) {
+      return;
+    }
+    sp.set(Constants.KEY_TUTORIAL_RES_DL, 1);
+
+    TutorialCoachMark(
+      context,
+      targets: [
+        TargetFocus(
+          identify: "dl_key_1",
+          keyTarget: _dlKey,
+          contents: [
+            ContentTarget(
+              align: AlignContent.left,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  "边下边播",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 15.0),
+                ),
+              ),
+            )
+          ],
+        )
+      ],
+      colorShadow: Colors.blueAccent,
+      // DEFAULT Colors.black
+      alignSkip: Alignment.bottomLeft,
+      textSkip: "我知道了",
+    )..show();
   }
 
   var itemExp = <bool>[];

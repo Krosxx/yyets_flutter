@@ -130,6 +130,15 @@ class _State extends State<DownloadManagerPage> {
     });
   }
 
+  String buildPlayTitle(item){
+    String name = item['mFilmName'];
+    String season = item['mSeason'];
+    if (season != null && season != "") {
+      name += " S${season}E${item['mEpisode']}";
+    }
+    return name;
+  }
+
   void play(filename, name) async {
     if (!Platform.isAndroid) {
       playOnLocal(filename, name);
@@ -302,7 +311,7 @@ class _State extends State<DownloadManagerPage> {
           onPressed: () {
             switch (status) {
               case STATUS_COMPLETE:
-                play(item['mFileName'], name);
+                play(item['mFileName'], buildPlayTitle(item));
                 //play
                 break;
               case STATUS_DOWNLOADING:
@@ -352,7 +361,7 @@ class _State extends State<DownloadManagerPage> {
                       RRResManager.playByExternal(item['mFileName']);
                     },
                     onPressed: () {
-                      play(item['mFileName'], name);
+                      play(item['mFileName'], buildPlayTitle(item));
                     })
                 : Container(),
           ],
