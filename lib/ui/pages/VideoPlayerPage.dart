@@ -75,8 +75,8 @@ class _PageState extends State<VideoPlayerPage> {
   //最大音量
   int _maxVolume = 0;
 
-  //退出时恢复亮度
-  double _disposeScreenBrightness = 0;
+  //倍速
+  double _speed = null;
 
   //显示模式 [DISPLAY_MODE_KEEP_PROPORTION] [DISPLAY_MODE_COVERED]
   int _displayMode;
@@ -99,7 +99,6 @@ class _PageState extends State<VideoPlayerPage> {
     //横屏
     Screen.brightness.then((value) {
       _screenBrightness = value;
-      _disposeScreenBrightness = value;
       print("screenBrightness: $value");
     });
     AutoOrientation.landscapeAutoMode();
@@ -555,13 +554,38 @@ class _PageState extends State<VideoPlayerPage> {
                               setState(() => _playPos = p.toInt()),
                         ),
                       ),
+                      InkResponse(
+                        child: PopupMenuButton(
+                          onSelected: (v) {
+                            setState(() {
+                              _speed = v;
+                              _controller.setSpeed(v);
+                            });
+                          },
+                          itemBuilder: (BuildContext context) => _speeds
+                              .map((e) => PopupMenuItem(
+                                  child: Text(
+                                    "${e}X",
+                                    style: e == (_speed ?? 1.0)
+                                        ? TextStyle(
+                                            color:
+                                                Theme.of(context).accentColor)
+                                        : null,
+                                  ),
+                                  value: e))
+                              .toList(),
+                          child: Text(
+                            _speed == null ? "倍速" : "${_speed}X",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      Container(width: 10),
                       Text(
                         formatLength(_totalLength),
                         style: TextStyle(color: Colors.white),
                       ),
-                      Container(
-                        width: 10,
-                      )
+                      Container(width: 10)
                     ],
                   ),
                 ),
@@ -573,6 +597,8 @@ class _PageState extends State<VideoPlayerPage> {
     );
   }
 
+  var _speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+
   @override
   void dispose() {
     timer?.cancel();
@@ -582,7 +608,8 @@ class _PageState extends State<VideoPlayerPage> {
     SystemChrome.setEnabledSystemUIOverlays(
         [SystemUiOverlay.top, SystemUiOverlay.bottom]);
     Screen.keepOn(false);
-    Screen.setBrightness(_disposeScreenBrightness);
+    Screen.setBrightness(-1);
+
     super.dispose();
   }
 
