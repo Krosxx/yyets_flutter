@@ -25,18 +25,25 @@ String formatLength(int millisSecs) {
 //友好的
 
 String friendlyFormat(int secs) {
-  DateTime time = DateTime.fromMillisecondsSinceEpoch(secs * 1000);
-  DateTime now = DateTime.now();
-  if (time.year == now.year) {
-    if (time.month == now.month) {
-      if (time.day < now.day) {
-        return "${(now.day - time.day)}天前";
-      } else if (time.day == now.day) {
-        if (time.hour < now.hour) {
-          return "${(now.hour - time.hour)}小时前";
-        } else if (time.hour == now.hour) {
-          if (time.minute < now.minute) {
-            return "${(now.minute - time.minute)}分钟前";
+  var time = DateTime.fromMillisecondsSinceEpoch(secs * 1000);
+
+  var now = DateTime.now();
+  DateTime d = DateTime.fromMillisecondsSinceEpoch(
+      now.millisecondsSinceEpoch - secs * 1000);
+  var dd = d.day - 1;
+  var dm = d.month - 1;
+  var dy = d.year - 1970;
+
+  if (dy == 0) {
+    if (dm == 0) {
+      if (dd > 0 && dd < 10) {
+        return "${dd}天前";
+      } else if (dd == 0) {
+        if (d.hour > 0) {
+          return "${d.hour}小时前";
+        } else if (d.hour == 0) {
+          if (d.minute > 0) {
+            return "${d.minute}分钟前";
           } else {
             return DateFormat("HH:mm").format(time);
           }
