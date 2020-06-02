@@ -109,12 +109,12 @@ class _State extends State<DownloadManagerPage> {
   }
 
   void playOnLocal(filename, name) {
-    if (filename.endsWith(".mkv")) {
-      toast("本地不支持mkv视频格式，将打开外部播放器播放");
-      Future.delayed(
-          Duration(seconds: 1), () => RRResManager.playByExternal(filename));
-      return;
-    }
+//    if (filename.endsWith(".mkv")) {
+//      toast("本地不支持mkv视频格式，将打开外部播放器播放");
+//      Future.delayed(
+//          Duration(seconds: 1), () => RRResManager.playByExternal(filename));
+//      return;
+//    }
     Navigator.pushNamed(context, "/play", arguments: {
       'uri': filename,
       'title': name,
@@ -406,12 +406,12 @@ class _State extends State<DownloadManagerPage> {
         barrierDismissible: true,
         builder: (c) => MaterialDialog(
           title: Text("提示"),
-          content: Text(
-            "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
-            "2. 下载5%即可播放。\n"
-            "3. 侧滑删除。\n"
-            "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
-            "5. 长按播放按钮直接使用外部播放器",
+          content: Text("1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
+              "2. 下载5%即可播放。\n"
+              "3. 侧滑删除。\n"
+              "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
+              "5. 长按播放按钮直接使用外部播放器\n"
+              "6. 卸载会清空下载及文件，需要请先备份",
           ),
           actions: [
             FlatButton(

@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:auto_orientation/auto_orientation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_tencentplayer/controller/tencent_player_controller.dart';
-import 'package:flutter_tencentplayer/flutter_tencentplayer.dart';
+import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
+import 'package:flutter_yyets/ui/widgets/visibility.dart';
 import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
@@ -35,7 +36,7 @@ const DISPLAY_MODE_KEEP_ASPECT = 0;
 const DISPLAY_MODE_COVERED = 1;
 
 class _PageState extends State<VideoPlayerPage> {
-  TencentPlayerController _controller;
+  IjkMediaController _controller = IjkMediaController();
 
   //滑动调节进度结束后是否继续播放状态
   bool _cacheStatus;
@@ -45,6 +46,7 @@ class _PageState extends State<VideoPlayerPage> {
 
   //视频当前进度
   int _playPos = 0;
+  var aspectRatio = 0.0;
 
   //高度
   double panelHeight = 60;
@@ -104,64 +106,58 @@ class _PageState extends State<VideoPlayerPage> {
     //隐藏状态栏 导航栏
     SystemChrome.setEnabledSystemUIOverlays([]);
 
-    var config = PlayerConfig(autoPlay: false, progressInterval: 900);
     if (widget.type == VideoPlayerPage.TYPE_FILE) {
-      _controller =
-          TencentPlayerController.file(widget.resUri, playerConfig: config);
+      _controller.setFileDataSource(File(widget.resUri));
     } else {
-      _controller =
-          TencentPlayerController.network(widget.resUri, playerConfig: config);
+      _controller.setNetworkDataSource(widget.resUri);
     }
 
-    _controller.initialize().then((_) {
+    _controller.play();
+    Future.delayed(Duration(milliseconds: 300), () async {
       //上次播放进度
-      Future.delayed(Duration(milliseconds: 500), () async {
-        var sp = await MySp;
-        _displayMode = sp.get("display_mode", DISPLAY_MODE_KEEP_ASPECT);
-        int pos = sp.get("pos_${widget.resUri.hashCode}", 0);
-        print("seek to $pos");
+      var sp = await MySp;
+      _displayMode = sp.get("display_mode", DISPLAY_MODE_KEEP_ASPECT);
+      int pos = sp.get("pos_${widget.resUri.hashCode}", 0);
+      print("seek to $pos");
 
-        _totalLength = _controller.value.duration.inMilliseconds;
-        //结尾
-        if (_totalLength - pos < 3000 || pos == 0) {
-          //todo 播放起始位置 跳过广告
-          pos = 0;
-        }
-        //后退2s
-        if (pos > 10000) {
-          pos -= 2000;
-        }
-        _controller.seekTo(Duration(milliseconds: pos)).whenComplete(() {
-          setState(() {
-            _playPos = pos;
-            _controller.play();
-          });
+      var vi = await _controller.getVideoInfo();
+      aspectRatio = vi.ratio;
+      print("VideoInfo $vi");
+
+      _totalLength = (vi.duration * 1000).toInt();
+      //结尾
+      if (_totalLength - pos < 3000 || pos == 0) {
+        //todo 播放起始位置 跳过广告
+        pos = 0;
+      }
+      //后退2s
+      if (pos > 10000) {
+        pos -= 2000;
+      }
+      _controller.seekTo(pos / 1000).whenComplete(() {
+        setState(() {
+          _playPos = pos;
+          _controller.play();
         });
-        startDelayHidePanel();
-        Screen.keepOn(true);
       });
+      startDelayHidePanel();
+      Screen.keepOn(true);
     }).catchError((e) {
-      print("errrr:==>  " + e);
+      showUnSupportDialog(e);
+      print("errrr:==>  $e");
       toast(e);
     });
 
-    if (widget.type == VideoPlayerPage.TYPE_FILE) {
-      Future.delayed(Duration(seconds: 2), () {
-        if (!_controller.value.initialized) {
-          showUnSupportDialog();
-          _controller.pause();
-        }
-      });
-    }
-
-    _controller.addListener(() {
+    timer = Timer.periodic(Duration(milliseconds: 800), (t) async {
+      print("timer");
       //未在调节进度时
-      if (!_controller.value.initialized || _centerProgressbarVisibility) {
+      if (!mounted || _centerProgressbarVisibility || !_controller.isPlaying) {
+        print("ret");
         return;
       }
+      var vi = await _controller.getVideoInfo();
       int now = DateTime.now().millisecondsSinceEpoch;
-      var p = _controller.value.position;
-      int pos = p.inMilliseconds;
+      int pos = (vi.currentPosition * 1000).toInt();
       if (pos >= _totalLength) {
         onPlayFinished();
       }
@@ -180,6 +176,8 @@ class _PageState extends State<VideoPlayerPage> {
     });
   }
 
+  Timer timer;
+
   void onPlayFinished() {
 //    Navigator.pop(context);
     setState(() {});
@@ -188,7 +186,7 @@ class _PageState extends State<VideoPlayerPage> {
   void togglePlayStatus() {
     startDelayHidePanel();
     setState(() {
-      if (_controller.value.isPlaying) {
+      if (_controller.isPlaying) {
         _controller.pause();
         Screen.keepOn(false);
       } else {
@@ -231,152 +229,153 @@ class _PageState extends State<VideoPlayerPage> {
       body: Stack(
         children: [
           Center(
-            child: _controller.value.initialized
-                ? GestureDetector(
-                    onVerticalDragStart: (DragStartDetails d) async {
-                      var size = MediaQuery.of(context).size;
-                      print("screen size: ${size.width}");
-                      double boundary = size.height * 0.2;
-                      var dy = d.globalPosition.dy;
-                      //上下边缘不处理
-                      if (dy < boundary || dy > size.height - boundary) {
-                        verticalDragAction = -1;
-                        return;
-                      }
-                      //确定 左右
-                      if (d.localPosition.dx < size.width / 2) {
-                        print("左侧");
-                        setState(() {
-                          _screenBrightnessPanelVisibility = true;
-                        });
-                        verticalDragAction = 0;
-                      } else {
-                        print("右侧");
-                        //防止 手动按键调节；重新获取音量
-                        num initVolume = await VolumeWatcher.getCurrentVolume;
-                        num maxVolume = await VolumeWatcher.getMaxVolume;
-                        this._volumePercentage = initVolume / maxVolume;
-                        setState(() {
-                          _volumePanelVisibility = true;
-                        });
-                        verticalDragAction = 1;
-                      }
-                    },
-                    onVerticalDragUpdate: (DragUpdateDetails d) {
-                      if (verticalDragAction == -1) {
-                        return;
-                      }
-                      var size = MediaQuery.of(context).size;
-                      double dy = d.delta.dy;
-                      double dyPercent = (dy / size.height * 1.5);
-                      if (dy == 0) {
-                        return;
-                      }
-                      print(dy);
-                      if (verticalDragAction == 0) {
-                        _screenBrightness -= dyPercent;
-                        if (_screenBrightness < 0) {
-                          _screenBrightness = 0;
-                        } else if (_screenBrightness > 1) {
-                          _screenBrightness = 1;
-                        }
-                        print("_screenBrightness $_screenBrightness");
-                        setState(() {
-                          Screen.setBrightness(_screenBrightness);
-                        });
-                      } else {
-                        _volumePercentage -= dyPercent;
+            child: GestureDetector(
+              onVerticalDragStart: (DragStartDetails d) async {
+                var size = MediaQuery.of(context).size;
+                print("screen size: ${size.width}");
+                double boundary = size.height * 0.2;
+                var dy = d.globalPosition.dy;
+                //上下边缘不处理
+                if (dy < boundary || dy > size.height - boundary) {
+                  verticalDragAction = -1;
+                  return;
+                }
+                //确定 左右
+                if (d.localPosition.dx < size.width / 2) {
+                  print("左侧");
+                  setState(() {
+                    _screenBrightnessPanelVisibility = true;
+                  });
+                  verticalDragAction = 0;
+                } else {
+                  print("右侧");
+                  //防止 手动按键调节；重新获取音量
+                  num initVolume = await VolumeWatcher.getCurrentVolume;
+                  num maxVolume = await VolumeWatcher.getMaxVolume;
+                  this._volumePercentage = initVolume / maxVolume;
+                  setState(() {
+                    _volumePanelVisibility = true;
+                  });
+                  verticalDragAction = 1;
+                }
+              },
+              onVerticalDragUpdate: (DragUpdateDetails d) {
+                if (verticalDragAction == -1) {
+                  return;
+                }
+                var size = MediaQuery.of(context).size;
+                double dy = d.delta.dy;
+                double dyPercent = (dy / size.height * 1.5);
+                if (dy == 0) {
+                  return;
+                }
+                print(dy);
+                if (verticalDragAction == 0) {
+                  _screenBrightness -= dyPercent;
+                  if (_screenBrightness < 0) {
+                    _screenBrightness = 0;
+                  } else if (_screenBrightness > 1) {
+                    _screenBrightness = 1;
+                  }
+                  print("_screenBrightness $_screenBrightness");
+                  setState(() {
+                    Screen.setBrightness(_screenBrightness);
+                  });
+                } else {
+                  _volumePercentage -= dyPercent;
 
-                        if (_volumePercentage < 0) {
-                          _volumePercentage = 0;
-                        } else if (_volumePercentage > 1) {
-                          _volumePercentage = 1;
-                        }
-                        setState(() {
-                          VolumeWatcher.setVolume(
-                              _maxVolume * _volumePercentage);
-                        });
-                        print("_volumePercentage: $_volumePercentage");
-                      }
-                    },
-                    onVerticalDragEnd: (DragEndDetails d) {
-                      if (verticalDragAction == -1) {
-                        return;
-                      }
-                      if (verticalDragAction == 0) {
-                        setState(() {
-                          _screenBrightnessPanelVisibility = false;
-                        });
-                      } else {
-                        setState(() {
-                          _volumePanelVisibility = false;
-                        });
-                      }
-                      print("onVerticalDragEnd");
-                    },
-                    onHorizontalDragStart: (DragStartDetails d) {
-                      //todo 利用onHorizontalDragDown拦截?
-                      var size = MediaQuery.of(context).size;
-                      double boundary = size.width * 0.1;
-                      var x = d.globalPosition.dx;
-                      //左右边缘不处理
-                      if (x < boundary || x > size.width - boundary) {
-                        return;
-                      }
-                      _startDragPos = _playPos;
-                      print("onHorizontalDragStart  ${_playPos}");
-                      _cacheStatus = _controller.value.isPlaying;
+                  if (_volumePercentage < 0) {
+                    _volumePercentage = 0;
+                  } else if (_volumePercentage > 1) {
+                    _volumePercentage = 1;
+                  }
+                  setState(() {
+                    VolumeWatcher.setVolume(_maxVolume * _volumePercentage);
+                  });
+                  print("_volumePercentage: $_volumePercentage");
+                }
+              },
+              onVerticalDragEnd: (DragEndDetails d) {
+                if (verticalDragAction == -1) {
+                  return;
+                }
+                if (verticalDragAction == 0) {
+                  setState(() {
+                    _screenBrightnessPanelVisibility = false;
+                  });
+                } else {
+                  setState(() {
+                    _volumePanelVisibility = false;
+                  });
+                }
+                print("onVerticalDragEnd");
+              },
+              onHorizontalDragStart: (DragStartDetails d) {
+                //todo 利用onHorizontalDragDown拦截?
+                var size = MediaQuery.of(context).size;
+                double boundary = size.width * 0.1;
+                var x = d.globalPosition.dx;
+                //左右边缘不处理
+                if (x < boundary || x > size.width - boundary) {
+                  return;
+                }
+                _startDragPos = _playPos;
+                print("onHorizontalDragStart  ${_playPos}");
+                _cacheStatus = _controller.isPlaying;
+                setState(() {
+                  _centerProgressbarVisibility = true;
+                  _controller.pause();
+                });
+              },
+              onHorizontalDragEnd: (DragEndDetails d) {
+                if (!_centerProgressbarVisibility) {
+                  return;
+                }
+                startDelayHidePanel();
+                print("DragEndDetails  ${_playPos}");
+                setState(() {
+                  _centerProgressbarVisibility = false;
+                  _controller.seekTo(_playPos / 1000).whenComplete(() {
+                    if (_cacheStatus) {
                       setState(() {
-                        _centerProgressbarVisibility = true;
-                        _controller.pause();
+                        _controller.play();
                       });
-                    },
-                    onHorizontalDragEnd: (DragEndDetails d) {
-                      if (!_centerProgressbarVisibility) {
-                        return;
-                      }
-                      startDelayHidePanel();
-                      print("DragEndDetails  ${_playPos}");
-                      setState(() {
-                        _centerProgressbarVisibility = false;
-                        _controller
-                            .seekTo(Duration(milliseconds: _playPos))
-                            .whenComplete(() {
-                          if (_cacheStatus) {
-                            setState(() {
-                              _controller.play();
-                            });
-                          }
-                        });
-                      });
-                    },
-                    onHorizontalDragUpdate: (DragUpdateDetails d) {
-                      if (!_centerProgressbarVisibility) {
-                        return;
-                      }
-                      double dx = d.delta.dx;
-                      if (dx == 0.0) return;
-                      _playPos += (d.delta.dx * 500).toInt();
-                      print("$dx,  ${_playPos}");
+                    }
+                  });
+                });
+              },
+              onHorizontalDragUpdate: (DragUpdateDetails d) {
+                if (!_centerProgressbarVisibility) {
+                  return;
+                }
+                double dx = d.delta.dx;
+                if (dx == 0.0) return;
+                _playPos += (d.delta.dx * 500).toInt();
+                print("$dx,  ${_playPos}");
 
-                      if (_playPos > _totalLength) {
-                        print("_playPos > _totalLength");
-                        _playPos = _totalLength;
-                      }
-                      setState(() {});
-                    },
-                    onDoubleTap: togglePlayStatus,
-                    onTap: toggleControllerPanel,
-                    child: _displayMode == 0
-                        ? AspectRatio(
-                            aspectRatio: _controller.value.aspectRatio,
-                            child: TencentPlayer(_controller),
-                          )
-                        : TencentPlayer(_controller),
-                  )
-                : Container(
-                    color: Colors.black,
-                  ),
+                if (_playPos > _totalLength) {
+                  print("_playPos > _totalLength");
+                  _playPos = _totalLength;
+                }
+                setState(() {});
+              },
+              onDoubleTap: togglePlayStatus,
+              onTap: toggleControllerPanel,
+              child: _displayMode == 0
+                  ? AspectRatio(
+                      aspectRatio: aspectRatio,
+                      child: IjkPlayer(
+                        controllerWidgetBuilder: (a) => Container(),
+                        statusWidgetBuilder: (a, b, v) => Container(),
+                        mediaController: _controller,
+                      ),
+                    )
+                  : IjkPlayer(
+                      controllerWidgetBuilder: (a) => Container(),
+                      statusWidgetBuilder: (a, b, v) => Container(),
+                      mediaController: _controller,
+                    ),
+            ),
           ),
           _StatusPanel(
             _screenBrightnessPanelVisibility,
@@ -440,137 +439,135 @@ class _PageState extends State<VideoPlayerPage> {
               ),
             ),
           ),
-          _playControlVisibility
-              ? Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                      colors: [Colors.black54, Colors.transparent],
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                    )),
-                    height: panelHeight,
-                    alignment: Alignment.centerLeft,
-                    child: AppBar(
-                      title: Text(
-                        widget.title,
+          Visible(
+            visible: _playControlVisibility,
+            childBuilder: () => Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  colors: [Colors.black54, Colors.transparent],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                )),
+                height: panelHeight,
+                alignment: Alignment.centerLeft,
+                child: AppBar(
+                  title: Text(
+                    widget.title,
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  actions: [
+                    IconButton(
+                      icon: Icon(
+                        Icons.aspect_ratio,
+                        color: _displayMode == DISPLAY_MODE_KEEP_ASPECT
+                            ? Colors.blueAccent
+                            : Colors.white,
+                      ),
+                      onPressed: () =>
+                          changeDisplayMode(DISPLAY_MODE_KEEP_ASPECT),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        Icons.settings_overscan,
+                        color: _displayMode == DISPLAY_MODE_COVERED
+                            ? Colors.blueAccent
+                            : Colors.white,
+                      ),
+                      onPressed: () => changeDisplayMode(DISPLAY_MODE_COVERED),
+                    ),
+                  ],
+                  elevation: 0,
+                  backgroundColor: Colors.transparent,
+                  leading: BackButton(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Visible(
+            visible: _playControlVisibility,
+            childBuilder: () => Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                  colors: [Colors.black54, Colors.transparent],
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                )),
+                width: double.infinity,
+                height: panelHeight,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 10),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: togglePlayStatus,
+                        icon: Icon(
+                          _controller.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                        ),
+                      ),
+                      Text(
+                        _playTime,
                         style: TextStyle(color: Colors.white),
                       ),
-                      actions: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.aspect_ratio,
-                            color: _displayMode == DISPLAY_MODE_KEEP_ASPECT
-                                ? Colors.blueAccent
-                                : Colors.white,
-                          ),
-                          onPressed: () =>
-                              changeDisplayMode(DISPLAY_MODE_KEEP_ASPECT),
+                      Expanded(
+                        child: Slider(
+                          activeColor: Colors.white,
+                          inactiveColor: Colors.white24,
+                          min: 0.0,
+                          label: _playTime,
+                          max: _totalLength.toDouble(),
+                          value: _playPos > _totalLength
+                              ? _totalLength.toDouble()
+                              : _playPos.toDouble(),
+                          onChangeStart: (d) {
+                            _startDragPos = _playPos;
+                            _cacheStatus = _controller.isPlaying;
+                            print("onChangeStart:  $_cacheStatus");
+                            delayHideTimer?.cancel();
+                            setState(() {
+                              _centerProgressbarVisibility = true;
+                              _controller.pause();
+                            });
+                          },
+                          onChangeEnd: (p) {
+                            print("onChangeEnd:  $_cacheStatus");
+                            startDelayHidePanel();
+                            _playPos = p.toInt();
+                            setState(() {
+                              _centerProgressbarVisibility = false;
+                              _controller.seekTo(p / 1000).whenComplete(() {
+                                if (_cacheStatus) {
+                                  _controller.play();
+                                }
+                              });
+                            });
+                          },
+                          onChanged: (p) =>
+                              setState(() => _playPos = p.toInt()),
                         ),
-                        IconButton(
-                          icon: Icon(
-                            Icons.settings_overscan,
-                            color: _displayMode == DISPLAY_MODE_COVERED
-                                ? Colors.blueAccent
-                                : Colors.white,
-                          ),
-                          onPressed: () =>
-                              changeDisplayMode(DISPLAY_MODE_COVERED),
-                        ),
-                      ],
-                      elevation: 0,
-                      backgroundColor: Colors.transparent,
-                      leading: BackButton(
-                        color: Colors.white,
                       ),
-                    ),
-                  ),
-                )
-              : Container(),
-          _playControlVisibility
-              ? Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                      colors: [Colors.black54, Colors.transparent],
-                      begin: Alignment.bottomCenter,
-                      end: Alignment.topCenter,
-                    )),
-                    width: double.infinity,
-                    height: panelHeight,
-                    child: Padding(
-                      padding: EdgeInsets.only(right: 10),
-                      child: Row(
-                        children: [
-                          IconButton(
-                            onPressed: togglePlayStatus,
-                            icon: Icon(
-                              _controller.value.isPlaying
-                                  ? Icons.pause
-                                  : Icons.play_arrow,
-                              color: Colors.white,
-                            ),
-                          ),
-                          Text(
-                            _playTime,
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Expanded(
-                            child: Slider(
-                              activeColor: Colors.white,
-                              inactiveColor: Colors.white24,
-                              min: 0.0,
-                              label: _playTime,
-                              max: _totalLength.toDouble(),
-                              value: _playPos > _totalLength
-                                  ? _totalLength.toDouble()
-                                  : _playPos.toDouble(),
-                              onChangeStart: (d) {
-                                _startDragPos = _playPos;
-                                _cacheStatus = _controller.value.isPlaying;
-                                print("onChangeStart:  $_cacheStatus");
-                                delayHideTimer?.cancel();
-                                setState(() {
-                                  _centerProgressbarVisibility = true;
-                                  _controller.pause();
-                                });
-                              },
-                              onChangeEnd: (p) {
-                                print("onChangeEnd:  $_cacheStatus");
-                                startDelayHidePanel();
-                                _playPos = p.toInt();
-                                setState(() {
-                                  _centerProgressbarVisibility = false;
-                                  _controller
-                                      .seekTo(
-                                          Duration(milliseconds: (p).toInt()))
-                                      .whenComplete(() {
-                                    if (_cacheStatus) {
-                                      _controller.play();
-                                    }
-                                  });
-                                });
-                              },
-                              onChanged: (p) =>
-                                  setState(() => _playPos = p.toInt()),
-                            ),
-                          ),
-                          Text(
-                            formatLength(_totalLength),
-                            style: TextStyle(color: Colors.white),
-                          ),
-                          Container(
-                            width: 10,
-                          )
-                        ],
+                      Text(
+                        formatLength(_totalLength),
+                        style: TextStyle(color: Colors.white),
                       ),
-                    ),
+                      Container(
+                        width: 10,
+                      )
+                    ],
                   ),
-                )
-              : Container(),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -578,6 +575,7 @@ class _PageState extends State<VideoPlayerPage> {
 
   @override
   void dispose() {
+    timer?.cancel();
     _controller.pause();
     _controller.dispose();
     AutoOrientation.fullAutoMode();
@@ -599,12 +597,12 @@ class _PageState extends State<VideoPlayerPage> {
     });
   }
 
-  void showUnSupportDialog() {
+  void showUnSupportDialog(e) {
     showDialog(
       context: context,
       builder: (c) => WrappedMaterialDialog(
         c,
-        title: Text("不支持该视频，"),
+        title: Text("不支持该视频，$e"),
         content: Text("请使用外部播放器播放"),
         actions: [
           FlatButton(
