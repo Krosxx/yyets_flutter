@@ -37,9 +37,6 @@ class _State extends State<DownloadManagerPage> {
         IconButton(
           icon: Icon(Icons.help),
           onPressed: _showTipsDialog,
-        ),
-        Center(
-          child: Text(totalSpeed),
         )
       ]),
       body: _buildBody(),
@@ -77,6 +74,9 @@ class _State extends State<DownloadManagerPage> {
                 },
                 child: Text("开始全部"),
               ),
+              Center(
+                child: Text(totalSpeed),
+              )
             ],
           ),
         ],
@@ -242,7 +242,7 @@ class _State extends State<DownloadManagerPage> {
               "cnname": item['mFilmName'],
               "poster_b": item['mFilmImg'],
             };
-            Navigator.pushNamed(context, "/detail", arguments: data);
+            Navigator.pushReplacementNamed(context, "/detail", arguments: data);
           },
         ),
         trailing: InkIconButton(

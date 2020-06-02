@@ -37,6 +37,7 @@ class Api {
                 {"uid": AppState.rrUser.uid, "token": AppState.rrUser.token},
               );
             }
+            print(options.uri);
           },
         ),
       );

@@ -71,9 +71,7 @@ class _ResPageState extends LoadingPageState<LatestResourcePage> {
                 suffixIcon: IconButton(
                   icon: Icon(
                     Icons.search,
-                    color: Theme
-                        .of(context)
-                        .backgroundColor,
+                    color: Theme.of(context).backgroundColor,
                   ),
                   onPressed: submitQuery,
                 ),
@@ -108,41 +106,38 @@ class _ResPageState extends LoadingPageState<LatestResourcePage> {
     }
     showDialog(
       context: context,
-      builder: (c) =>
-          WrappedMaterialDialog(
-            c,
-            enableCloseButton: true,
-            onCloseButtonClicked: () => Navigator.pop(c),
-            title: Text("确认下载"),
-            content: SelectableText(
-                rrUri + (magnetUrl == null ? "" : "\n\n磁力：$magnetUrl")),
-            actions: [
-              Visible(
-                visible: magnetUrl != null,
-                childBuilder: () =>
-                    FlatButton(
-                      child: Text("使用迅雷下载"),
-                      onPressed: () {
-                        launchUri(item['magnet_url']).catchError((e) {
-                          toast("请安装迅雷");
-                        });
-                        Navigator.pop(c);
-                      },
-                    ),
-              ),
-              FlatButton(
-                child: Text("下载"),
-                onPressed: () {
-                  RRResManager.addTask(
-                      item['fileid'].hashCode.toString(), rrUri, "")
-                      .then((value) {
-                    Navigator.pushNamed(context, "/download");
-                    Navigator.pop(c);
-                  }).catchError((e) => toast(e.toString()));
-                },
-              ),
-            ],
+      builder: (c) => WrappedMaterialDialog(
+        c,
+        enableCloseButton: true,
+        onCloseButtonClicked: () => Navigator.pop(c),
+        title: Text("确认下载"),
+        content: SelectableText(
+            rrUri + (magnetUrl == null ? "" : "\n\n磁力：$magnetUrl")),
+        actions: [
+          Visible(
+            visible: magnetUrl != null,
+            childBuilder: () => FlatButton(
+              child: Text("使用迅雷下载"),
+              onPressed: () {
+                launchUri(item['magnet_url']).catchError((e) {
+                  toast("请安装迅雷");
+                });
+                Navigator.pop(c);
+              },
+            ),
           ),
+          FlatButton(
+            child: Text("下载"),
+            onPressed: () {
+              var id = item['fileid'].hashCode;
+              if (id > 0) id = -id;
+              RRResManager.addTask(id.toString(), rrUri, "").then((value) {
+                Navigator.pushReplacementNamed(c, "/download");
+              }).catchError((e) => toast(e.toString()));
+            },
+          ),
+        ],
+      ),
     );
   }
 }

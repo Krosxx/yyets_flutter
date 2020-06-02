@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_yyets/utils/tools.dart';
 
 class MoviesGridWidget extends StatelessWidget {
   final List list;
@@ -19,6 +20,7 @@ class MoviesGridWidget extends StatelessWidget {
             onTap: () {
               Navigator.of(context).pushNamed("/detail", arguments: it);
             },
+            onLongPress: () => showDebugInfo(context, it),
             child: Stack(
               children: <Widget>[
                 Hero(

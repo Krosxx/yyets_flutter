@@ -28,7 +28,7 @@ class _ResInfoState extends State<ResInfoPage> {
         rrUri,
         info['poster_b'] ?? info['poster'],
       );
-      Navigator.pushNamed(context, "/download");
+      Navigator.pushReplacementNamed(context, "/download");
     } else {
       toast("请授予存储权限");
     }
