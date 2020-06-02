@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Intent, Action;
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -28,6 +29,8 @@ const int STATUS_UNKNOWN = -1;
 class _State extends State<DownloadManagerPage> {
   List dataSet;
 
+  Map<String, List> groupSet;
+
   String totalSpeed = "";
 
   @override
@@ -43,18 +46,30 @@ class _State extends State<DownloadManagerPage> {
     );
   }
 
+  Map<String, bool> itemExp = {};
+
   Widget _buildBody() {
     if (dataSet == null) {
       return Center(
         child: CircularProgressIndicator(),
       );
     } else {
+      var gks = groupSet.keys.toList();
       return Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: dataSet.length,
-              itemBuilder: (c, i) => buildItem(dataSet[i]),
+            child: SingleChildScrollView(
+              child: ExpansionPanelList(
+                expandedHeaderPadding: EdgeInsets.all(10),
+                expansionCallback: (i, e) {
+                  setState(() {
+                    itemExp[gks[i]] = !e;
+                  });
+                },
+                children: gks
+                    .map((k) => buildGroup(k, groupSet[k], itemExp[k] ?? true))
+                    .toList(),
+              ),
             ),
           ),
           Row(
@@ -109,12 +124,6 @@ class _State extends State<DownloadManagerPage> {
   }
 
   void playOnLocal(filename, name) {
-//    if (filename.endsWith(".mkv")) {
-//      toast("本地不支持mkv视频格式，将打开外部播放器播放");
-//      Future.delayed(
-//          Duration(seconds: 1), () => RRResManager.playByExternal(filename));
-//      return;
-//    }
     Navigator.pushNamed(context, "/play", arguments: {
       'uri': filename,
       'title': name,
@@ -144,6 +153,7 @@ class _State extends State<DownloadManagerPage> {
               child: Text("本地[不再询问]"),
               onPressed: () {
                 sp.set("dont_request_play_mode", true);
+                Navigator.pop(c);
                 playOnLocal(filename, name);
               },
             ),
@@ -188,11 +198,63 @@ class _State extends State<DownloadManagerPage> {
     }
   }
 
+  ExpansionPanel buildGroup(String keyTitle, List items, bool exp) {
+    var img = items[0]['mFilmImg'];
+    if (img == null || img == "") img = "https://flutter.cn/favicon.ico";
+
+    return ExpansionPanel(
+      isExpanded: exp,
+      canTapOnHeader: true,
+      headerBuilder: (c, i) => Row(
+        children: [
+          InkWell(
+            child: Image.network(
+              img,
+              width: 40,
+              height: 60,
+            ),
+            onTap: () {
+              var item = items[0];
+              var id = int.parse(item['mFilmId']);
+              if (id < 0) {
+                return;
+              }
+              var data = {
+                "id": item['mFilmId'],
+                "cnname": item['mFilmName'],
+                "poster_b": item['mFilmImg'],
+              };
+              Navigator.pushReplacementNamed(context, "/detail",
+                  arguments: data);
+            },
+          ),
+          Container(width: 10),
+          Flexible(
+            child: Text(
+              keyTitle,
+              softWrap: true,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          )
+        ],
+      ),
+      body: ListView.builder(
+        physics: NeverScrollableScrollPhysics(),
+        shrinkWrap: true,
+        itemCount: items.length,
+        itemBuilder: (c, i) => buildItem(items[i]),
+      ),
+    );
+  }
+
   Widget buildItem(Map item) {
-    String name = item['mFilmName'];
+    String name = "";
     String season = item['mSeason'];
     if (season != null && season != "") {
-      name += " S${season}E${item['mEpisode']}";
+      name += "第${item['mEpisode']}集";
+    } else {
+      name = item['mFilmName'];
     }
     int status = item['status'];
 
@@ -222,29 +284,10 @@ class _State extends State<DownloadManagerPage> {
         statusIcon = Icons.adb;
         break;
     }
-    var img = item['mFilmImg'];
-    if (img == null || img == "") {
-      img = "https://flutter.cn/favicon.ico";
-    }
 
     return Slidable(
       child: ListTile(
-        leading: InkWell(
-          child: Image.network(img),
-          onLongPress: () => _showDetail(item),
-          onTap: () {
-            var id = int.parse(item['mFilmId']);
-            if (id < 0) {
-              return;
-            }
-            var data = {
-              "id": item['mFilmId'],
-              "cnname": item['mFilmName'],
-              "poster_b": item['mFilmImg'],
-            };
-            Navigator.pushReplacementNamed(context, "/detail", arguments: data);
-          },
-        ),
+        onLongPress: () => _showDetail(item),
         trailing: InkIconButton(
           icon: Icon(
             statusIcon,
@@ -360,10 +403,27 @@ class _State extends State<DownloadManagerPage> {
     RRResManager.getAllItems().then((value) {
       print("list: ==> " + value.toString());
       dataSet = value ?? [];
+      _buildGroup();
       refreshStatus();
     }).catchError((e) {
       print(e);
       toast(e);
+    });
+  }
+
+  _buildGroup() {
+    groupSet = {};
+    dataSet.forEach((item) {
+      String key = item['mFilmName'];
+      var season = item['mSeason'];
+      if (season != null && season != "") {
+        key += "第${season}季";
+      }
+      if (groupSet[key] == null) {
+        groupSet[key] = [item];
+      } else {
+        groupSet[key].add(item);
+      }
     });
   }
 
@@ -406,12 +466,13 @@ class _State extends State<DownloadManagerPage> {
         barrierDismissible: true,
         builder: (c) => MaterialDialog(
           title: Text("提示"),
-          content: Text("1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
-              "2. 下载5%即可播放。\n"
-              "3. 侧滑删除。\n"
-              "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
-              "5. 长按播放按钮直接使用外部播放器\n"
-              "6. 卸载会清空下载及文件，需要请先备份",
+          content: Text(
+            "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
+            "2. 下载5%即可播放。\n"
+            "3. 侧滑删除。\n"
+            "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
+            "5. 长按播放按钮直接使用外部播放器\n"
+            "6. 卸载会清空下载及文件，需要请先备份",
           ),
           actions: [
             FlatButton(

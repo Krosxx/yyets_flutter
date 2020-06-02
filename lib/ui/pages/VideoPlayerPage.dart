@@ -108,9 +108,9 @@ class _PageState extends State<VideoPlayerPage> {
     SystemChrome.setEnabledSystemUIOverlays([]);
 
     if (widget.type == VideoPlayerPage.TYPE_FILE) {
-      _controller.setFileDataSource(File(widget.resUri),autoPlay: true);
+      _controller.setFileDataSource(File(widget.resUri), autoPlay: true);
     } else {
-      _controller.setNetworkDataSource(widget.resUri,autoPlay: true);
+      _controller.setNetworkDataSource(widget.resUri, autoPlay: true);
     }
 //
 //    _controller.play().catchError((e) {
@@ -127,7 +127,7 @@ class _PageState extends State<VideoPlayerPage> {
       aspectRatio = vi.ratio;
       print("VideoInfo $vi");
 
-      _totalLength = (vi.duration * 1000).toInt();
+      _totalLength = ((vi.duration ?? 0) * 1000).toInt();
       //结尾
       if (_totalLength - pos < 3000 || pos == 0) {
         //todo 播放起始位置 跳过广告
