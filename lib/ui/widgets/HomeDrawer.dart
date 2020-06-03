@@ -230,7 +230,7 @@ class HomeDrawer extends StatelessWidget {
       builder: (c) =>
           WrappedMaterialDialog(c, title: Text("请使用${donateWay}扫码"), children: [
         Visible(
-          visible: !PlatformExt.isMobilePhone,
+          visible: PlatformExt.isMobilePhone,
           childBuilder: () => Text("可截图到本地后扫码"),
         ),
         Image.asset(
