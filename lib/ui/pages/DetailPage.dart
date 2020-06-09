@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_yyets/app/Api.dart';
-import 'package:flutter_yyets/model/RRUser.dart';
+import 'package:flutter_yyets/model/provider/RRUser.dart';
 import 'package:flutter_yyets/ui/pages/CommentsPage.dart';
 import 'package:flutter_yyets/ui/utils.dart';
 import 'package:flutter_yyets/ui/widgets/EpisodeWidget.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
-import 'package:flutter_yyets/model/RRUser.dart';
+import 'package:flutter_yyets/model/provider/RRUser.dart';
 import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
@@ -27,6 +27,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+
     _nameController = TextEditingController();
     _nameController.addListener(() {
       bool old = _isShowClear;
@@ -75,6 +76,8 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    var user = Provider.of<RRUser>(context);
+
     return Scaffold(
       backgroundColor: Colors.blueAccent,
       body: Center(
@@ -173,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20)),
-                                onPressed: _login),
+                                onPressed: () => _login(user)),
                           ),
                         ),
                         Container(
@@ -195,7 +198,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _login() {
+  void _login(user) {
     _focusNodeName.unfocus();
     _focusNodePassWord.unfocus();
     if (!_formKey.currentState.validate()) {
@@ -203,17 +206,16 @@ class _LoginPageState extends State<LoginPage> {
     }
     Api.login(_nameController.text, _passController.text).then((data) async {
       //uid token
-      Provider.of<RRUser>(context, listen: false)
-          .setUidAndToken(data['uid'], data['token']);
+      user.setUidAndToken(data['uid'], data['token']);
       return Api.userInfo();
     }).then((data) {
-      return Provider.of<RRUser>(context, listen: false).save(data);
+      return user.save(data);
     }).then((value) {
       toast("登录成功");
       Navigator.pop(context);
     }).catchError((e) {
       print(e);
-      toast(e.message);
+      toast(e.toString());
     });
   }
 }

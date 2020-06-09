@@ -13,7 +13,6 @@ import 'package:flutter_yyets/utils/constants.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
-import 'package:material_dialog/material_dialog.dart';
 
 class DownloadManagerPage extends StatefulWidget {
   @override
@@ -130,7 +129,7 @@ class _State extends State<DownloadManagerPage> {
     });
   }
 
-  String buildPlayTitle(item){
+  String buildPlayTitle(item) {
     String name = item['mFilmName'];
     String season = item['mSeason'];
     if (season != null && season != "") {
@@ -446,7 +445,8 @@ class _State extends State<DownloadManagerPage> {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (c) => MaterialDialog(
+      builder: (c) => WrappedMaterialDialog(
+        context,
         title: Text("确认删除？"),
         actions: [
           FlatButton(
@@ -473,7 +473,8 @@ class _State extends State<DownloadManagerPage> {
   void _showTipsDialog() => showDialog(
         context: context,
         barrierDismissible: true,
-        builder: (c) => MaterialDialog(
+        builder: (c) => WrappedMaterialDialog(
+          context,
           title: Text("提示"),
           content: Text(
             "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"

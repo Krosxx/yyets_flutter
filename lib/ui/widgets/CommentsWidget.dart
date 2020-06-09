@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/main.dart';
-import 'package:flutter_yyets/model/RRUser.dart';
+import 'package:flutter_yyets/model/provider/RRUser.dart';
 import 'package:flutter_yyets/ui/utils.dart';
 import 'package:flutter_yyets/utils/times.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -35,7 +35,7 @@ class CommentsWidgetBuilder {
             Api.commentUser(item['id'], itemId, text, channel)
                 .then((commentData) {
               replies.add(commentData);
-              commentData['nickname'] = AppState.rrUser.name;
+              commentData['nickname'] = MyApp.rrUser.name;
               item['reply'] = replies;
               refresh();
             }).catchError((e) {

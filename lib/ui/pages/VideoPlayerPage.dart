@@ -32,9 +32,6 @@ class VideoPlayerPage extends StatefulWidget {
   State createState() => _PageState();
 }
 
-const DISPLAY_MODE_KEEP_ASPECT = 0;
-const DISPLAY_MODE_COVERED = 1;
-
 class _PageState extends State<VideoPlayerPage> {
   IjkMediaController _controller = IjkMediaController();
 
@@ -48,7 +45,6 @@ class _PageState extends State<VideoPlayerPage> {
 
   //视频当前进度
   int _playPos = 0;
-  var aspectRatio = 0.0;
 
   //高度
   double panelHeight = 60;
@@ -120,7 +116,6 @@ class _PageState extends State<VideoPlayerPage> {
       print("seek to $pos");
 
       var vi = await _controller.getVideoInfo();
-      aspectRatio = vi.ratio;
       print("VideoInfo $vi");
 
       _totalLength = ((vi.duration ?? 0) * 1000).toInt();

@@ -32,9 +32,12 @@ class Api {
             }
           },
           onRequest: (RequestOptions options) {
-            if (AppState.rrUser.uid != null) {
+            if (MyApp.rrUser.uid != null) {
               options.queryParameters.addAll(
-                {"uid": AppState.rrUser.uid, "token": AppState.rrUser.token},
+                {
+                  "uid": MyApp.rrUser.uid,
+                  "token": MyApp.rrUser.token
+                },
               );
             }
             print(options.uri);
@@ -45,7 +48,7 @@ class Api {
     return _dioClient;
   }
 
-  static String get rankUrl => linkUrl("m=index&a=HOT&limit=50&g=api/v3");
+  static String get rankUrl => linkUrl("m=index&a=HOT&limit=100&g=api/v3");
 
   static String detailUrl(String id) =>
       linkUrl("m=index&a=resource&rid=$id&g=api/v2");

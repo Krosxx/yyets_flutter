@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/main.dart';
-import 'package:flutter_yyets/model/RRUser.dart';
+import 'package:flutter_yyets/model/provider/RRUser.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
 import 'package:flutter_yyets/ui/widgets/CommentsWidget.dart';
 import 'package:flutter_yyets/utils/toast.dart';
@@ -188,8 +188,8 @@ class _CommentsPageState extends State<CommentsPage>
                 if (text != null) {
                   Api.commentTvOrMovie(widget.id, widget.channel, text)
                       .then((data) {
-                    data['nickname'] = AppState.rrUser.name;
-                    data['avatar_s'] = AppState.rrUser.avatar;
+                    data['nickname'] = MyApp.rrUser.name;
+                    data['avatar_s'] = MyApp.rrUser.avatar;
                     data['good'] = "0";
                     data['bad'] = "0";
                     setState(() {
