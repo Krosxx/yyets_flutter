@@ -216,11 +216,11 @@ class _State extends State<DownloadManagerPage> {
       headerBuilder: (c, i) => Row(
         children: [
           InkWell(
-            child: Image.network(
+            child: Hero(child:  Image.network(
               img,
               width: 40,
               height: 60,
-            ),
+            ),tag: "img_${items[0]["mFilmId"]}"),
             onTap: () {
               var item = items[0];
               var id = int.parse(item['mFilmId']);

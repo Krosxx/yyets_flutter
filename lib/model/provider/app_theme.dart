@@ -44,6 +44,11 @@ class AppTheme extends ChangeNotifier {
     primaryColor: Colors.white,
     cardColor: Colors.white,
     iconTheme: IconThemeData(color: Colors.grey),
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      },
+    ),
   );
 
   static final ThemeData dark = ThemeData(
@@ -51,5 +56,10 @@ class AppTheme extends ChangeNotifier {
     buttonColor: Colors.blueAccent,
     brightness: Brightness.dark,
     cardColor: Colors.black12,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: <TargetPlatform, PageTransitionsBuilder>{
+        TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      },
+    ),
   );
 }

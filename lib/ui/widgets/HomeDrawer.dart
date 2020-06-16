@@ -180,10 +180,12 @@ class HomeDrawer extends StatelessWidget {
       ],
       actions: [
         FlatButton(
-          child: Text("支持一下"),
+          child: Text(
+            "支持一下",
+            style: TextStyle(color: Theme.of(context).accentColor),
+          ),
           onPressed: () {
             _showSupportDialog(context);
-//            Navigator.pop(context);
           },
         ),
       ],
@@ -196,7 +198,7 @@ class HomeDrawer extends StatelessWidget {
       builder: (c) => WrappedMaterialDialog(
         c,
         children: [
-          Text("你的支持就是我的动力"),
+          Text(""),
           ListTile(
             onTap: () {
               Navigator.pop(context);
