@@ -182,7 +182,6 @@ String _prettyFormat(data) {
 
 //格式化文件大小
 String renderSize(int value) {
-  print("renderSize $value");
   if (null == value || value == 0) {
     return "0B";
   }
