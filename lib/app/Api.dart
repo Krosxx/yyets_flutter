@@ -34,10 +34,7 @@ class Api {
           onRequest: (RequestOptions options) {
             if (MyApp.rrUser.uid != null) {
               options.queryParameters.addAll(
-                {
-                  "uid": MyApp.rrUser.uid,
-                  "token": MyApp.rrUser.token
-                },
+                {"uid": MyApp.rrUser.uid, "token": MyApp.rrUser.token},
               );
             }
             print(options.uri);
@@ -215,15 +212,18 @@ class Api {
     return res.data['status'] == 1;
   }
 
-  //统一 accKey  client
-  static String linkUrl(String url) {
-    String baseUrl;
+  static String wrapUrl(String url) {
     if (PlatformExt.isWeb) {
       //转发api跨域问题
-      baseUrl = "https://bird.ioliu.cn/v1?url=http://a.zmzapi.com";
+      return "https://bird.ioliu.cn/v1?url=$url";
     } else {
-      baseUrl = "http://a.zmzapi.com";
+      return url;
     }
+  }
+
+  //统一 accKey  client
+  static String linkUrl(String url) {
+    String baseUrl = wrapUrl("http://a.zmzapi.com");
     String linkUrl =
         "${baseUrl}/index.php/?accesskey=519f9cab85c8059d17544947k361a827&client=2&" +
             url;
@@ -276,13 +276,13 @@ class Api {
 
   static Future<List> latestResource(int page) async {
     var res =
-        await dioClient.get("http://file.apicvn.com/file/list?page=$page");
+        await dioClient.get(wrapUrl("http://file.apicvn.com/file/list?page=$page"));
     return res.data ?? [];
   }
 
   static Future<List> queryRRResource(String query, int page) async {
     var res = await dioClient
-        .get("http://file.apicvn.com/file/search?keyword=$query&page=$page");
+        .get(wrapUrl("http://file.apicvn.com/file/search?keyword=$query&page=$page"));
     return res.data ?? [];
   }
 }
