@@ -55,14 +55,14 @@ storePassword=...
 ```
 ❯ flutter doctor
 Doctor summary (to see all details, run flutter doctor -v):
-[√] Flutter (Channel master, v1.18.0-5.0.pre.35, on Microsoft Windows [Version 10.0.19613.1000], locale zh-CN)
+[√] Flutter (Channel master, 1.20.0-1.0.pre.55, on Microsoft Windows [Version 10.0.19628.1], locale zh-CN)
 
 [√] Android toolchain - develop for Android devices (Android SDK version 29.0.2)
 [√] Chrome - develop for the web
 [√] Visual Studio - develop for Windows (Visual Studio Community 2019 16.5.3)
-[√] Android Studio (version 3.6)
+[√] Android Studio (version 4.0)
 [√] VS Code, 64-bit edition (version 1.44.2)
-[√] Connected device (4 available)
+[√] Connected device (3 available)
 ```
 
 - Android
