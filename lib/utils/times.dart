@@ -22,8 +22,9 @@ String formatLength(int millisSecs) {
   }
 }
 
-//友好的
-
+///
+/// 格式化日期
+///
 String friendlyFormat(int secs) {
   var time = DateTime.fromMillisecondsSinceEpoch(secs * 1000);
 
@@ -50,8 +51,10 @@ String friendlyFormat(int secs) {
         } else {
           return DateFormat("HH:mm").format(time);
         }
-      } else {
+      } else if (time.year == now.year) {
         return DateFormat("MM-dd").format(time);
+      } else {
+        return DateFormat("yyyy-MM-dd").format(time);
       }
     } else {
       return DateFormat("MM-dd").format(time);
