@@ -10,7 +10,6 @@ import 'package:flutter_yyets/utils/toast.dart';
 class CommentsWidgetBuilder {
   static Widget build(BuildContext context, Map item, String channel,
       String itemId, Function refresh) {
-    print(item);
     var rep = item['reply'];
     List replies;
     if (rep is Map) {
@@ -30,7 +29,6 @@ class CommentsWidgetBuilder {
           String text = await showInputDialog(
               context, "回复", Text("回复: ${item['nickname']}"));
 
-          print(text);
           if (text != null) {
             Api.commentUser(item['id'], itemId, text, channel)
                 .then((commentData) {

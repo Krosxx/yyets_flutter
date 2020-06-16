@@ -56,8 +56,10 @@ String friendlyFormat(int secs) {
       } else {
         return DateFormat("yyyy-MM-dd").format(time);
       }
-    } else {
+    } else if (time.year == now.year) {
       return DateFormat("MM-dd").format(time);
+    } else {
+      return DateFormat("yyyy-MM-dd").format(time);
     }
   } else {
     return DateFormat("yyyy-MM-dd").format(time);
