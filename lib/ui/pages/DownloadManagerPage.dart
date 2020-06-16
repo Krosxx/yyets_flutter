@@ -16,7 +16,7 @@ import 'package:flutter_yyets/utils/tools.dart';
 
 class DownloadManagerPage extends StatefulWidget {
   @override
-  State createState() => _State();
+  State createState() => DownloadPageState();
 }
 
 const int STATUS_COMPLETE = 1;
@@ -25,8 +25,19 @@ const int STATUS_DOWNLOADING = 3;
 const int STATUS_PAUSED = 4;
 const int STATUS_UNKNOWN = -1;
 
-class _State extends State<DownloadManagerPage> {
+class DownloadPageState extends State<DownloadManagerPage> {
   List dataSet;
+
+  //保存 Route 栈所有 [/download] 存活实例
+  static List<Route> _routes = [];
+
+  //移除路由栈中本页面实例
+  static void removeAll(c) {
+    var nav = Navigator.of(c);
+    _routes.forEach((r) {
+      nav.removeRoute(r);
+    });
+  }
 
   Map<String, List> groupSet;
 
@@ -240,7 +251,7 @@ class _State extends State<DownloadManagerPage> {
                 "cnname": item['mFilmName'],
                 "poster_b": item['mFilmImg'],
               };
-              Navigator.pushReplacementNamed(
+              Navigator.pushNamed(
                 context,
                 "/detail",
                 arguments: data,
@@ -402,11 +413,23 @@ class _State extends State<DownloadManagerPage> {
   }
 
   @override
+  void didUpdateWidget(DownloadManagerPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    refreshStatus();
+  }
+
+  Route myRoute;
+
+  @override
   void initState() {
     super.initState();
     RRResManager.addEventListener(onReceiverData);
     refreshList();
     Future.delayed(Duration(seconds: 1), _showTutorial);
+    Future.delayed(Duration(milliseconds: 100), () {
+      myRoute = ModalRoute.of(context);
+      _routes.add(myRoute);
+    });
   }
 
   _showTutorial() async {
@@ -448,6 +471,7 @@ class _State extends State<DownloadManagerPage> {
 
   @override
   void dispose() {
+    _routes.remove(myRoute);
     RRResManager.removeEventListener(onReceiverData);
     super.dispose();
   }

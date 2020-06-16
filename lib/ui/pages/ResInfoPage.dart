@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/app/Api.dart';
 import 'package:flutter_yyets/ui/load/LoadingStatus.dart';
+import 'package:flutter_yyets/ui/pages/DownloadManagerPage.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/constants.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
@@ -31,6 +32,7 @@ class _ResInfoState extends State<ResInfoPage> {
           filmName: info['cnname'],
           episode: info['episode'].toString(),
           season: info['season'].toString());
+      DownloadPageState.removeAll(context);
       Navigator.pushReplacementNamed(context, "/download");
     } else {
       toast("请授予存储权限");
