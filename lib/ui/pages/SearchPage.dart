@@ -8,11 +8,11 @@ import 'package:flutter_yyets/ui/widgets/movie_tile.dart';
 class SearchPageDelegate extends SearchDelegate<Map> {
   @override
   Widget buildSuggestions(BuildContext context) {
-    print("buildSuggestions  $query");
-
     return SuggestionPage(query, (q) {
       query = q;
       showResults(context);
+    }, (q) {
+      query = q;
     });
   }
 
@@ -60,31 +60,17 @@ class SearchPageDelegate extends SearchDelegate<Map> {
   }
 }
 
-class SuggestionPage extends StatefulWidget {
+class SuggestionPage extends StatelessWidget {
   final String query;
   final Function onShowResult;
+  final Function onQuery;
 
-  SuggestionPage(this.query, this.onShowResult);
-
-  @override
-  State createState() => _SuggestionState();
-}
-
-class _SuggestionState extends State<SuggestionPage> {
-  String get query => widget.query;
-
-  Future apiCall;
-
-  @override
-  void initState() {
-    super.initState();
-    apiCall = getQueryHistory();
-  }
+  SuggestionPage(this.query, this.onShowResult, this.onQuery);
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: apiCall,
+      future: querySuggest(query),
       builder: (c, snap) {
         if (snap.connectionState == ConnectionState.done && !snap.hasError) {
           var suggestions = snap.data;
@@ -93,7 +79,7 @@ class _SuggestionState extends State<SuggestionPage> {
               itemBuilder: (c, i) {
                 return ListTile(
                   onTap: () {
-                    widget.onShowResult(suggestions[i]);
+                    onShowResult(suggestions[i]);
                   },
                   title: Text(suggestions[i]),
                   trailing: Container(
@@ -104,7 +90,7 @@ class _SuggestionState extends State<SuggestionPage> {
                       padding: EdgeInsets.all(0),
                       onPressed: () async {
                         await deleteQueryHistory(suggestions[i]);
-                        setState(() {});
+                        onQuery(query);
                       },
                       icon: Icon(Icons.close),
                     ),
