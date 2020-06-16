@@ -28,7 +28,7 @@ class EpisodeWidgetState extends State<EpisodeWidget>
 
   Map get resInfo => widget.resInfo;
 
-  Map<String, bool> downloaded = {};
+  Map<dynamic, dynamic> downloaded = {};
 
   @override
   void initState() {
@@ -37,10 +37,10 @@ class EpisodeWidgetState extends State<EpisodeWidget>
   }
 
   void initDownloadStatus() async {
-    if (!RRResManager.isSupportThisPlatForm) {
+    if (!RRResManager.isSupportThisPlatForm || !mounted) {
       return;
     }
-    var kl = [];
+    var kl = <Map>[];
     episodes.forEach((item) {
       String season = item['season'].toString();
       item['episode_list'].forEach((epi) {
@@ -56,12 +56,10 @@ class EpisodeWidgetState extends State<EpisodeWidget>
         });
       });
     });
-    print(kl);
-    kl.forEach((element) async {
-      downloaded[element['key']] =
-          await RRResManager.isDownloadComplete(element);
+    downloaded = await RRResManager.isDownloadComplete(kl);
+    if(mounted) {
       setState(() {});
-    });
+    }
   }
 
   @override

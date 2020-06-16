@@ -1,13 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_yyets/main.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 
 ///
 /// 各平台下载Api
 ///
 class RRResManager {
+//  static Map<String, void Function(dynamic atgs)> methods = {
+//    "goDetail": (args) {
+//      return Navigator.pushNamed(MyApp.navigatorKey.currentContext, "/detail",
+//          arguments: args);
+//    },
+//  };
+
   static var methodChannel = MethodChannel("cn.vove7.flutter_yyets/channel");
 
   static List _eventListeners = [];
@@ -34,7 +43,7 @@ class RRResManager {
     return jsonDecode(await methodChannel.invokeMethod("getAllItems"));
   }
 
-  static Future<bool> isDownloadComplete(Map data) {
+  static Future<Map<dynamic, dynamic>> isDownloadComplete(List<Map> data) {
     return methodChannel.invokeMethod("isDownloadComplete", data);
   }
 

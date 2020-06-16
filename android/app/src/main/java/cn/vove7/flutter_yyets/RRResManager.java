@@ -3,6 +3,7 @@ package cn.vove7.flutter_yyets;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.util.ArrayMap;
 import android.util.Log;
 
 import androidx.core.content.FileProvider;
@@ -13,6 +14,7 @@ import com.yyets.zimuzu.db.bean.FilmCacheBean;
 import com.yyets.zimuzu.fileloader.RRFilmDownloadManager;
 
 import java.io.File;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -61,12 +63,17 @@ class RRResManager implements P4PClientEvent {
         return gson.toJson(DBCache.instance.getAllCacheItemsByTime());
     }
 
-    boolean isDownloadComplete(Map<String, String> data) {
-        return DBCache.instance.hasDownloadComplete(
-                data.get("filmid"),
-                data.get("season"),
-                data.get("episode")
-        );
+    Map<String, Boolean> isDownloadComplete(List<Map<String, String>> datas) {
+        Map<String, Boolean> ss = new ArrayMap<>();
+        for (Map<String, String> data : datas) {
+            boolean b = DBCache.instance.hasDownloadComplete(
+                    data.get("filmid"),
+                    data.get("season"),
+                    data.get("episode")
+            );
+            ss.put(data.get("key"), b);
+        }
+        return ss;
     }
 
     boolean startDownload(Map<String, Object> filmData) {
