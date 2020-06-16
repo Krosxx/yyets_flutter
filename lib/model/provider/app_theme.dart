@@ -37,6 +37,18 @@ class AppTheme extends ChangeNotifier {
     notifyListeners();
   }
 
+  //页面切换效果
+  static PageTransitionsTheme _pageT = const PageTransitionsTheme(
+    builders: <TargetPlatform, PageTransitionsBuilder>{
+      TargetPlatform.android: ZoomPageTransitionsBuilder(),
+      TargetPlatform.fuchsia: ZoomPageTransitionsBuilder(),
+      TargetPlatform.windows: ZoomPageTransitionsBuilder(),
+      TargetPlatform.macOS: ZoomPageTransitionsBuilder(),
+      TargetPlatform.iOS: ZoomPageTransitionsBuilder(),
+      TargetPlatform.linux: ZoomPageTransitionsBuilder(),
+    },
+  );
+
   static final ThemeData light = ThemeData(
     primarySwatch: Colors.blue,
     buttonColor: Colors.blueAccent,
@@ -44,11 +56,7 @@ class AppTheme extends ChangeNotifier {
     primaryColor: Colors.white,
     cardColor: Colors.white,
     iconTheme: IconThemeData(color: Colors.grey),
-    pageTransitionsTheme: const PageTransitionsTheme(
-      builders: <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
-      },
-    ),
+    pageTransitionsTheme: _pageT,
   );
 
   static final ThemeData dark = ThemeData(
@@ -56,10 +64,6 @@ class AppTheme extends ChangeNotifier {
     buttonColor: Colors.blueAccent,
     brightness: Brightness.dark,
     cardColor: Colors.black12,
-    pageTransitionsTheme: const PageTransitionsTheme(
-      builders: <TargetPlatform, PageTransitionsBuilder>{
-        TargetPlatform.android: ZoomPageTransitionsBuilder(),
-      },
-    ),
+    pageTransitionsTheme: _pageT,
   );
 }
