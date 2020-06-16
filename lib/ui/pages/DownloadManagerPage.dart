@@ -35,12 +35,15 @@ class _State extends State<DownloadManagerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("下载管理"), actions: [
-        IconButton(
-          icon: Icon(Icons.help),
-          onPressed: _showTipsDialog,
-        )
-      ]),
+      appBar: AppBar(
+        title: Text("下载管理"),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.help),
+            onPressed: _showTipsDialog,
+          )
+        ],
+      ),
       body: _buildBody(),
     );
   }
@@ -59,7 +62,7 @@ class _State extends State<DownloadManagerPage> {
           Expanded(
             child: SingleChildScrollView(
               child: ExpansionPanelList(
-                expandedHeaderPadding: EdgeInsets.all(10),
+                expandedHeaderPadding: EdgeInsets.symmetric(vertical: 10),
                 expansionCallback: (i, e) {
                   setState(() {
                     itemExp[gks[i]] = !e;
@@ -215,12 +218,17 @@ class _State extends State<DownloadManagerPage> {
       canTapOnHeader: true,
       headerBuilder: (c, i) => Row(
         children: [
+          Container(
+            width: 10,
+          ),
           InkWell(
-            child: Hero(child:  Image.network(
-              img,
-              width: 40,
-              height: 60,
-            ),tag: "img_${items[0]["mFilmId"]}"),
+            child: Hero(
+                child: Image.network(
+                  img,
+                  width: 40,
+                  height: 60,
+                ),
+                tag: "img_${items[0]["mFilmId"]}"),
             onTap: () {
               var item = items[0];
               var id = int.parse(item['mFilmId']);
@@ -232,8 +240,11 @@ class _State extends State<DownloadManagerPage> {
                 "cnname": item['mFilmName'],
                 "poster_b": item['mFilmImg'],
               };
-              Navigator.pushReplacementNamed(context, "/detail",
-                  arguments: data);
+              Navigator.pushReplacementNamed(
+                context,
+                "/detail",
+                arguments: data,
+              );
             },
           ),
           Container(width: 10),

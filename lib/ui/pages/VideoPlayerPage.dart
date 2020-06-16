@@ -1,17 +1,15 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:auto_orientation/auto_orientation.dart';
+import 'package:fijkplayer/fijkplayer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_ijkplayer/flutter_ijkplayer.dart';
 import 'package:flutter_yyets/ui/widgets/visibility.dart';
 import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/times.dart';
-import 'package:flutter_yyets/utils/toast.dart';
 import 'package:screen/screen.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 
@@ -20,30 +18,34 @@ class VideoPlayerPage extends StatefulWidget {
   final String title;
   final int type;
 
+  // 播放起始位置 [跳过广告]
+  final int startPos;
+
   static const int TYPE_FILE = 0;
   static const int TYPE_NETWORK = 1;
 
   VideoPlayerPage(Map data)
       : this.resUri = data['uri'],
         this.title = data['title'],
-        this.type = data['type'] ?? 0;
+        this.type = data['type'] ?? 0,
+        this.startPos = data['startPos'] ?? 0;
 
   @override
   State createState() => _PageState();
 }
 
 class _PageState extends State<VideoPlayerPage> {
-  IjkMediaController _controller = IjkMediaController();
+  FijkPlayer _controller = FijkPlayer();
 
   //滑动调节进度结束后是否继续播放状态
   bool _cacheStatus;
 
-  //视频总长度
+  //视频总长度 ms
   int _totalLength = 0;
 
   double get playProgress => _totalLength == 0 ? 0.0 : _playPos / _totalLength;
 
-  //视频当前进度
+  //视频当前进度 ms
   int _playPos = 0;
 
   //高度
@@ -76,6 +78,8 @@ class _PageState extends State<VideoPlayerPage> {
   //倍速
   double _speed = null;
 
+  bool get isPlaying => _controller.state == FijkState.started;
+
   Future<void> initPlatformState() async {
     num initVolume = await VolumeWatcher.getCurrentVolume;
     num maxVolume = await VolumeWatcher.getMaxVolume;
@@ -99,94 +103,113 @@ class _PageState extends State<VideoPlayerPage> {
     AutoOrientation.landscapeAutoMode();
     //隐藏状态栏 导航栏
     SystemChrome.setEnabledSystemUIOverlays([]);
-
-    if (widget.type == VideoPlayerPage.TYPE_FILE) {
-      _controller.setFileDataSource(File(widget.resUri), autoPlay: true);
-    } else {
-      _controller.setNetworkDataSource(widget.resUri, autoPlay: true);
-    }
-//
-//    _controller.play().catchError((e) {
-//      showUnSupportDialog(e);
-//    });
-    Future.delayed(Duration(milliseconds: 300), () async {
-      //上次播放进度
-      var sp = await MySp;
-      int pos = sp.get("pos_${widget.resUri.hashCode}", 0);
-      print("seek to $pos");
-
-      var vi = await _controller.getVideoInfo();
-      print("VideoInfo $vi");
-
-      _totalLength = ((vi.duration ?? 0) * 1000).toInt();
-      //结尾
-      if (_totalLength - pos < 3000 || pos == 0) {
-        //todo 播放起始位置 跳过广告
-        pos = 0;
-      }
-      //后退2s
-      if (pos > 10000) {
-        pos -= 2000;
-      }
-      _controller.seekTo(pos / 1000).whenComplete(() {
-        setState(() {
-          _playPos = pos;
-          _controller.play();
-        });
-      });
-      startDelayHidePanel();
-      Screen.keepOn(true);
-    }).catchError((e) {
-      showUnSupportDialog(e);
-      print("errrr:==>  $e");
-      toast(e);
-    });
-
-    timer = Timer.periodic(Duration(milliseconds: 800), (t) async {
-      //未在调节进度时
-      if (!mounted || _centerProgressbarVisibility || !_controller.isPlaying) {
-        return;
-      }
-      var vi = await _controller.getVideoInfo();
-      int now = DateTime.now().millisecondsSinceEpoch;
-      _totalLength = (vi.duration * 1000).toInt();
-      int pos = (vi.currentPosition * 1000).toInt();
-      if (pos >= _totalLength) {
-        onPlayFinished();
-      }
-
-      if (now - _lastSavePos > 800 && pos > 0) {
-        _lastSavePos = now;
-        MySp.then((sp) {
-          sp.set("pos_${widget.resUri.hashCode}", pos);
-        });
-      }
-      _playPos = pos;
-      //更新进度条
-      if (_playControlVisibility && mounted) {
-        setState(() {});
-      }
-    });
+    _controller.setDataSource(widget.resUri, autoPlay: true);
+    _controller.onCurrentPosUpdate.listen(onCurrentPosUpdate);
   }
 
-  Timer timer;
+  prepareOnce() async {
+    if (_totalLength != 0) return;
+    if (_controller.state == FijkState.error) {
+      showUnSupportDialog("");
+    }
+    var info = _controller.value;
+    _totalLength = info.duration.inMilliseconds;
+    if (_totalLength == 0) {
+      print("获取时长失败");
+      return;
+    }
+    //上次播放进度
+    var sp = await MySp;
+    int pos = sp.get("pos_${widget.resUri.hashCode}", 0);
+
+    print("VideoInfo $info");
+
+    //结尾
+    if (_totalLength - pos < 3000 || pos == 0) {
+      pos = widget.startPos;
+    }
+    //后退2s
+    if (pos > 10000) {
+      pos -= 2000;
+    }
+    print("seek to $pos");
+    _controller.seekTo(pos).whenComplete(() {
+      _playPos = pos;
+    });
+    startDelayHidePanel();
+    Screen.keepOn(true);
+  }
+
+  void onCurrentPosUpdate(Duration event) {
+    //此处初始化_totalLength prepareAsync 方法无法获取 duration
+    prepareOnce();
+    int pos = event.inMilliseconds;
+    if (pos >= _totalLength || _controller.state == FijkState.completed) {
+      onPlayFinished();
+    }
+    //未在调节进度时
+    if (!mounted || _centerProgressbarVisibility || !isPlaying) {
+      return;
+    }
+    var vi = _controller.value;
+    int now = DateTime.now().millisecondsSinceEpoch;
+    _totalLength = vi.duration.inMilliseconds;
+
+
+    if (now - _lastSavePos > 800 && pos > 0) {
+      _lastSavePos = now;
+      MySp.then((sp) {
+        sp.set("pos_${widget.resUri.hashCode}", pos);
+      });
+    }
+    _playPos = pos;
+    //更新进度条
+    if (_playControlVisibility && mounted) {
+      setState(() {});
+    }
+  }
 
   void onPlayFinished() {
-//    Navigator.pop(context);
-    setState(() {});
+    print("结束");
+    _controller.pause();
+    Screen.keepOn(false);
+    showDialog(
+      context: context,
+      builder: (c) => WrappedMaterialDialog(
+        c,
+        title: Text("播放结束"),
+        actions: [
+          FlatButton(
+            child: Text("重播"),
+            onPressed: () {
+              _controller.seekTo(0);
+              _controller.start();
+              Screen.keepOn(true);
+              Navigator.pop(c);
+            },
+          ),
+          FlatButton(
+            child: Text("退出"),
+            onPressed: () {
+              Navigator.pop(c);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
   }
 
-  void togglePlayStatus() {
+  void togglePlayStatus() async {
     startDelayHidePanel();
-    setState(() {
-      if (_controller.isPlaying) {
-        _controller.pause();
-        Screen.keepOn(false);
-      } else {
-        _controller.play();
-        Screen.keepOn(true);
-      }
-    });
+    if (isPlaying) {
+      await _controller.pause();
+      Screen.keepOn(false);
+    } else {
+      _controller.start();
+      await Screen.keepOn(true);
+    }
+    setState(() {});
   }
 
   bool _playControlVisibility = true;
@@ -314,7 +337,7 @@ class _PageState extends State<VideoPlayerPage> {
                 }
                 _startDragPos = _playPos;
                 print("onHorizontalDragStart  ${_playPos}");
-                _cacheStatus = _controller.isPlaying;
+                _cacheStatus = isPlaying;
                 setState(() {
                   _centerProgressbarVisibility = true;
                   _controller.pause();
@@ -328,10 +351,10 @@ class _PageState extends State<VideoPlayerPage> {
                 print("DragEndDetails  ${_playPos}");
                 setState(() {
                   _centerProgressbarVisibility = false;
-                  _controller.seekTo(_playPos / 1000).whenComplete(() {
+                  _controller.seekTo(_playPos).whenComplete(() {
                     if (_cacheStatus) {
                       setState(() {
-                        _controller.play();
+                        _controller.start();
                       });
                     }
                   });
@@ -356,10 +379,10 @@ class _PageState extends State<VideoPlayerPage> {
               },
               onDoubleTap: togglePlayStatus,
               onTap: toggleControllerPanel,
-              child: IjkPlayer(
-                controllerWidgetBuilder: (a) => Container(),
-                statusWidgetBuilder: (a, b, v) => Container(),
-                mediaController: _controller,
+              child: FijkView(
+                player: _controller,
+                color: Colors.black,
+                panelBuilder: (p, d, c, v, t) => Container(),
               ),
             ),
           ),
@@ -473,9 +496,7 @@ class _PageState extends State<VideoPlayerPage> {
                       IconButton(
                         onPressed: togglePlayStatus,
                         icon: Icon(
-                          _controller.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
+                          isPlaying ? Icons.pause : Icons.play_arrow,
                           color: Colors.white,
                         ),
                       ),
@@ -495,7 +516,7 @@ class _PageState extends State<VideoPlayerPage> {
                               : _playPos.toDouble(),
                           onChangeStart: (d) {
                             _startDragPos = _playPos;
-                            _cacheStatus = _controller.isPlaying;
+                            _cacheStatus = isPlaying;
                             print("onChangeStart:  $_cacheStatus");
                             delayHideTimer?.cancel();
                             setState(() {
@@ -509,9 +530,9 @@ class _PageState extends State<VideoPlayerPage> {
                             _playPos = p.toInt();
                             setState(() {
                               _centerProgressbarVisibility = false;
-                              _controller.seekTo(p / 1000).whenComplete(() {
+                              _controller.seekTo(_playPos).whenComplete(() {
                                 if (_cacheStatus) {
-                                  _controller.play();
+                                  _controller.start();
                                 }
                               });
                             });
@@ -567,9 +588,8 @@ class _PageState extends State<VideoPlayerPage> {
 
   @override
   void dispose() {
-    timer?.cancel();
     _controller.pause();
-    _controller.dispose();
+    _controller.release();
     AutoOrientation.fullAutoMode();
     SystemChrome.setEnabledSystemUIOverlays(
         [SystemUiOverlay.top, SystemUiOverlay.bottom]);
