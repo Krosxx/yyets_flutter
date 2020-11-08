@@ -134,6 +134,7 @@ class _PageState extends State<VideoPlayerPage> {
     print("start pos: $pos");
     //结尾
     if (_totalLength - pos < 3000 || pos < widget.startPos) {
+      //跳过片头/广告
       pos = widget.startPos;
     } else if (pos > 10000) {
       //后退2s

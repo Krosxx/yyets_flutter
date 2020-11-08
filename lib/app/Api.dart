@@ -117,6 +117,24 @@ class Api {
     }
   }
 
+  static Future<Map> register(
+      String email, String nickname, String pass) async {
+    //http://a.zmzapi.com/index.php?g=api/public&m=v2&
+    // accesskey=519f9cab85c8059d17544947k361a827&client=2&
+    // a=register&email=$email&nickname=$nickname&password=$pass&repassword=$pass
+
+    var res = await dioClient
+        .get(linkUrl("g=api/public&m=v2&a=register&email=$email&nickname="
+            "$nickname&password=$pass&repassword=$pass"));
+
+    var data = res.data['data'];
+    if (data == null || data == '') {
+      throw Exception(res.data["info"]);
+    }
+    data['uid'] = data['uid'].toString();
+    return data;
+  }
+
   static Future<Map> _loginWithAccount(String account, String pass) async {
     String id = "";
     var ran = Random();
@@ -141,24 +159,6 @@ class Api {
         "g=api/public&m=v2&a=mobile_login&area=$area&mobile=$phone&password=$pass"));
     var data = res.data['data'];
     if (data == null || data == '') {
-      throw Exception(res.data["info"]);
-    }
-    return data;
-  }
-
-  /// @return token uid
-  static Future<Map> register(
-      String username, String email, String pass) async {
-    FormData formData = new FormData.fromMap({
-      "email": email,
-      "nickname": username,
-      "password": pass,
-      "repassword": pass,
-    });
-    var res = await dioClient.post(linkUrl("g=api/public&m=v2/a=register"),
-        data: formData);
-    var data = res.data['data'];
-    if (data == null) {
       throw Exception(res.data["info"]);
     }
     return data;
@@ -234,8 +234,10 @@ class Api {
       String id, String channel, String text) async {
     var res = await dioClient.get(linkUrl(
         "m=comment&a=save&channel=$channel&itemid=$id&content=$text&replyid=0&thread=1"));
+    print(res.data);
 
     if (res.data['status'] == 1) {
+      res.data['data']['dateline'] = res.data['data']['dateline'].toString();
       return res.data['data'];
     } else {
       throw Exception(res.data['info']);
