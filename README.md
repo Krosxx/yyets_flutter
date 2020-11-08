@@ -41,7 +41,7 @@
 - 目前仅支持安卓端边下边播，其他端仅支持其他方式下载。
 - 关于Dart文件命名规范lowercase_with_underscores，后期会修改。
 - 某些布局代码需要提取优化。
-- 安卓打包请在`android/local.properties`中配置签名文件信息: `keyPath`, `keyAlias`, `keyPassword`, `storePassword`>
+- **安卓打包请在`android/local.properties`中配置签名文件信息: `keyPath`, `keyAlias`, `keyPassword`, `storePassword`>**
 ```properties
 keyPath=F:\\..\\..
 keyAlias=...
@@ -54,15 +54,15 @@ storePassword=...
 环境：
 ```
 ❯ flutter doctor
-Doctor summary (to see all details, run flutter doctor -v):
-[√] Flutter (Channel master, 1.20.0-1.0.pre.55, on Microsoft Windows [Version 10.0.19628.1], locale zh-CN)
 
-[√] Android toolchain - develop for Android devices (Android SDK version 29.0.2)
-[√] Chrome - develop for the web
-[√] Visual Studio - develop for Windows (Visual Studio Community 2019 16.5.3)
-[√] Android Studio (version 4.0)
-[√] VS Code, 64-bit edition (version 1.44.2)
-[√] Connected device (3 available)
+[✓] Flutter (Channel stable, 1.22.3, on Mac OS X 10.15.7 19H2, locale zh-Hans-CN)
+
+[✓] Android toolchain - develop for Android devices (Android SDK version 30.0.2)
+[!] Android Studio (version 4.0)
+    ✗ Flutter plugin not installed; this adds Flutter specific functionality.
+    ✗ Dart plugin not installed; this adds Dart specific functionality.
+...
+[✓] Connected device (1 available)
 ```
 
 - Android

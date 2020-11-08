@@ -28,7 +28,7 @@ class VideoPlayerPage extends StatefulWidget {
       : this.resUri = data['uri'],
         this.title = data['title'],
         this.type = data['type'] ?? 0,
-        this.startPos = data['startPos'] ?? 0;
+        this.startPos = (data['adTime'] ?? 0) * 1000;
 
   @override
   State createState() => _PageState();
@@ -73,7 +73,7 @@ class _PageState extends State<VideoPlayerPage> {
   double _volumePercentage = 0;
 
   //最大音量
-  int _maxVolume = 0;
+  double _maxVolume = 0;
 
   //倍速
   double _speed = null;
@@ -90,9 +90,16 @@ class _PageState extends State<VideoPlayerPage> {
     print("音量：${initVolume}/${maxVolume}");
   }
 
+  void onStop() {
+    print("onStop");
+    _controller.pause();
+  }
+
   @override
   void initState() {
+    print("startPos: ${widget.startPos}");
     super.initState();
+    RRResManager.addOnStopListener(onStop);
 
     initPlatformState();
     //横屏
@@ -124,12 +131,12 @@ class _PageState extends State<VideoPlayerPage> {
 
     print("VideoInfo $info");
 
+    print("start pos: $pos");
     //结尾
-    if (_totalLength - pos < 3000 || pos == 0) {
+    if (_totalLength - pos < 3000 || pos < widget.startPos) {
       pos = widget.startPos;
-    }
-    //后退2s
-    if (pos > 10000) {
+    } else if (pos > 10000) {
+      //后退2s
       pos -= 2000;
     }
     print("seek to $pos");
@@ -590,6 +597,7 @@ class _PageState extends State<VideoPlayerPage> {
   void dispose() {
     _controller.pause();
     _controller.release();
+    RRResManager.removeOnStopListener(onStop);
     AutoOrientation.fullAutoMode();
     SystemChrome.setEnabledSystemUIOverlays(
         [SystemUiOverlay.top, SystemUiOverlay.bottom]);

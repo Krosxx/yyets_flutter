@@ -13,3 +13,6 @@ plugins.each { name, path ->
     include ":$name"
     project(":$name").projectDir = pluginDirectory
 }
+
+//include ':rr'
+//project(':rr').projectDir = new File('../../yyets-downloader-android/rr-lib')

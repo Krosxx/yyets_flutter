@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
+import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/toast.dart';
 import 'package:flutter_yyets/utils/tools.dart';
 
@@ -28,7 +29,7 @@ class EpisodeWidgetState extends State<EpisodeWidget>
 
   Map get resInfo => widget.resInfo;
 
-  Map<dynamic, dynamic> downloaded = {};
+  Map<dynamic, dynamic> downloadStatus = {};
 
   @override
   void initState() {
@@ -56,11 +57,25 @@ class EpisodeWidgetState extends State<EpisodeWidget>
         });
       });
     });
-    downloaded = await RRResManager.isDownloadComplete(kl);
-    if(mounted) {
+    downloadStatus = await RRResManager.getFilmStatus(kl);
+    print(downloadStatus);
+    if (mounted) {
       setState(() {});
     }
   }
+
+  //STATUS_COMPLETE = 1;
+  // STATUS_WAITING = 2;
+  // STATUS_DOWNLOADING = 3;
+  // STATUS_PAUSED = 4;
+  // STATUS_UNKNOWN = -1;
+  // STATUS_UN_DOWNLOAD = -2;
+  Map statusColors = {
+    1: Colors.lightGreen,
+    2: Colors.amberAccent,
+    3: Colors.greenAccent,
+    4: Colors.orange,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -90,22 +105,30 @@ class EpisodeWidgetState extends State<EpisodeWidget>
                       (season ?? "") +
                       "-" +
                       (epiItem['episode'] ?? "");
-                  bool isDownload = downloaded[k] ?? false;
+                  dynamic ss = downloadStatus[k] ?? [-1, 0.0];
+                  int status = ss[0];
+                  double progress = ss[1];
                   bool unPlay = epiItem['play_status_cn'] == "未播";
                   return Card(
-                    color: isDownload ? Colors.lightGreen : null,
+                    color: statusColors[status],
+                    //isDownload ? Colors.lightGreen : null,
                     child: InkWell(
-                      onTap: () {
-                        if (unPlay) {
-                          toastLong("未播");
+                      onLongPress: () {
+                        _toResPage(unPlay, epiItem, item);
+                      },
+                      onTap: () async {
+                        if (status >= 1 && status <= 4) {
+                          Navigator.pushNamed(context, "/download");
+                          dynamic sp = (await MySp);
+                          int guideCount = sp.get("res_guide", 0);
+                          print(guideCount);
+                          if (guideCount < 3) {
+                            sp.set("res_guide", guideCount + 1);
+                            toast("长按可进入资源页");
+                          }
                           return;
                         }
-                        Navigator.pushNamed(context, "/res",
-                            arguments: epiItem
-                              ..addAll(resInfo)
-                              ..["season_cn"] = item['season_cn']
-                              ..["season"] = item['season']
-                              ..['episode'] = epiItem['episode']);
+                        _toResPage(unPlay, epiItem, item);
                       },
                       child: Padding(
                         padding: EdgeInsets.all(5),
@@ -136,6 +159,11 @@ class EpisodeWidgetState extends State<EpisodeWidget>
                             Text(
                               nullEmptyElse(epiItem['play_time'], "无时间"),
                             ),
+                            progress > 0
+                                ? LinearProgressIndicator(
+                                    value: progress,
+                                  )
+                                : Container(),
                           ],
                         ),
                       ),
@@ -148,5 +176,19 @@ class EpisodeWidgetState extends State<EpisodeWidget>
         );
       },
     );
+  }
+
+  void _toResPage(unPlay, epiItem, item) {
+    if (unPlay) {
+      toastLong("未播");
+      return;
+    }
+    Navigator.pushNamed(context, "/res",
+        arguments: epiItem
+          ..addAll(resInfo)
+          ..["season_cn"] = item['season_cn']
+          ..["season"] = item['season']
+          ..['episode'] = epiItem['episode'])
+        .whenComplete(initDownloadStatus);
   }
 }

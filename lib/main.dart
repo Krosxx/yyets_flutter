@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_yyets/model/provider/app_theme.dart';
 import 'package:flutter_yyets/ui/routes.dart';
@@ -7,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'model/provider/RRUser.dart';
 
 void main() {
+  GestureBinding.instance?.resamplingEnabled = true;
   runApp(MyApp());
 }
 

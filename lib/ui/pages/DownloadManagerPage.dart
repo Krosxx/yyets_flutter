@@ -80,7 +80,7 @@ class DownloadPageState extends State<DownloadManagerPage> {
                   });
                 },
                 children: gks
-                    .map((k) => buildGroup(k, groupSet[k], itemExp[k] ?? true))
+                    .map((k) => buildGroup(k, groupSet[k], itemExp[k] ?? false))
                     .toList(),
               ),
             ),
@@ -91,14 +91,14 @@ class DownloadPageState extends State<DownloadManagerPage> {
                 onPressed: () async {
                   await RRResManager.pauseAll();
                   totalSpeed = "";
-                  refreshStatus();
+                  refreshStatus(false);
                 },
                 child: Text("暂停全部"),
               ),
               FlatButton(
                 onPressed: () async {
                   await RRResManager.resumeAll();
-                  refreshStatus();
+                  refreshStatus(false);
                 },
                 child: Text("开始全部"),
               ),
@@ -133,13 +133,14 @@ class DownloadPageState extends State<DownloadManagerPage> {
         updateStatus(stat['id'], stat, 0);
       }
     });
-    refreshStatus();
+    refreshStatus(false);
   }
 
-  void playOnLocal(filename, name) {
+  void playOnLocal(keyTitle, filename, name) async {
     Navigator.pushNamed(context, "/play", arguments: {
       'uri': filename,
       'title': name,
+      'adTime': (await MySp).get(keyTitle, 0)
     });
   }
 
@@ -152,15 +153,15 @@ class DownloadPageState extends State<DownloadManagerPage> {
     return name;
   }
 
-  void play(filename, name) async {
+  void play(keyTitle, filename, name) async {
     if (!Platform.isAndroid) {
-      playOnLocal(filename, name);
+      playOnLocal(keyTitle, filename, name);
       return;
     }
     var sp = await MySp;
     bool drpm = sp.get('dont_request_play_mode', false);
     if (drpm) {
-      playOnLocal(filename, name);
+      playOnLocal(keyTitle, filename, name);
       return;
     }
     showDialog(
@@ -176,14 +177,14 @@ class DownloadPageState extends State<DownloadManagerPage> {
               onPressed: () {
                 sp.set("dont_request_play_mode", true);
                 Navigator.pop(c);
-                playOnLocal(filename, name);
+                playOnLocal(keyTitle, filename, name);
               },
             ),
             FlatButton(
               child: Text("本地"),
               onPressed: () {
                 Navigator.pop(c);
-                playOnLocal(filename, name);
+                playOnLocal(keyTitle, filename, name);
               },
             ),
             FlatButton(
@@ -227,62 +228,79 @@ class DownloadPageState extends State<DownloadManagerPage> {
     return ExpansionPanel(
       isExpanded: exp,
       canTapOnHeader: true,
-      headerBuilder: (c, i) => Row(
-        children: [
-          Container(
-            width: 10,
+      headerBuilder: (c, i) => Slidable(
+        actions: [
+          IconSlideAction(
+            caption: "删除",
+            icon: Icons.delete,
+            color: Colors.redAccent,
+            onTap: () => deleteAll(items),
           ),
-          InkWell(
-            child: Hero(
-                child: Image.network(
-                  img,
-                  width: 40,
-                  height: 60,
-                ),
-                tag: "img_${items[0]["mFilmId"]}"),
-            onTap: () {
-              var item = items[0];
-              var id = int.parse(item['mFilmId']);
-              if (id < 0) {
-                return;
-              }
-              var data = {
-                "id": item['mFilmId'],
-                "cnname": item['mFilmName'],
-                "poster_b": item['mFilmImg'],
-              };
-              Navigator.pushNamed(
-                context,
-                "/detail",
-                arguments: data,
-              );
-            },
+          IconSlideAction(
+            caption: "跳过开头",
+            icon: Icons.access_alarms_outlined,
+            color: Colors.blueAccent,
+            onTap: () => setSkipBeginning(keyTitle),
           ),
-          Container(width: 10),
-          Flexible(
-            child: Text(
-              keyTitle,
-              softWrap: true,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          )
         ],
+        actionPane: SlidableScrollActionPane(),
+        child: Row(
+          children: [
+            Container(
+              width: 10,
+            ),
+            InkWell(
+              child: Hero(
+                  child: Image.network(
+                    img,
+                    width: 40,
+                    height: 60,
+                  ),
+                  tag: "img_${items[0]["mFilmId"]}"),
+              onTap: () {
+                var item = items[0];
+                var id = int.parse(item['mFilmId']);
+                if (id < 0) {
+                  return;
+                }
+                var data = {
+                  "id": item['mFilmId'],
+                  "cnname": item['mFilmName'],
+                  "poster_b": item['mFilmImg'],
+                };
+                Navigator.pushNamed(
+                  context,
+                  "/detail",
+                  arguments: data,
+                );
+              },
+            ),
+            Container(width: 10),
+            Flexible(
+              child: Text(
+                keyTitle,
+                softWrap: true,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            )
+          ],
+        ),
       ),
       body: ListView.builder(
         physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: items.length,
-        itemBuilder: (c, i) => buildItem(items[i]),
+        itemBuilder: (c, i) => buildItem(keyTitle, items[i]),
       ),
     );
   }
 
-  Widget buildItem(Map item) {
+  Widget buildItem(keyTitle, Map item) {
     String name = "";
-    String season = item['mSeason'];
-    if (season != null && season != "") {
-      name += "第${item['mEpisode']}集";
+    String episode = item['mEpisode'];
+    if (episode != null && episode != "" && episode != "null") {
+      name += "第${episode}集";
     } else {
       name = item['mFilmName'];
     }
@@ -332,18 +350,18 @@ class DownloadPageState extends State<DownloadManagerPage> {
           onPressed: () {
             switch (status) {
               case STATUS_COMPLETE:
-                play(item['mFileName'], buildPlayTitle(item));
+                play(keyTitle, item['mFileName'], buildPlayTitle(item));
                 //play
                 break;
               case STATUS_DOWNLOADING:
                 RRResManager.pauseByFileId(item['mFileId']);
                 totalSpeed = "";
-                refreshStatus();
+                refreshStatus(false);
                 break;
               case STATUS_PAUSED:
                 RRResManager.resumeByFileId(item['mFileId']);
                 totalSpeed = "";
-                refreshStatus();
+                refreshStatus(false);
                 break;
               case STATUS_UNKNOWN:
                 break;
@@ -382,7 +400,7 @@ class DownloadPageState extends State<DownloadManagerPage> {
                       RRResManager.playByExternal(item['mFileName']);
                     },
                     onPressed: () {
-                      play(item['mFileName'], buildPlayTitle(item));
+                      play(keyTitle, item['mFileName'], buildPlayTitle(item));
                     })
                 : Container(),
           ],
@@ -395,27 +413,39 @@ class DownloadPageState extends State<DownloadManagerPage> {
           caption: "删除",
           icon: Icons.delete,
           color: Colors.redAccent,
-          onTap: () => _requestDelete(item['mFileId']),
+          onTap: () => _requestDelete([item['mFileId']]),
         )
       ],
       actionPane: SlidableScrollActionPane(),
     );
   }
 
-  void refreshStatus() {
+  void refreshStatus(bool isInit) {
     Future.wait(dataSet.map((item) {
       return RRResManager.getStatus(item).then((value) {
         if (item['status'] != STATUS_COMPLETE) {
           item['status'] = value;
         }
       });
-    })).whenComplete(() => setState(() {}));
+    })).whenComplete(() =>
+        setState(() {
+          if (isInit) {
+            groupSet.forEach((key, items) {
+              itemExp[key] = false;
+              items.forEach((item) {
+                if (item['status'] != STATUS_COMPLETE) {
+                  itemExp[key] = true;
+                }
+              });
+            });
+          }
+        }));
   }
 
   @override
   void didUpdateWidget(DownloadManagerPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    refreshStatus();
+    refreshStatus(false);
   }
 
   Route myRoute;
@@ -424,7 +454,7 @@ class DownloadPageState extends State<DownloadManagerPage> {
   void initState() {
     super.initState();
     RRResManager.addEventListener(onReceiverData);
-    refreshList();
+    refreshList(true);
     Future.delayed(Duration(seconds: 1), _showTutorial);
     Future.delayed(Duration(milliseconds: 100), () {
       myRoute = ModalRoute.of(context);
@@ -441,12 +471,12 @@ class DownloadPageState extends State<DownloadManagerPage> {
     _showTipsDialog();
   }
 
-  void refreshList() {
+  void refreshList(bool isInit) {
     RRResManager.getAllItems().then((value) {
       print("list: ==> " + value.toString());
       dataSet = value ?? [];
       _buildGroup();
-      refreshStatus();
+      refreshStatus(isInit);
     }).catchError((e) {
       print(e);
       toast(e);
@@ -458,8 +488,12 @@ class DownloadPageState extends State<DownloadManagerPage> {
     dataSet.forEach((item) {
       String key = item['mFilmName'];
       var season = item['mSeason'];
-      if (season != null && season != "") {
-        key += "第${season}季";
+      if (season != null && season != "" && season != "null") {
+        if (season == "102") {
+          key += "mini剧";
+        } else {
+          key += "第${season}季";
+        }
       }
       if (groupSet[key] == null) {
         groupSet[key] = [item];
@@ -476,32 +510,36 @@ class DownloadPageState extends State<DownloadManagerPage> {
     super.dispose();
   }
 
-  void _requestDelete(String fileId) {
+  void deleteAll(List ss) {
+    _requestDelete(ss.map((e) => e["mFileId"]).toList());
+  }
+
+  void _requestDelete(List fileIds) {
     showDialog(
       context: context,
       barrierDismissible: true,
-      builder: (c) => WrappedMaterialDialog(
-        context,
-        title: Text("确认删除？"),
-        actions: [
-          FlatButton(
-            child: Text("确认"),
-            onPressed: () async {
-              if (await RRResManager.deleteDownload(fileId)) {
-                refreshList();
-              } else {
-                toast("删除失败");
-              }
-              Navigator.pop(c);
-            },
+      builder: (c) =>
+          WrappedMaterialDialog(
+            context,
+            title: Text("确认删除？"),
+            actions: [
+              FlatButton(
+                child: Text("确认"),
+                onPressed: () async {
+                  Navigator.pop(c);
+                  fileIds.forEach((id) {
+                    RRResManager.deleteDownload(id);
+                  });
+                  refreshList(false);
+                },
+              ),
+              FlatButton(
+                  child: Text("取消"),
+                  onPressed: () {
+                    Navigator.pop(c);
+                  }),
+            ],
           ),
-          FlatButton(
-              child: Text("取消"),
-              onPressed: () {
-                Navigator.pop(c);
-              }),
-        ],
-      ),
     );
   }
 
@@ -513,11 +551,11 @@ class DownloadPageState extends State<DownloadManagerPage> {
           title: Text("提示"),
           content: Text(
             "1. 请不要同时开启人人官方应用，否则无法使用下载功能。\n"
-            "2. 下载5%即可播放。\n"
-            "3. 侧滑删除。\n"
-            "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/download\n"
-            "5. 长按播放按钮直接使用外部播放器\n"
-            "6. 卸载会清空下载及文件，需要请先备份",
+                "2. 下载5%即可播放。\n"
+                "3. 剧集左滑删除；分类标题右滑删除\n"
+                "4. 下载目录：/sdcard/Android/data/cn.vove7.flutter_yyets/files/download\n"
+                "5. 长按播放按钮直接使用外部播放器\n"
+                "6. 卸载会清空下载及文件，需要请先备份",
           ),
           actions: [
             FlatButton(
@@ -526,9 +564,87 @@ class DownloadPageState extends State<DownloadManagerPage> {
             )
           ],
         ),
-      );
+  );
 
   void _showDetail(Map item) {
     showDebugInfo(context, item);
   }
+
+  void setSkipBeginning(String keyTitle) async {
+    dynamic sp = (await MySp);
+    double skipSec = sp.get(keyTitle, 0).toDouble();
+    double v = await showDialog(
+        context: context,
+        builder: (c) =>
+            WrappedMaterialDialog(context,
+              content: DialogSliderWidget(
+                min: 0,
+                max: 120,
+                step: 1,
+                initValue: skipSec,
+              ),
+              title: Text("设置跳过开头(单位s)"),
+            )
+    );
+    print(v);
+    if (v != null) {
+      sp.set(keyTitle, v.toInt());
+    }
+  }
+}
+
+class DialogSliderWidget extends StatefulWidget {
+  final double initValue;
+  final double min;
+  final double max;
+  final int step;
+
+
+  const DialogSliderWidget(
+      {Key key, this.min, this.max, this.step, this.initValue})
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return SliderState();
+  }
+
+}
+
+class SliderState extends State<DialogSliderWidget> {
+  double v;
+  int div;
+
+  @override
+  void initState() {
+    super.initState();
+    v = widget.initValue;
+    div = (widget.max - widget.min) ~/ widget.step;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return
+      Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Slider(
+            max: widget.max,
+            min: widget.min,
+            divisions: div,
+            label: "${v.toInt()}s",
+            value: v,
+            onChanged: (double value) {
+              print(value);
+              setState(() {
+                v = value;
+              });
+            },
+          ),
+          FlatButton(onPressed: () {
+            Navigator.pop(context, v);
+          }, child: Text("确定"))
+        ],);
+  }
+
 }

@@ -5,21 +5,18 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.ArrayMap;
 import android.util.Log;
-
 import androidx.core.content.FileProvider;
-
+import cn.vove7.rr_lib.AndroidHelper;
 import com.google.gson.Gson;
 import com.yyets.zimuzu.db.DBCache;
 import com.yyets.zimuzu.db.bean.FilmCacheBean;
 import com.yyets.zimuzu.fileloader.RRFilmDownloadManager;
-
+import io.flutter.plugin.common.EventChannel;
 import java.io.File;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
-import cn.vove7.rr_lib.InitCp;
-import io.flutter.plugin.common.EventChannel;
 import tv.zimuzu.sdk.p4pclient.P4PClientEvent;
 import tv.zimuzu.sdk.p4pclient.P4PStat;
 
@@ -63,15 +60,15 @@ class RRResManager implements P4PClientEvent {
         return gson.toJson(DBCache.instance.getAllCacheItemsByTime());
     }
 
-    Map<String, Boolean> isDownloadComplete(List<Map<String, String>> datas) {
-        Map<String, Boolean> ss = new ArrayMap<>();
+    Map<String, List> getFilmStatus(List<Map<String, String>> datas) {
+        Map<String, List> ss = new ArrayMap<>();
         for (Map<String, String> data : datas) {
-            boolean b = DBCache.instance.hasDownloadComplete(
+            RRFilmDownloadManager.FilmStatus fs = RRFilmDownloadManager.getStatus(
                     data.get("filmid"),
                     data.get("season"),
                     data.get("episode")
             );
-            ss.put(data.get("key"), b);
+            ss.put(data.get("key"), Arrays.asList(fs.status, fs.progress));
         }
         return ss;
     }
@@ -152,7 +149,7 @@ class RRResManager implements P4PClientEvent {
         playIntent.setType("video/*");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             Uri contentUri = FileProvider.getUriForFile(
-                    InitCp.androidContext,
+                    AndroidHelper.getAndroidContext(),
                     BuildConfig.APPLICATION_ID + ".fileProvider", f);
             playIntent.setData(contentUri);
             playIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
@@ -162,15 +159,13 @@ class RRResManager implements P4PClientEvent {
             playIntent.putExtra(Intent.EXTRA_STREAM, uri);
             playIntent.setData(uri);
         }
-        int s = InitCp.androidContext
-                .getPackageManager()
-                .queryIntentActivities(playIntent, 0).size();
-        if (s > 0) {
+        try {
             Intent ci = Intent.createChooser(playIntent, "选择播放方式");
             ci.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            InitCp.androidContext.startActivity(ci);
+            AndroidHelper.getAndroidContext().startActivity(ci);
             return true;
-        } else {
+        } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }

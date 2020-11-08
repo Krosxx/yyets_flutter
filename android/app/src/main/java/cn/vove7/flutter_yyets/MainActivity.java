@@ -1,33 +1,30 @@
 package cn.vove7.flutter_yyets;
 
-import android.os.Bundle;
-import android.os.Handler;
-
-import io.flutter.app.FlutterActivity;
+import androidx.annotation.NonNull;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.EventChannel;
-import io.flutter.plugin.common.PluginRegistry;
-import io.flutter.plugins.GeneratedPluginRegistrant;
 
 public class MainActivity extends FlutterActivity {
     private static final String DOWNLOAD_EVENT_CHANNEL = "cn.vove7.flutter_yyets/download_event";
 
-
     public static EventChannel.EventSink eventSink;
 
-    private MyMethodChannel methodChannel;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        GeneratedPluginRegistrant.registerWith(this);
-        bindChannel();
+    @Override protected void onStop() {
+        super.onStop();
+        if (eventSink != null) {
+            eventSink.success("onStop");
+        }
     }
 
+    @Override
+    public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+        super.configureFlutterEngine(flutterEngine);
 
-    private void bindChannel() {
-        PluginRegistry.Registrar registrar = registrarFor(DOWNLOAD_EVENT_CHANNEL);
-
-        EventChannel downloadEventChannel = new EventChannel(registrar.messenger(), DOWNLOAD_EVENT_CHANNEL);
+        EventChannel downloadEventChannel = new EventChannel(
+                flutterEngine.getDartExecutor().getBinaryMessenger(),
+                DOWNLOAD_EVENT_CHANNEL
+        );
 
         downloadEventChannel.setStreamHandler(new EventChannel.StreamHandler() {
             @Override
@@ -40,7 +37,9 @@ public class MainActivity extends FlutterActivity {
                 eventSink = null;
             }
         });
-        methodChannel = new MyMethodChannel(getFlutterView());
+        new MyMethodChannel(
+                flutterEngine.getDartExecutor().getBinaryMessenger()
+        );
     }
 
 }

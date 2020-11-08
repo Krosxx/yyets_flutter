@@ -20,6 +20,7 @@ class RRResManager {
   static var methodChannel = MethodChannel("cn.vove7.flutter_yyets/channel");
 
   static List _eventListeners = [];
+  static List _onStopListeners = [];
 
   /// api是否支持运行平台
   static bool isSupportThisPlatForm = Platform.isAndroid;
@@ -37,24 +38,23 @@ class RRResManager {
 
   static bool ecIsInit = false;
   static EventChannel eventChannel =
-      EventChannel('cn.vove7.flutter_yyets/download_event');
+  EventChannel('cn.vove7.flutter_yyets/download_event');
 
   static Future getAllItems() async {
     return jsonDecode(await methodChannel.invokeMethod("getAllItems"));
   }
 
-  static Future<Map<dynamic, dynamic>> isDownloadComplete(List<Map> data) {
-    return methodChannel.invokeMethod("isDownloadComplete", data);
+  static Future<Map<dynamic, dynamic>> getFilmStatus(List<Map> data) {
+    return methodChannel.invokeMethod("getFilmStatus", data);
   }
 
-  static Future addTask(
-    String id,
-    String rrUri,
-    String filmImg, {
-    String filmName,
-    String season,
-    String episode,
-  }) async {
+  static Future addTask(String id,
+      String rrUri,
+      String filmImg, {
+        String filmName,
+        String season,
+        String episode,
+      }) async {
     Map data = parseRRUri(rrUri);
     if (filmName != null) {
       data['filmName'] = filmName;
@@ -115,19 +115,37 @@ class RRResManager {
     });
   }
 
-  static void addEventListener<T>(void onData(T data)) {
+  static void _ensureEventChannel() {
     if (!ecIsInit) {
       ecIsInit = true;
       eventChannel.receiveBroadcastStream().listen((data) {
-        _eventListeners.forEach((lis) {
-          lis(data);
-        });
+        print("eventChannel -> " + data);
+        if (data == "onStop") {
+          _onStopListeners.forEach((e) => e());
+        } else {
+          _eventListeners.forEach((lis) {
+            lis(data);
+          });
+        }
       });
     }
+  }
+
+  static void addEventListener<T>(void onData(T)) {
+    _ensureEventChannel();
     _eventListeners.add(onData);
+  }
+
+  static void addOnStopListener(void onStop()) {
+    _ensureEventChannel();
+    _onStopListeners.add(onStop);
   }
 
   static void removeEventListener<T>(void onData(T data)) {
     _eventListeners.remove(onData);
+  }
+
+  static void removeOnStopListener<T>(void onStop()) {
+    _onStopListeners.remove(onStop);
   }
 }

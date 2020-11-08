@@ -3,11 +3,10 @@ package cn.vove7.flutter_yyets;
 import android.util.Log;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
 
+import io.flutter.embedding.android.FlutterView;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodChannel;
-import io.flutter.view.FlutterView;
 
 /**
  * # MyMethodChannel
@@ -19,11 +18,10 @@ import io.flutter.view.FlutterView;
 class MyMethodChannel {
     private static final String METHOD_CHANNEL = "cn.vove7.flutter_yyets/channel";
 
-    private MethodChannel channel;
-    private RRResManager rrResManager = new RRResManager();
+    private final RRResManager rrResManager = new RRResManager();
 
-    public MyMethodChannel(FlutterView fv) {
-        channel = new MethodChannel(fv, METHOD_CHANNEL);
+    public MyMethodChannel(BinaryMessenger bm) {
+        MethodChannel channel = new MethodChannel(bm, METHOD_CHANNEL);
         channel.setMethodCallHandler((call, result) -> {
             Log.d("Flutter", "channel:  " + call.method + "(" + call.arguments + ")");
             try {

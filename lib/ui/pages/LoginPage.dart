@@ -206,6 +206,7 @@ class _LoginPageState extends State<LoginPage> {
     }
     Api.login(_nameController.text, _passController.text).then((data) async {
       //uid token
+      print(data);
       user.setUidAndToken(data['uid'], data['token']);
       return Api.userInfo();
     }).then((data) {
