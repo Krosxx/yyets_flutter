@@ -15,7 +15,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   //todo read from pubspec.yaml
-  static final String VERSION = "1.1.0";
+  static final String VERSION = "1.2.0";
 
   static AppTheme appTheme = AppTheme();
   static RRUser rrUser = RRUser();

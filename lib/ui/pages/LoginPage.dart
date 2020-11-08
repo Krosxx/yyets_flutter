@@ -92,7 +92,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: Padding(
                   padding: EdgeInsets.all(10),
                   child: Container(
-                    width: 250,
+                    width: 270,
                     height: 350,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,8 +101,13 @@ class _LoginPageState extends State<LoginPage> {
                           focusNode: _focusNodeName,
                           controller: _nameController,
                           decoration: InputDecoration(
-                            labelText: "用户名/邮箱/手机号(中国)",
-                            prefixIcon: Icon(Icons.person),
+                            focusColor: Colors.lightGreen,
+                            labelText: "邮箱",
+                            labelStyle: TextStyle(color: Colors.blueAccent),
+                            prefixIcon: Icon(
+                              Icons.person,
+                              color: Colors.grey,
+                            ),
                             //尾部添加清除按钮
                             suffixIcon: (_isShowClear)
                                 ? IconButton(
@@ -133,7 +138,8 @@ class _LoginPageState extends State<LoginPage> {
                           },
                           decoration: InputDecoration(
                             labelText: "密码",
-                            prefixIcon: Icon(Icons.lock),
+                            labelStyle: TextStyle(color: Colors.blueAccent),
+                            prefixIcon: Icon(Icons.lock, color: Colors.grey,),
                             // 是否显示密码
                             suffixIcon: IconButton(
                               icon: Icon((_isShowPwd)
@@ -154,11 +160,6 @@ class _LoginPageState extends State<LoginPage> {
                         Row(
                           children: [
                             FlatButton(
-                                child: Text("注册"),
-                                onPressed: () => toast("TODO")
-//                                  Navigator.pushNamed(context, "/register"),
-                                ),
-                            FlatButton(
                               child: Text("忘记密码"),
                               onPressed: () => launchUri(
                                   "http://www.rrys2019.com/user/password/forgot"),
@@ -167,16 +168,32 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         Align(
                           alignment: Alignment.centerRight,
-                          child: Center(
-                            child: RaisedButton(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RaisedButton(
                                 elevation: 10,
                                 child: Text(
                                   "登录",
                                   style: TextStyle(color: Colors.white),
                                 ),
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20)),
-                                onPressed: () => _login(user)),
+                                    borderRadius:
+                                    BorderRadius.circular(20)),
+                                onPressed: () => _login(user, false),
+                              ),
+                              Container(width: 10),
+                              RaisedButton(
+                                  elevation: 10,
+                                  child: Text(
+                                    "注册",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius:
+                                      BorderRadius.circular(20)),
+                                  onPressed: () => _login(user, true)),
+                            ],
                           ),
                         ),
                         Container(
@@ -198,13 +215,22 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void _login(user) {
+  void _login(user, reg) {
     _focusNodeName.unfocus();
     _focusNodePassWord.unfocus();
     if (!_formKey.currentState.validate()) {
       return;
     }
-    Api.login(_nameController.text, _passController.text).then((data) async {
+    Future apiCall;
+    String pass = _passController.text;
+    if (reg) {
+      String mail = _nameController.text;
+      String name = mail.substring(0, mail.indexOf('@'));
+      apiCall = Api.register(mail, name, pass);
+    } else {
+      apiCall = Api.login(_nameController.text, _passController.text);
+    }
+    apiCall.then((data) async {
       //uid token
       print(data);
       user.setUidAndToken(data['uid'], data['token']);
@@ -212,7 +238,7 @@ class _LoginPageState extends State<LoginPage> {
     }).then((data) {
       return user.save(data);
     }).then((value) {
-      toast("登录成功");
+      toast(reg ? "注册成功" : "登录成功");
       Navigator.pop(context);
     }).catchError((e) {
       print(e);

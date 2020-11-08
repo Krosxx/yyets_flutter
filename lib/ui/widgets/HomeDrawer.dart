@@ -69,7 +69,7 @@ class HomeDrawer extends StatelessWidget {
                   Container(
                     height: 10,
                   ),
-                  Text(user.name ?? "登录",
+                  Text(user.name ?? "登录/注册",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   RRUser.isLogin ? Text(MyApp.rrUser.email ?? "") : Container(),
                 ],
