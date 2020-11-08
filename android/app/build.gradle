@@ -40,6 +40,9 @@ android {
         versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
+        ndk {
+            abiFilters "armeabi-v7a"
+        }
     }
 
     signingConfigs {
@@ -59,10 +62,9 @@ android {
             minifyEnabled false
             shrinkResources false
             useProguard false
-
-            ndk {
-                abiFilters "armeabi-v7a"
-            }
+        }
+        profile {
+            signingConfig signingConfigs.release
         }
     }
 }

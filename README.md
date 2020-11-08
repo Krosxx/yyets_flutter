@@ -58,9 +58,7 @@ storePassword=...
 [✓] Flutter (Channel stable, 1.22.3, on Mac OS X 10.15.7 19H2, locale zh-Hans-CN)
 
 [✓] Android toolchain - develop for Android devices (Android SDK version 30.0.2)
-[!] Android Studio (version 4.0)
-    ✗ Flutter plugin not installed; this adds Flutter specific functionality.
-    ✗ Dart plugin not installed; this adds Dart specific functionality.
+[✓] Android Studio (version 4.1)
 ...
 [✓] Connected device (1 available)
 ```
@@ -68,7 +66,7 @@ storePassword=...
 - Android
 
 ```shell script
-flutter build apk
+flutter build apk --profile
 ```
 build output dir: `build/app/outputs/apk/release/app-release.apk`
 
@@ -102,5 +100,4 @@ web 发布：可以将 build/web 目录下文件直接静态发布，你可以�
 
 ### TODO
 
-- 注册
 - 按类型搜索
