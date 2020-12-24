@@ -10,14 +10,16 @@ import 'package:flutter_yyets/ui/widgets/wrapped_material_dialog.dart';
 import 'package:flutter_yyets/utils/RRResManager.dart';
 import 'package:flutter_yyets/utils/mysp.dart';
 import 'package:flutter_yyets/utils/times.dart';
+import 'package:flutter_yyets/utils/toast.dart';
+import 'package:oktoast/oktoast.dart';
 import 'package:screen/screen.dart';
 import 'package:volume_watcher/volume_watcher.dart';
 
 class VideoPlayerPage extends StatefulWidget {
-  final String resUri;
-  final String title;
+  String resUri;
+  String title;
   final int type;
-
+  final List items;
   // 播放起始位置 [跳过广告]
   final int startPos;
 
@@ -28,6 +30,7 @@ class VideoPlayerPage extends StatefulWidget {
       : this.resUri = data['uri'],
         this.title = data['title'],
         this.type = data['type'] ?? 0,
+        this.items = data['items']??[],
         this.startPos = (data['adTime'] ?? 0) * 1000;
 
   @override
@@ -78,6 +81,10 @@ class _PageState extends State<VideoPlayerPage> {
   //倍速
   double _speed = null;
 
+  //当前集
+  String label = null;
+  int currentPos = -1;
+
   bool get isPlaying => _controller.state == FijkState.started;
 
   Future<void> initPlatformState() async {
@@ -99,6 +106,12 @@ class _PageState extends State<VideoPlayerPage> {
   void initState() {
     print("startPos: ${widget.startPos}");
     super.initState();
+    widget.items.forEach((element) {
+      String fileName = element['mFileName'];
+      if(fileName==widget.resUri) {
+        currentPos = widget.items.indexOf(element);
+      }
+    });
     RRResManager.addOnStopListener(onStop);
 
     initPlatformState();
@@ -219,7 +232,17 @@ class _PageState extends State<VideoPlayerPage> {
     }
     setState(() {});
   }
-
+  
+  void next()async{
+    if(currentPos+1<widget.items.length){
+      currentPos++;
+      dynamic item = widget.items[currentPos];
+      nextOne(item);
+    }else{
+      toast("没有更多了");
+    }
+  }
+ 
   bool _playControlVisibility = true;
 
   void toggleControllerPanel() {
@@ -508,6 +531,13 @@ class _PageState extends State<VideoPlayerPage> {
                           color: Colors.white,
                         ),
                       ),
+                      IconButton(
+                        onPressed:next,
+                        icon: Icon(
+                          Icons.play_arrow_rounded,
+                          color: Colors.white,
+                        ),
+                      ),
                       Text(
                         _playTime,
                         style: TextStyle(color: Colors.white),
@@ -580,7 +610,25 @@ class _PageState extends State<VideoPlayerPage> {
                         formatLength(_totalLength),
                         style: TextStyle(color: Colors.white),
                       ),
-                      Container(width: 10)
+                      Container(width: 10),
+                      InkResponse(
+                        child: PopupMenuButton(
+                          onSelected: (v) {
+                            setState(() async{
+                              if(v['mFileName']!=widget.resUri){
+                                await nextOne(v);
+                              }
+                            });
+                          },
+                          itemBuilder: (BuildContext context) => widget.items
+                              .map((e) => buildItem(e))
+                              .toList(),
+                          child: Text(
+                            label == null ? "选集" : "${label}",
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+                      )
                     ],
                   ),
                 ),
@@ -592,8 +640,60 @@ class _PageState extends State<VideoPlayerPage> {
     );
   }
 
-  var _speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+  Future nextOne(v) async {
+              String name = "";
+    String episode = v['mEpisode'];
+    label = "S${v['mSeason']}E${episode}";
+    if (episode != null && episode != "" && episode != "null") {
+      name += "${v['mFilmName']} $label";
+    } else {
+      name = v['mFilmName'];
+    }
+    print("old path:${widget.resUri}");
+    widget.resUri = v['mFileName'];
+    widget.title = name;
+    print("new path:${widget.resUri}");
+    await _controller.reset();
+    _controller.setDataSource(widget.resUri, autoPlay: true);
+  }
+  PopupMenuItem buildItem(Map item) {
+    String name = "";
+    String fileName = "";
+    String episode = item['mEpisode'];
+    if (episode != null && episode != "" && episode != "null") {
+      name += "S${item['mSeason']}E${episode}";
+    } else {
+      name = item['mFilmName'];
+    }
+    fileName = item['mFileName'];
+    int status = item['status'];
+    Color color = null;
+    switch (status) {
+      case STATUS_COMPLETE:
+        color = Colors.greenAccent;
+        break;
+      case STATUS_DOWNLOADING:
+        color = Colors.grey;
+        break;
+      case STATUS_PAUSED:
+        color = Colors.blueAccent;
+        break;
+      case STATUS_UNKNOWN:
+        color = Colors.red;
+        break;
+    }
+    if(fileName == widget.resUri) {
+      color = Theme.of(context).accentColor;
+    }
+    return PopupMenuItem(
+        child: Text(
+          name,
+          style: TextStyle(color: color),
+        ),
+        value: item);
+  }
 
+  var _speeds = [0.25, 0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
   @override
   void dispose() {
     _controller.pause();
@@ -637,6 +737,11 @@ class _PageState extends State<VideoPlayerPage> {
   }
 }
 
+const int STATUS_COMPLETE = 1;
+const int STATUS_WAITING = 2;
+const int STATUS_DOWNLOADING = 3;
+const int STATUS_PAUSED = 4;
+const int STATUS_UNKNOWN = -1;
 class _StatusPanel extends StatelessWidget {
   final bool visibility;
   final double progress;

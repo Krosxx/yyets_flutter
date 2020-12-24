@@ -58,17 +58,46 @@ class _MyHomePageState extends State<MyHomePage>
       ),
       body: RankPage(_controller),
       drawer: HomeDrawer(),
-      floatingActionButton: FloatingActionButton(
-        tooltip: "资讯",
-        backgroundColor: Colors.blueAccent,
-        onPressed: () {
-          Navigator.pushNamed(context, "/news");
-        },
-        child: Icon(
-          Icons.inbox,
-          color: Colors.white,
-        ),
-      ),
+      floatingActionButton:Container(
+        alignment: Alignment.bottomRight,
+        child: Column(
+          verticalDirection: VerticalDirection.up,
+          children:[
+          Padding(
+            padding: EdgeInsets.only(
+                bottom: 10
+            ),
+            child: FloatingActionButton(
+              tooltip: "资讯",
+              backgroundColor: Colors.blueAccent,
+              onPressed: () async{
+                Navigator.pushNamed(context, "/news");
+              },
+              child: Icon(
+                Icons.inbox,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(
+                bottom: 10
+            ),
+            child: FloatingActionButton(
+              heroTag: null,
+              tooltip: "下载管理",
+              backgroundColor: Colors.blueAccent,
+              onPressed: () async {
+                Navigator.pushNamed(context, "/download");
+              },
+              child: Icon(
+                Icons.download_rounded,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ]),
+      )
     );
   }
 }
