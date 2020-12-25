@@ -136,11 +136,12 @@ class DownloadPageState extends State<DownloadManagerPage> {
     refreshStatus(false);
   }
 
-  void playOnLocal(keyTitle, filename, name) async {
+  void playOnLocal(keyTitle, filename, name, List items) async {
     Navigator.pushNamed(context, "/play", arguments: {
       'uri': filename,
       'title': name,
-      'adTime': (await MySp).get(keyTitle, 0)
+      'adTime': (await MySp).get(keyTitle, 0),
+      'items': items
     });
   }
 
@@ -153,15 +154,15 @@ class DownloadPageState extends State<DownloadManagerPage> {
     return name;
   }
 
-  void play(keyTitle, filename, name) async {
+  void play(keyTitle, filename, name,List items) async {
     if (!Platform.isAndroid) {
-      playOnLocal(keyTitle, filename, name);
+      playOnLocal(keyTitle, filename, name,items);
       return;
     }
     var sp = await MySp;
     bool drpm = sp.get('dont_request_play_mode', false);
     if (drpm) {
-      playOnLocal(keyTitle, filename, name);
+      playOnLocal(keyTitle, filename, name,items);
       return;
     }
     showDialog(
@@ -177,14 +178,14 @@ class DownloadPageState extends State<DownloadManagerPage> {
               onPressed: () {
                 sp.set("dont_request_play_mode", true);
                 Navigator.pop(c);
-                playOnLocal(keyTitle, filename, name);
+                playOnLocal(keyTitle, filename, name,items);
               },
             ),
             FlatButton(
               child: Text("本地"),
               onPressed: () {
                 Navigator.pop(c);
-                playOnLocal(keyTitle, filename, name);
+                playOnLocal(keyTitle, filename, name,items);
               },
             ),
             FlatButton(
@@ -291,12 +292,12 @@ class DownloadPageState extends State<DownloadManagerPage> {
         physics: NeverScrollableScrollPhysics(),
         shrinkWrap: true,
         itemCount: items.length,
-        itemBuilder: (c, i) => buildItem(keyTitle, items[i]),
+        itemBuilder: (c, i) => buildItem(keyTitle, items[i],items),
       ),
     );
   }
 
-  Widget buildItem(keyTitle, Map item) {
+  Widget buildItem(keyTitle, Map item,List items) {
     String name = "";
     String episode = item['mEpisode'];
     if (episode != null && episode != "" && episode != "null") {
@@ -350,7 +351,7 @@ class DownloadPageState extends State<DownloadManagerPage> {
           onPressed: () {
             switch (status) {
               case STATUS_COMPLETE:
-                play(keyTitle, item['mFileName'], buildPlayTitle(item));
+                play(keyTitle, item['mFileName'], buildPlayTitle(item),items);
                 //play
                 break;
               case STATUS_DOWNLOADING:
@@ -400,7 +401,7 @@ class DownloadPageState extends State<DownloadManagerPage> {
                       RRResManager.playByExternal(item['mFileName']);
                     },
                     onPressed: () {
-                      play(keyTitle, item['mFileName'], buildPlayTitle(item));
+                      play(keyTitle, item['mFileName'], buildPlayTitle(item),items);
                     })
                 : Container(),
           ],
